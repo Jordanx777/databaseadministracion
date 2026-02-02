@@ -32,7 +32,16 @@ export const menus: Navigation[] = [
         classes: 'nav-item',
         url: '/component/producto',
         icon: '#custom-box'
-      }
+      },
+      // Busca la sección de productos en tu archivo de menú y déjala así:
+{
+  id: 'agregar-producto',
+  title: 'Agregar Productos',
+  type: 'item',
+  classes: 'nav-item',
+  url: '/component/nuevo-producto', // URL corregida
+  icon: '#custom-plus-circle'
+}
     ]
   },
 
