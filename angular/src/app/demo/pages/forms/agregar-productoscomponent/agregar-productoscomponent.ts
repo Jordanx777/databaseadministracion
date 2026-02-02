@@ -70,6 +70,9 @@ export class AgregarProductoscomponent implements OnInit {
     });
   }
 
+  /*kfldlld */
+
+
   /** SUBMIT */
   onSubmit(): void {
     if (this.formAgregar.invalid) {

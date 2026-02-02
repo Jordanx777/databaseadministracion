@@ -11,6 +11,7 @@ describe('AgregarProductoscomponent', () => {
       imports: [AgregarProductoscomponent]
     })
     .compileComponents();
+    /*uno */
 
     fixture = TestBed.createComponent(AgregarProductoscomponent);
     component = fixture.componentInstance;
