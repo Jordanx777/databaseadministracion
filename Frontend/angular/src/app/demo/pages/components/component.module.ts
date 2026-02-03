@@ -9,3 +9,4 @@ import { ComponentRoutingModule } from './component-routing.module';
 })
 export class ComponentModule {}
 // Agregar nuevas rutas aquí
+// 
