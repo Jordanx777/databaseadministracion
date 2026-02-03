@@ -1,0 +1,23 @@
+### **.gitignore**
+```
+# Environment files
+.env
+
+# Composer
+/vendor/
+composer.lock
+
+# Logs
+/logs/*.log
+
+# Uploads (opcional, dependiendo si quieres versionar las imágenes)
+/uploads/*
+!/uploads/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
