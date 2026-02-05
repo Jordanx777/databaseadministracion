@@ -17,8 +17,22 @@ export const menus: Navigation[] = [
       }
     ]
   },
-
-
+{
+    id: 'inicio',
+    title: 'inicio',
+    type: 'item',
+    icon: 'icon-navigation',
+    children: [
+      {
+        id: 'Dashboard',
+        title: 'inicio',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/inicio',
+        icon: '#custom-home'
+      }
+    ]
+  },
   {
     id: 'productos',
     title: 'Productos',
