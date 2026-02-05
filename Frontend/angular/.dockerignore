@@ -1,0 +1,11 @@
+
+node_modules
+npm-debug.log
+.angular
+.vscode
+.git
+.gitignore
+*.md
+dist
+coverage
+.DS_Store

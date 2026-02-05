@@ -1,0 +1,7 @@
+<!-- ¿Cómo usarla?
+php// En cualquier parte de tu código:
+$db = Database::connect();
+$stmt = $db->query("SELECT * FROM usuario");
+$usuarios = $stmt->fetchAll(); -->
+
+<!-- Ventaja del patrón Singleton: Solo se crea UNA conexión a la BD y se reutiliza en todo el proyecto. -->
