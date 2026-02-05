@@ -69,6 +69,23 @@ export const menus: Navigation[] = [
       }
     ]
   },
+
+  {
+    id: 'ventas',
+    title: 'Ventas',
+    type: 'group',
+    icon: 'icon-navigation',
+    children: [
+      {
+        id: 'agregar-venta',
+        title: 'Agregar Ventas',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/component/addventas',
+        icon: '#custom-cart'
+      }
+    ]
+  },
   
   {
     id: 'auth',
