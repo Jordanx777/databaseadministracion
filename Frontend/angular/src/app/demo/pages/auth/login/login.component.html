@@ -7,24 +7,6 @@
       </div>
       <div class="main-form">
         <app-card [showHeader]="false" class="auth-form-card" [padding]="40">
-          <div class="text-center">
-            <a href="javascript:">
-              <img src="assets/images/logo-dark.svg" alt="logo" />
-            </a>
-            <div class="login-with">
-              @for (list of loginType; track list) {
-                <button mat-stroked-button class="m-t-10 text-muted">
-                  <div class="flex">
-                    <img src="{{ list.image }}" alt="{{ list.alt }}" />
-                    <span class="mat-body p-l-10">{{ list.title }}</span>
-                  </div>
-                </button>
-              }
-            </div>
-          </div>
-          <div class="separator">
-            <span>OR</span>
-          </div>
           <h4 class="text-center m-b-25 f-20 f-w-500">Login With Your Email</h4>
           <div class="text-start">
             <label for="name" class="f-w-500">Enter Your Email</label>
