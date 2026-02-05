@@ -139,6 +139,7 @@ export default class RegisterComponent implements OnInit {
       apellido: this.registerForm.get('apellido')?.value,
       email: this.registerForm.get('email')?.value,
       password: password,
+      confirmPassword: confirmPassword,
       telefono: this.registerForm.get('telefono')?.value,
       direccion: this.registerForm.get('direccion')?.value,
       id_rol: this.registerForm.get('id_rol')?.value
