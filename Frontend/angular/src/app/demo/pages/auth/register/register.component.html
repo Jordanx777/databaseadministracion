@@ -41,6 +41,31 @@
                 </mat-form-field>
               </div>
 
+              <!-- Phone -->
+              <div class="col-12">
+                <label for="telefono" class="f-w-500">Phone Number</label>
+                <mat-form-field appearance="outline" class="w-100 m-t-5">
+                  <input matInput type="tel" placeholder="Enter your phone number" formControlName="telefono" />
+                  @if (registerForm.get('telefono')?.invalid && registerForm.get('telefono')?.touched) {
+                    <mat-error>{{ getErrorMessage('telefono') }}</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <!-- Address -->
+              <div class="col-12">
+                <label for="direccion" class="f-w-500">Address</label>
+                <mat-form-field appearance="outline" class="w-100 m-t-5">
+                  <input matInput type="text" placeholder="Enter your address" formControlName="direccion" />
+                  @if (registerForm.get('direccion')?.invalid && registerForm.get('direccion')?.touched) {
+                    <mat-error>{{ getErrorMessage('direccion') }}</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+            </div>
+
+            
+
               <!-- Email -->
               <div class="col-12">
                 <label for="email" class="f-w-500">Enter Your Email</label>
@@ -95,27 +120,18 @@
                 </mat-form-field>
               </div>
 
-              <!-- Phone -->
-              <div class="col-12">
-                <label for="telefono" class="f-w-500">Phone Number</label>
-                <mat-form-field appearance="outline" class="w-100 m-t-5">
-                  <input matInput type="tel" placeholder="Enter your phone number" formControlName="telefono" />
-                  @if (registerForm.get('telefono')?.invalid && registerForm.get('telefono')?.touched) {
-                    <mat-error>{{ getErrorMessage('telefono') }}</mat-error>
-                  }
-                </mat-form-field>
-              </div>
-
-              <!-- Address -->
-              <div class="col-12">
-                <label for="direccion" class="f-w-500">Address</label>
-                <mat-form-field appearance="outline" class="w-100 m-t-5">
-                  <input matInput type="text" placeholder="Enter your address" formControlName="direccion" />
-                  @if (registerForm.get('direccion')?.invalid && registerForm.get('direccion')?.touched) {
-                    <mat-error>{{ getErrorMessage('direccion') }}</mat-error>
-                  }
-                </mat-form-field>
-              </div>
+              
+            <!-- ✅ AGREGAR ESTO: Terms & Conditions -->
+            <div class="col-12">
+              <mat-checkbox formControlName="acceptTerms" color="primary">
+                I agree to the 
+                <a href="/terms" target="_blank" class="text-primary-500">Terms & Conditions</a>
+              </mat-checkbox>
+              @if (registerForm.get('acceptTerms')?.invalid && registerForm.get('acceptTerms')?.touched) {
+                <div class="text-danger f-s-12 m-t-5">
+                  Debe aceptar los términos y condiciones
+                </div>
+              }
             </div>
 
             <!-- Submit Button -->
