@@ -1,0 +1,166 @@
+<div class="productos-container">
+
+  <mat-card class="card-productos">
+
+    <!-- FILTRO + BOTÓN -->
+    <div class="filtro-toolbar">
+
+      <!-- BUSCADOR -->
+      <mat-form-field appearance="outline" class="buscador">
+        <mat-label>Buscar proveedor</mat-label>
+        <input
+          matInput
+          placeholder="Nombre, NIT, correo, ciudad..."
+          (keyup)="applyFilter($event)"
+        />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <!-- BOTÓN -->
+      <button
+        mat-raised-button
+        color="primary"
+        class="btn-agregar"
+        (click)="agregarProveedor()"
+      >
+        <mat-icon>add</mat-icon>
+        Agregar proveedor
+      </button>
+
+    </div>
+
+    <!-- TABLA -->
+    <div class="tabla-wrapper">
+      <table mat-table [dataSource]="dataSource" matSort>
+
+        <!-- NOMBRE -->
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
+          <td mat-cell *matCellDef="let row">{{ row.nombre }}</td>
+        </ng-container>
+
+        <!-- NIT -->
+        <ng-container matColumnDef="nit">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>NIT</th>
+          <td mat-cell *matCellDef="let row">{{ row.nit }}</td>
+        </ng-container>
+
+        <!-- CORREO -->
+        <ng-container matColumnDef="correo">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Correo</th>
+          <td mat-cell *matCellDef="let row">{{ row.correo }}</td>
+        </ng-container>
+
+        <!-- TELÉFONO -->
+        <ng-container matColumnDef="telefono">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Teléfono</th>
+          <td mat-cell *matCellDef="let row">{{ row.telefono }}</td>
+        </ng-container>
+
+        <!-- CIUDAD -->
+        <ng-container matColumnDef="ciudad">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Ciudad</th>
+          <td mat-cell *matCellDef="let row">{{ row.ciudad }}</td>
+        </ng-container>
+
+        <!-- ESTADO -->
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+          <td mat-cell *matCellDef="let row">
+            <span
+              class="badge"
+              [ngClass]="row.estado === 'activo' ? 'badge-success' : 'badge-danger'">
+              {{ row.estado }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- ACCIONES -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let row" class="acciones">
+            <button mat-icon-button color="primary" (click)="editarProveedor(row)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="eliminarProveedor(row)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <!-- ROWS -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+        <!-- EMPTY -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell empty" colspan="7">
+            No hay proveedores registrados
+          </td>
+        </tr>
+
+      </table>
+    </div>
+
+    <!-- PAGINADOR -->
+    <mat-paginator
+      [pageSizeOptions]="[5, 10, 25]"
+      showFirstLastButtons>
+    </mat-paginator>
+
+  </mat-card>
+
+</div>
+
+<!-- ================= MODAL EDITAR PROVEEDOR ================= -->
+<ng-template #editarProveedorDialog>
+
+  <h2 mat-dialog-title>Editar proveedor</h2>
+
+  <form [formGroup]="editarForm" mat-dialog-content class="row g-3">
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Nombre</mat-label>
+      <input matInput formControlName="nombre">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>NIT</mat-label>
+      <input matInput formControlName="nit">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Correo</mat-label>
+      <input matInput type="email" formControlName="correo">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Teléfono</mat-label>
+      <input matInput formControlName="telefono">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Ciudad</mat-label>
+      <input matInput formControlName="ciudad">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Estado</mat-label>
+      <mat-select formControlName="estado">
+        <mat-option value="activo">Activo</mat-option>
+        <mat-option value="inactivo">Inactivo</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+  </form>
+
+  <div mat-dialog-actions align="end">
+    <button mat-stroked-button color="warn" (click)="cerrarDialog()">
+      Cancelar
+    </button>
+    <button mat-raised-button color="primary" (click)="guardarEdicion()">
+      Guardar
+    </button>
+  </div>
+
+</ng-template>

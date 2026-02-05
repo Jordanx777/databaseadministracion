@@ -17,22 +17,9 @@ export const menus: Navigation[] = [
       }
     ]
   },
-{
-    id: 'inicio',
-    title: 'inicio',
-    type: 'item',
-    icon: 'icon-navigation',
-    children: [
-      {
-        id: 'Dashboard',
-        title: 'inicio',
-        type: 'item',
-        classes: 'nav-item',
-        url: '/inicio',
-        icon: '#custom-home'
-      }
-    ]
-  },
+
+  
+  
   {
     id: 'productos',
     title: 'Productos',
@@ -48,17 +35,58 @@ export const menus: Navigation[] = [
         icon: '#custom-box'
       },
       // Busca la sección de productos en tu archivo de menú y déjala así:
-{
-  id: 'agregar-producto',
-  title: 'Agregar Productos',
-  type: 'item',
-  classes: 'nav-item',
-  url: '/component/nuevo-producto', // URL corregida
-  icon: '#custom-plus-circle'
-}
+      {
+        id: 'agregar-producto',
+        title: 'Agregar Productos',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/component/addproducto', // URL corregida
+        icon: '#custom-plus-circle'
+      }
+    ]
+  },
+  {
+    id: 'Proveedores',
+    title: 'Proveedores',
+    type: 'group',
+    icon: 'icon-navigation',
+    children: [
+      {
+        id: 'proveedores',
+        title: 'Lista de Proveedores',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/component/proveedor',
+        icon: '#custom-people'
+      },
+      {
+        id: 'agregar-proveedor',
+        title: 'Agregar Proveedores',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/component/addproveedor',
+        icon: '#custom-user-plus'
+      }
     ]
   },
 
+  {
+    id: 'ventas',
+    title: 'Ventas',
+    type: 'group',
+    icon: 'icon-navigation',
+    children: [
+      {
+        id: 'agregar-venta',
+        title: 'Agregar Ventas',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/component/addventas',
+        icon: '#custom-cart'
+      }
+    ]
+  },
+  
   {
     id: 'auth',
     title: 'Authentication',

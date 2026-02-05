@@ -1,0 +1,130 @@
+<mat-card class="cardWithShadow theme-card">
+  <mat-card-header>
+    <mat-card-title>➕ Agregar Proveedor</mat-card-title>
+    <mat-card-subtitle>
+      Registra un nuevo proveedor en el sistema
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+
+    <form [formGroup]="proveedorForm" class="row g-3">
+
+      <!-- ================= DATOS BÁSICOS ================= -->
+      <div class="col-12">
+        <h5 class="section-title">Información del proveedor</h5>
+      </div>
+
+      <div class="col-md-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Nombre del proveedor</mat-label>
+          <input matInput formControlName="nombre" placeholder="Ej: Distribuidora ABC">
+          <mat-error *ngIf="proveedorForm.get('nombre')?.touched && proveedorForm.get('nombre')?.invalid">
+            El nombre es obligatorio
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="col-md-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>NIT / Documento</mat-label>
+          <input matInput formControlName="nit" placeholder="Ej: 900123456">
+          <mat-error *ngIf="proveedorForm.get('nit')?.touched && proveedorForm.get('nit')?.invalid">
+            El NIT es obligatorio
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="col-md-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Correo electrónico</mat-label>
+          <input matInput type="email" formControlName="correo" placeholder="proveedor@email.com">
+          <mat-error *ngIf="proveedorForm.get('correo')?.touched && proveedorForm.get('correo')?.invalid">
+            Ingresa un correo válido
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="col-md-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Teléfono</mat-label>
+          <input matInput type="tel" formControlName="telefono" placeholder="Ej: 3001234567">
+          <mat-error *ngIf="proveedorForm.get('telefono')?.touched && proveedorForm.get('telefono')?.invalid">
+            El teléfono es obligatorio
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- ================= UBICACIÓN ================= -->
+      <div class="col-12">
+        <h5 class="section-title">Ubicación</h5>
+      </div>
+
+      <div class="col-md-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Ciudad</mat-label>
+          <input matInput formControlName="ciudad" placeholder="Ej: Cartagena">
+          <mat-error *ngIf="proveedorForm.get('ciudad')?.touched && proveedorForm.get('ciudad')?.invalid">
+            La ciudad es obligatoria
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="col-md-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Dirección</mat-label>
+          <input matInput formControlName="direccion" placeholder="Ej: Cra 10 # 25 - 30">
+          <mat-error *ngIf="proveedorForm.get('direccion')?.touched && proveedorForm.get('direccion')?.invalid">
+            La dirección es obligatoria
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- ================= ESTADO ================= -->
+      <div class="col-md-4">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="estado">
+            <mat-option value="activo">Activo</mat-option>
+            <mat-option value="inactivo">Inactivo</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- ================= OBSERVACIONES ================= -->
+      <div class="col-12">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Observaciones</mat-label>
+          <textarea
+            matInput
+            rows="3"
+            formControlName="observaciones"
+            placeholder="Notas adicionales sobre el proveedor">
+          </textarea>
+        </mat-form-field>
+      </div>
+
+      <!-- ================= BOTONES ================= -->
+      <div class="col-12 text-end mt-3">
+        <button
+          mat-stroked-button
+          color="warn"
+          type="button"
+          class="me-2"
+          (click)="cancelar()">
+          Cancelar
+        </button>
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          (click)="guardarProveedor()">
+          Guardar proveedor
+        </button>
+      </div>
+
+    </form>
+
+  </mat-card-content>
+</mat-card>

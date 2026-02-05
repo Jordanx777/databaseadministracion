@@ -1,10 +1,17 @@
 import {
   Component,
   AfterViewInit,
-  ViewChild
+  ViewChild,
+  TemplateRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators
+} from '@angular/forms';
 
 /* ===== ANGULAR MATERIAL ===== */
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -15,6 +22,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatSelectModule } from '@angular/material/select';
 
 /* ===== INTERFACE ===== */
 export interface Producto {
@@ -36,6 +45,8 @@ export interface Producto {
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
+
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
@@ -43,10 +54,26 @@ export interface Producto {
     MatInputModule,
     MatCardModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    MatDialogModule,
+    MatSelectModule
   ]
 })
 export class ProductosComponent implements AfterViewInit {
+
+  /* ===== MODAL ===== */
+  @ViewChild('modalProducto') modalProducto!: TemplateRef<any>;
+  dialogRef!: MatDialogRef<any>;
+
+  /* ===== FORM ===== */
+  formProducto!: FormGroup;
+  modoFormulario: 'agregar' | 'editar' = 'agregar';
+  productoEditando: Producto | null = null;
+
+  /* ===== SELECT DATA ===== */
+  categorias = ['Ropa', 'Accesorios'];
+  tallas = ['XS', 'S', 'M', 'L', 'XL'];
+  proveedores = ['Proveedor A', 'Proveedor B'];
 
   /* ===== COLUMNAS ===== */
   displayedColumns: string[] = [
@@ -85,17 +112,51 @@ export class ProductosComponent implements AfterViewInit {
     }
   ]);
 
-  /* ===== VIEWCHILD ===== */
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  /* ===== INIT ===== */
+  constructor(
+    private fb: FormBuilder,
+    private dialog: MatDialog
+  ) {
+    this.crearFormulario();
+    this.configurarFiltro();
+  }
+
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
   }
 
-  /* ===== FILTRO ===== */
+  /* ===== FORM ===== */
+  crearFormulario(): void {
+    this.formProducto = this.fb.group({
+      nombre: ['', Validators.required],
+      categoria_nombre: ['', Validators.required],
+      talla: ['', Validators.required],
+      color: ['', Validators.required],
+      cantidad: [0, [Validators.required, Validators.min(0)]],
+      precioCompra: [0, [Validators.required, Validators.min(0)]],
+      precioVenta: [0, [Validators.required, Validators.min(0)]],
+      proveedor_nombre: ['', Validators.required]
+    });
+  }
+
+  /* ===== FILTRO GLOBAL ===== */
+  configurarFiltro(): void {
+    this.dataSource.filterPredicate = (data: Producto, filter: string) => {
+      const texto = `
+        ${data.nombre}
+        ${data.categoria_nombre}
+        ${data.talla}
+        ${data.color}
+        ${data.proveedor_nombre}
+      `.toLowerCase();
+
+      return texto.includes(filter);
+    };
+  }
+
   applyFilter(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.dataSource.filter = value.trim().toLowerCase();
@@ -105,13 +166,61 @@ export class ProductosComponent implements AfterViewInit {
     }
   }
 
-  /* ===== CRUD ===== */
+  /* ===== MODAL ===== */
   agregarProducto(): void {
-    console.log('Agregar producto');
+    this.modoFormulario = 'agregar';
+    this.productoEditando = null;
+    this.formProducto.reset({
+      nombre: '',
+      categoria_nombre: '',
+      talla: '',
+      color: '',
+      cantidad: 0,
+      precioCompra: 0,
+      precioVenta: 0,
+      proveedor_nombre: ''
+    });
+
+    this.abrirModal();
   }
 
   editarProducto(producto: Producto): void {
-    console.log('Editar', producto);
+    this.modoFormulario = 'editar';
+    this.productoEditando = producto;
+    this.formProducto.patchValue(producto);
+
+    this.abrirModal();
+  }
+
+  abrirModal(): void {
+    this.dialogRef = this.dialog.open(this.modalProducto, {
+      width: '750px',
+      disableClose: true
+    });
+  }
+
+  cerrarModal(): void {
+    this.dialogRef.close();
+  }
+
+  /* ===== GUARDAR ===== */
+  guardar(): void {
+    if (this.formProducto.invalid) {
+      this.formProducto.markAllAsTouched();
+      return;
+    }
+
+    if (this.modoFormulario === 'agregar') {
+      this.dataSource.data = [
+        ...this.dataSource.data,
+        this.formProducto.value
+      ];
+    } else if (this.productoEditando) {
+      Object.assign(this.productoEditando, this.formProducto.value);
+      this.dataSource.data = [...this.dataSource.data];
+    }
+
+    this.cerrarModal();
   }
 
   eliminarProducto(producto: Producto): void {
