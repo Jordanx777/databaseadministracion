@@ -21,8 +21,8 @@ class UsuarioModel {
     public function create(array $data): ?int {
         try {
             
-            $sql = "INSERT INTO usuario (nombre, apellido, correo, contrasena, telefono, id_rol, activo,fecha_creacion) 
-                    VALUES (:nombre, :apellido, :correo, :contrasena, :telefono, :id_rol, :activo, CURRENT_TIMESTAMP) 
+            $sql = "INSERT INTO usuario (nombre, apellido, correo, contrasena, telefono, direccion, id_rol, activo,fecha_creacion) 
+                    VALUES (:nombre, :apellido, :correo, :contrasena, :telefono, :direccion, :id_rol, :activo, CURRENT_TIMESTAMP) 
                     RETURNING id_usuario";
             
             $stmt = $this->db->prepare($sql);
@@ -33,6 +33,7 @@ class UsuarioModel {
                 'correo' => $data['correo'],
                 'contrasena' => $data['contrasena'],
                 'telefono' => $data['telefono'],
+                'direccion' => $data['direccion'],
                 'id_rol' => $data['id_rol'],
                 'activo' => $data['activo'] ?? true
             ];
@@ -104,13 +105,13 @@ class UsuarioModel {
     }
     
     // // Actualizar último acceso
-    // public function updateLastAccess(int $id): bool {
-    //     try {
-    //         $stmt = $this->db->prepare("UPDATE usuario SET ultimo_acceso = CURRENT_TIMESTAMP WHERE id_usuario = :id");
-    //         return $stmt->execute(['id' => $id]);
+    public function updateLastAccess(int $id): bool {
+        try {
+            $stmt = $this->db->prepare("UPDATE usuario SET ultimo_acceso = CURRENT_TIMESTAMP WHERE id_usuario = :id");
+            return $stmt->execute(['id' => $id]);
             
-    //     } catch (\PDOException $e) {
-    //         throw new \Exception("Error al actualizar último acceso: " . $e->getMessage());
-    //     }
-    // }
+        } catch (\PDOException $e) {
+            throw new \Exception("Error al actualizar último acceso: " . $e->getMessage());
+        }
+    }
 }
