@@ -7,82 +7,130 @@
       </div>
       <div class="main-form">
         <app-card [showHeader]="false" class="auth-form-card" [padding]="40">
-          <div class="text-center">
-            <a href="javascript:">
-              <img src="assets/images/logo-dark.svg" alt="logo" />
-            </a>
-            <div class="login-with">
-              @for (list of loginType; track list) {
-                <button mat-stroked-button class="m-t-10 text-muted">
-                  <div class="flex">
-                    <img src="{{ list.image }}" alt="{{ list.alt }}" />
-                    <span class="mat-body p-l-10">{{ list.title }}</span>
-                  </div>
-                </button>
-              }
-            </div>
-          </div>
-          <div class="separator">
-            <span>OR</span>
-          </div>
           <h4 class="text-center m-b-25 f-20 f-w-500">Sign up with your work email.</h4>
-          <div class="row text-start">
-            <div class="col-md-6">
-              <label for="name" class="f-w-500">First Name</label>
-              <mat-form-field appearance="outline" class="w-100 m-t-5">
-                <input type="text" matInput placeholder="First Name" />
-              </mat-form-field>
+          
+          <!-- Mensajes de error/éxito -->
+          @if (errorMessage) {
+            <div class="alert alert-danger">{{ errorMessage }}</div>
+          }
+          @if (successMessage) {
+            <div class="alert alert-success">{{ successMessage }}</div>
+          }
+
+          <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+            <div class="row text-start">
+              <!-- First Name -->
+              <div class="col-md-6">
+                <label for="nombre" class="f-w-500">First Name</label>
+                <mat-form-field appearance="outline" class="w-100 m-t-5">
+                  <input type="text" matInput placeholder="First Name" formControlName="nombre" />
+                  @if (registerForm.get('nombre')?.invalid && registerForm.get('nombre')?.touched) {
+                    <mat-error>{{ getErrorMessage('nombre') }}</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <!-- Last Name -->
+              <div class="col-md-6">
+                <label for="apellido" class="f-w-500">Last Name</label>
+                <mat-form-field appearance="outline" class="w-100 m-t-5">
+                  <input type="text" matInput placeholder="Last Name" formControlName="apellido" />
+                  @if (registerForm.get('apellido')?.invalid && registerForm.get('apellido')?.touched) {
+                    <mat-error>{{ getErrorMessage('apellido') }}</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <!-- Email -->
+              <div class="col-12">
+                <label for="email" class="f-w-500">Enter Your Email</label>
+                <mat-form-field appearance="outline" class="w-100 m-t-5">
+                  <input matInput placeholder="Email Address" formControlName="email" />
+                  @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
+                    <mat-error>{{ getErrorMessage('email') }}</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <!-- Password -->
+              <div class="col-12">
+                <label for="password" class="f-w-500">Enter your password</label>
+                <mat-form-field appearance="outline" class="w-100 m-t-5">
+                  <input matInput [type]="hide ? 'password' : 'text'" placeholder="Enter your password" formControlName="password" />
+                  <button mat-icon-button matSuffix type="button" (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
+                    <mat-icon>{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
+                  </button>
+                  @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
+                    <mat-error>{{ getErrorMessage('password') }}</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <!-- Confirm Password -->
+              <div class="col-12">
+                <label for="confirmPassword" class="f-w-500">Confirm Password</label>
+                <mat-form-field appearance="outline" class="w-100 m-t-5">
+                  <input matInput [type]="coHide ? 'password' : 'text'" placeholder="Confirm your password" formControlName="confirmPassword" />
+                  <button mat-icon-button matSuffix type="button" (click)="coHide = !coHide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="coHide">
+                    <mat-icon>{{ coHide ? 'visibility_off' : 'visibility' }}</mat-icon>
+                  </button>
+                  @if (registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched) {
+                    <mat-error>{{ getErrorMessage('confirmPassword') }}</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <!-- Rol -->
+              <div class="col-12">
+                <label for="id_rol" class="f-w-500">Select Role</label>
+                <mat-form-field appearance="outline" class="w-100 m-t-5">
+                  <mat-select placeholder="Select a role" formControlName="id_rol">
+                    @for (rol of roles; track rol.id_rol) {
+                      <mat-option [value]="rol.id_rol">{{ rol.nombre }}</mat-option>
+                    }
+                  </mat-select>
+                  @if (registerForm.get('id_rol')?.invalid && registerForm.get('id_rol')?.touched) {
+                    <mat-error>Debe seleccionar un rol</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <!-- Phone -->
+              <div class="col-12">
+                <label for="telefono" class="f-w-500">Phone Number</label>
+                <mat-form-field appearance="outline" class="w-100 m-t-5">
+                  <input matInput type="tel" placeholder="Enter your phone number" formControlName="telefono" />
+                  @if (registerForm.get('telefono')?.invalid && registerForm.get('telefono')?.touched) {
+                    <mat-error>{{ getErrorMessage('telefono') }}</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <!-- Address -->
+              <div class="col-12">
+                <label for="direccion" class="f-w-500">Address</label>
+                <mat-form-field appearance="outline" class="w-100 m-t-5">
+                  <input matInput type="text" placeholder="Enter your address" formControlName="direccion" />
+                  @if (registerForm.get('direccion')?.invalid && registerForm.get('direccion')?.touched) {
+                    <mat-error>{{ getErrorMessage('direccion') }}</mat-error>
+                  }
+                </mat-form-field>
+              </div>
             </div>
-            <div class="col-md-6">
-              <label for="name" class="f-w-500">Last Name</label>
-              <mat-form-field appearance="outline" class="w-100 m-t-5">
-                <input type="text" matInput placeholder="Last Name" />
-              </mat-form-field>
+
+            <!-- Submit Button -->
+            <div class="grid">
+              <button mat-flat-button color="primary" class="b-rad-20 m-t-15" type="submit" [disabled]="isLoading">
+                {{ isLoading ? 'Registering...' : 'Register' }}
+              </button>
             </div>
-            <div class="col-12">
-              <label for="name" class="f-w-500">Enter Your Email</label>
-              <mat-form-field appearance="outline" class="w-100 m-t-5">
-                <input matInput [formControl]="email" required placeholder="Email Address" />
-                @if (email.invalid) {
-                  <mat-error>{{ getErrorMessage() }}</mat-error>
-                }
-              </mat-form-field>
+
+            <!-- Login Link -->
+            <div class="check-me m-t-15">
+              <h6 class="f-w-400 text-muted m-b-0">Already have an Account?</h6>
+              <a class="text-primary-500" [routerLink]="['/auth/login']">Login Account</a>
             </div>
-            <div class="col-12">
-              <label for="name" class="f-w-500">Enter your password</label>
-              <mat-form-field appearance="outline" class="w-100 m-t-5">
-                <input matInput [type]="hide ? 'password' : 'text'" placeholder="Enter your password" />
-                <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
-                  <mat-icon>{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
-                </button>
-              </mat-form-field>
-            </div>
-            <div class="col-12">
-              <label for="name" class="f-w-500">Enter your Confirm Password</label>
-              <mat-form-field appearance="outline" class="w-100 m-t-5">
-                <input matInput [type]="coHide ? 'password' : 'text'" placeholder="Enter your password" />
-                <button
-                  mat-icon-button
-                  matSuffix
-                  (click)="coHide = !coHide"
-                  [attr.aria-label]="'Hide password'"
-                  [attr.aria-pressed]="coHide"
-                >
-                  <mat-icon>{{ coHide ? 'visibility_off' : 'visibility' }}</mat-icon>
-                </button>
-              </mat-form-field>
-            </div>
-          </div>
-          <div class="check-me">
-            <mat-checkbox class="float-start" checked color="primary">I agree to all the Terms & Condition</mat-checkbox>
-          </div>
-          <div class="grid">
-            <button mat-flat-button color="primary" class="b-rad-20 m-t-15">Register</button>
-          </div>
-          <div class="check-me m-t-15">
-            <h6 class="f-w-400 text-muted m-b-0">Don't have an Account?</h6>
-            <a class="text-primary-500" [routerLink]="['/auth/login']">Login Account</a>
-          </div>
+          </form>
         </app-card>
       </div>
     </div>
