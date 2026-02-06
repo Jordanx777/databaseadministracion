@@ -1,6 +1,7 @@
 // Angular import
-import { Component, inject, input } from '@angular/core';
+import { Component, inject, input, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, Location, LocationStrategy } from '@angular/common';
+import { Subject, takeUntil } from 'rxjs';
 
 // project import
 import { NavigationItem } from 'src/app/@theme/types/navigation';
@@ -8,6 +9,8 @@ import { SharedModule } from 'src/app/demo/shared/shared.module';
 import { MenuItemComponent } from './menu-item/menu-item.component';
 import { MenuCollapseComponent } from './menu-collapse/menu-collapse.component';
 import { MenuGroupVerticalComponent } from './menu-group/menu-group.component';
+import { AuthService, User } from 'src/app/@theme/services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-vertical-menu',
@@ -15,12 +18,83 @@ import { MenuGroupVerticalComponent } from './menu-group/menu-group.component';
   templateUrl: './vertical-menu.component.html',
   styleUrls: ['./vertical-menu.component.scss']
 })
-export class VerticalMenuComponent {
+export class VerticalMenuComponent implements OnInit, OnDestroy {
   private location = inject(Location);
   private locationStrategy = inject(LocationStrategy);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   // public props
   menus = input.required<NavigationItem[]>();
+  currentUser: User | null = null;
+  
+  private destroy$ = new Subject<void>();
+
+  ngOnInit() {
+    // Suscribirse a los cambios del usuario
+    this.authService.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        this.currentUser = user;
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // Obtener iniciales del usuario
+  getUserInitials(): string {
+    if (!this.currentUser) return 'U';
+    const nombre = this.currentUser.nombre?.charAt(0) || '';
+    const apellido = this.currentUser.apellido?.charAt(0) || '';
+    return (nombre + apellido).toUpperCase() || 'U';
+  }
+
+  // Obtener nombre completo
+  getFullName(): string {
+    if (!this.currentUser) return 'Usuario';
+    return `${this.currentUser.nombre || ''} ${this.currentUser.apellido || ''}`.trim() || 'Usuario';
+  }
+
+  // Obtener rol
+  getUserRole(): string {
+    return this.currentUser?.rol_nombre || 'Usuario';
+  }
+
+  // Manejar acciones del menú de cuenta
+  handleAccountAction(action: string) {
+    switch(action) {
+      case 'profile':
+        this.router.navigate(['/profile']);
+        break;
+      case 'settings':
+        this.router.navigate(['/settings']);
+        break;
+      case 'lock':
+        this.router.navigate(['/lock-screen']);
+        break;
+      case 'logout':
+        this.logout();
+        break;
+    }
+  }
+
+  // Cerrar sesión
+  logout() {
+  this.authService.logout().subscribe({
+    next: () => {
+      // Navega a la ruta relativa 'login' o usa '/auth/login' si auth es el módulo padre
+      this.router.navigate(['/auth/login']); // o simplemente ['login'] si estás en el contexto correcto
+    },
+    error: (error) => {
+      console.error('Error al cerrar sesión:', error);
+      // Aún así redirigir al login
+      this.router.navigate(['/auth/login']);
+    }
+  });
+}
 
   // public method
   fireOutClick() {
@@ -51,19 +125,23 @@ export class VerticalMenuComponent {
   accountList = [
     {
       icon: 'ti ti-user',
-      title: 'My Account'
+      title: 'My Account',
+      action: 'profile'
     },
     {
       icon: 'ti ti-settings',
-      title: 'Settings'
+      title: 'Settings',
+      action: 'settings'
     },
     {
       icon: 'ti ti-lock',
-      title: 'Lock Screen'
+      title: 'Lock Screen',
+      action: 'lock'
     },
     {
       icon: 'ti ti-power',
-      title: 'Logout'
+      title: 'Logout',
+      action: 'logout'
     }
   ];
 }
