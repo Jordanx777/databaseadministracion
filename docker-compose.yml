@@ -28,11 +28,8 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
       - "5051:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
     networks:
       - inventario_network
     depends_on:
@@ -61,27 +58,14 @@ services:
       DB_NAME: app_db
       DB_USER: app_user
       DB_PASSWORD: secret
-      JWT_SECRET: tu_secreto_super_seguro_cambiar_en_produccion
-      JWT_EXPIRATION: 3600
       FRONTEND_URL: http://localhost:4200
-      APP_ENV: development
-      APP_DEBUG: "true"
-      APP_URL: http://localhost:8080
 
   frontend:
-    build:
-      context: ./Frontend/angular
-      dockerfile: Dockerfile
     container_name: inventario_frontend
-    restart: unless-stopped
-    ports:
-      - "4200:80"
     networks:
       - inventario_network
     depends_on:
       - backend
-    environment:
-      NODE_ENV: production
 
 networks:
   inventario_network:
@@ -89,8 +73,4 @@ networks:
 
 volumes:
   almacen_pgdata:
-    driver: local
-  pgadmin_data:
-    driver: local
   backend_vendor:
-    driver: local

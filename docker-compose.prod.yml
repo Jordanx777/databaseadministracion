@@ -1,0 +1,9 @@
+services:
+  frontend:
+    build:
+      context: ./Frontend/angular
+      dockerfile: Dockerfile.prod
+    ports:
+      - "4200:80"
+    environment:
+      NODE_ENV: production

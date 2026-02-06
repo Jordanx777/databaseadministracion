@@ -106,11 +106,6 @@ export default class RegisterComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error al cargar roles:', error);
-        // Roles por defecto si falla la carga
-        this.roles = [
-          { id_rol: 1, nombre: 'Administrador', descripcion: 'Admin' },
-          { id_rol: 2, nombre: 'Usuario', descripcion: 'User' }
-        ];
       }
     });
   }
@@ -145,11 +140,9 @@ export default class RegisterComponent implements OnInit {
       id_rol: this.registerForm.get('id_rol')?.value
     };
 
-    console.log('Enviando datos:', registerData);
 
     this.apiService.post<any>('auth/register', registerData).subscribe({
       next: (response) => {
-        console.log('Respuesta registro:', response);
         if (response.status === 'success') {
           this.successMessage = 'Registro exitoso. Redirigiendo...';
           setTimeout(() => {

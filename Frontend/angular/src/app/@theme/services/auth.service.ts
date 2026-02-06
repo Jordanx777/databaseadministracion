@@ -43,7 +43,7 @@ export class AuthService {
 
   // Registro
   register(data: RegisterData): Observable<any> {
-    return this.apiService.post('/api/auth/register', data).pipe(
+    return this.apiService.post('auth/register', data).pipe(
       tap((response: any) => {
         // console.log('📝 AuthService - Respuesta de registro:', response);
         if (response.status === 'success') {
@@ -56,7 +56,7 @@ export class AuthService {
 
   // Login
   login(data: LoginData): Observable<any> {
-    return this.apiService.post('/api/auth/login', data).pipe(
+    return this.apiService.post('auth/login', data).pipe(
       tap((response: any) => {
         // console.log('🔐 AuthService - Respuesta de login:', response);
         if (response.status === 'success') {
@@ -70,7 +70,7 @@ export class AuthService {
 
   // Logout
   logout(): Observable<any> {
-    return this.apiService.post('/api/auth/logout', {}).pipe(
+    return this.apiService.post('auth/logout', {}).pipe(
       tap(() => {
         // console.log('👋 AuthService - Cerrando sesión...');
         this.currentUserSubject.next(null);
@@ -81,7 +81,7 @@ export class AuthService {
   // Verificar estado de autenticación
   checkAuthStatus(): void {
     // console.log('🔍 AuthService - Verificando sesión en el servidor...');
-    this.apiService.get<any>('/api/auth/me').subscribe({
+    this.apiService.get<any>('auth/me').subscribe({
       next: (response) => {
         // console.log('📥 AuthService - Respuesta de /me:', response);
         if (response.status === 'success') {
