@@ -2,11 +2,20 @@
   <app-card [showHeader]="false" cardClass="user-card" [padding]="20">
     <div class="flex align-items-center">
       <div class="flex-shrink-0">
-        <img src="assets/images/user/avatar-1.jpg" alt="user-image" class="user-avatar" />
+        @if (currentUser) {
+          <!-- Avatar con iniciales si no hay imagen -->
+          <div class="user-avatar-placeholder">
+            {{ getUserInitials() }}
+          </div>
+          <!-- Si tienes un campo de imagen en tu base de datos, puedes usar: -->
+          <!-- <img [src]="currentUser.avatar || 'assets/images/user/avatar-default.jpg'" alt="user-image" class="user-avatar" /> -->
+        } @else {
+          <img src="assets/images/user/avatar-1.jpg" alt="user-image" class="user-avatar" />
+        }
       </div>
       <div class="flex-grow-1 user-details">
-        <h6>Jonh Smith</h6>
-        <small>Administrator</small>
+        <h6>{{ getFullName() }}</h6>
+        <small>{{ getUserRole() }}</small>
       </div>
       <div class="user-setting">
         <a href="javascript:" [matMenuTriggerFor]="menu" class="text-muted">
@@ -16,7 +25,7 @@
         </a>
         <mat-menu #menu="matMenu" [overlapTrigger]="false" yPosition="below" xPosition="after">
           @for (list of accountList; track $index) {
-            <button mat-menu-item>
+            <button mat-menu-item (click)="handleAccountAction(list.action)">
               <a href="javascript:" class="text-muted">
                 <i class="{{ list.icon }} f-18 m-r-10"></i>
                 <span class="mat-body">{{ list.title }}</span>
