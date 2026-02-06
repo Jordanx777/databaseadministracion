@@ -239,6 +239,7 @@ class AuthController {
     
     // POST /api/auth/logout
     public function logout(): void {
+        error_log("Cerrando sesión...");
         session_start();
         session_destroy();
         
