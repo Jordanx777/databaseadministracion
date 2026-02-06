@@ -86,6 +86,31 @@ export const menus: Navigation[] = [
       }
     ]
   },
+
+  {
+    id: 'pagos',
+    title: 'Pagos',
+    type: 'group',
+    icon: 'icon-navigation',
+    children: [
+      {
+        id: 'pagos-pendientes',
+        title: 'Pagos Pendientes',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/component/pagos-pendientes',
+        icon: '#custom-wallet'
+      }, 
+      {
+        id: 'agregar-deudores',
+        title: 'Agregar Deudores',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/component/adddeudores',
+        icon: '#custom-user-plus'
+      }
+    ]
+  },
   
   {
     id: 'auth',
@@ -93,16 +118,16 @@ export const menus: Navigation[] = [
     type: 'group',
     icon: 'icon-navigation',
     children: [
-      {
-        id: 'Login',
-        title: 'Login',
-        type: 'item',
-        classes: 'nav-item',
-        url: '/auth/login',
-        icon: '#custom-shield',
-        target: true,
-        breadcrumbs: false
-      },
+      // {
+      //   id: 'Login',
+      //   title: 'Login',
+      //   type: 'item',
+      //   classes: 'nav-item',
+      //   url: '/auth/login',
+      //   icon: '#custom-shield',
+      //   target: true,
+      //   breadcrumbs: false
+      // },
       {
         id: 'register',
         title: 'Register',

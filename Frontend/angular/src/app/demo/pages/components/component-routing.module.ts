@@ -36,6 +36,16 @@ const routes: Routes = [
         loadComponent: () =>
           import('../forms/agregar-ventas-component/agregar-ventas-component')
             .then(m => m.AgregarVentasComponent),
+      }, 
+      
+      {
+
+
+        path: 'adddeudores',
+        loadComponent: () =>
+          import('../forms/agregar-clientes-saldo-component/agregar-clientes-saldo-component')
+            .then(m => m.AgregarClientesSaldoComponent),
+
       },
 
       /*-- -- -- -- -- -- */
@@ -48,6 +58,15 @@ const routes: Routes = [
   import('./productos-component/productos-component')
     .then(m => m.ProductosComponent)
 
+      }, 
+
+      {
+
+
+        path: 'pagos-pendientes',
+        loadComponent: () =>
+          import('./pagos-pendientes-component/pagos-pendientes-component')
+            .then(m => m.PagosPendientesComponent),
       },
 
       {

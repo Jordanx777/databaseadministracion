@@ -1,1 +1,84 @@
-<p>agregar-clientes-saldo-component works!</p>
+<div class="clientes-saldo-container">
+
+  <mat-card class="card-clientes-saldo">
+
+    <mat-card-header>
+      <mat-card-title>Agregar cliente con saldo</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+
+      <form [formGroup]="formClienteSaldo" (ngSubmit)="guardar()">
+
+        <div class="form-grid">
+
+          <!-- Nombre -->
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre del cliente</mat-label>
+            <input matInput formControlName="deudor">
+            <mat-error *ngIf="formClienteSaldo.get('deudor')?.hasError('required')">
+              Campo obligatorio
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Productos -->
+          <mat-form-field appearance="outline">
+            <mat-label>Productos que debe</mat-label>
+            <input matInput formControlName="productos" placeholder="Ej: 2 camisetas, 1 jean">
+          </mat-form-field>
+
+          <!-- Cantidad -->
+          <mat-form-field appearance="outline">
+            <mat-label>Cantidad de productos</mat-label>
+            <input matInput type="number" formControlName="cantidad">
+          </mat-form-field>
+
+          <!-- Total -->
+          <mat-form-field appearance="outline">
+            <mat-label>Valor total</mat-label>
+            <input matInput type="number" formControlName="total">
+          </mat-form-field>
+
+          <!-- Abono -->
+          <mat-form-field appearance="outline">
+            <mat-label>Abono</mat-label>
+            <input matInput type="number" formControlName="abono">
+          </mat-form-field>
+
+          <!-- Saldo -->
+          <mat-form-field appearance="outline">
+            <mat-label>Saldo restante</mat-label>
+            <input matInput type="number" formControlName="saldo" disabled>
+          </mat-form-field>
+
+          <!-- Estado -->
+          <mat-form-field appearance="outline">
+            <mat-label>Estado</mat-label>
+            <mat-select formControlName="estado">
+              <mat-option value="Pendiente">Pendiente</mat-option>
+              <mat-option value="Parcial">Parcial</mat-option>
+              <mat-option value="Pagado">Pagado</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+        </div>
+
+        <!-- BOTONES -->
+        <div class="acciones">
+          <button mat-flat-button color="primary" type="submit">
+            Guardar
+          </button>
+
+          <button mat-stroked-button type="button" routerLink="/pagos-pendientes">
+            Cancelar
+          </button>
+        </div>
+
+      </form>
+
+    </mat-card-content>
+
+  </mat-card>
+
+</div>
+
