@@ -1,0 +1,60 @@
+<div class="profile-page">
+  <app-card>
+    <h3 slot="header">Mi Perfil</h3>
+    
+    @if (currentUser) {
+      <div class="profile-content">
+        <div class="profile-header">
+          <div class="profile-avatar-large">
+            {{ getUserInitials() }}
+          </div>
+          <div class="profile-name">
+            <h4>{{ currentUser.nombre }} {{ currentUser.apellido }}</h4>
+            <p class="text-muted">{{ currentUser.rol_nombre }}</p>
+          </div>
+        </div>
+
+        <div class="profile-details">
+          <div class="detail-row">
+            <label>Usuario:</label>
+            <span>{{ currentUser.nombre }}</span>
+          </div>
+          
+          <div class="detail-row">
+            <label>Email:</label>
+            <span>{{ currentUser.correo || 'No especificado' }}</span>
+          </div>
+          
+          <div class="detail-row">
+            <label>Rol:</label>
+            <span>{{ currentUser.rol_nombre }}</span>
+          </div>
+          
+           <div class="detail-row">
+            <label>Fecha de Registro : </label>
+            <span>{{ currentUser.fecha_creacion | date:'longDate' }}</span>
+          </div>
+
+          <!-- telefono -->
+          <div class="detail-row">
+            <label>Teléfono:</label>
+            <span>{{ currentUser.telefono || 'No especificado' }}</span>
+          </div>
+
+          <!-- direccion -->
+          <div class="detail-row">
+            <label>Dirección:</label>
+            <span>{{ currentUser.direccion || 'No especificado' }}</span>
+          </div>
+          
+          <div class="detail-row">
+            <label>Estado:</label>
+            <span class="badge badge-success">{{ getStatusText() }}</span>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <p>Cargando información del usuario...</p>
+    }
+  </app-card>
+</div>
