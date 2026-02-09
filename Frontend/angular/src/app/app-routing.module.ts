@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AdminComponent } from './demo/layout/admin';
 import { EmptyComponent } from './demo/layout/empty';
 import { Inicio } from './inicio/inicio';
+import { ProfileComponent } from './demo/pages/profile/profile';
 
 const routes: Routes = [
   {
@@ -13,6 +14,10 @@ const routes: Routes = [
         path: '',
         redirectTo: '/dashboard',
         pathMatch: 'full'
+      },
+      {
+        path: 'profile',
+        component: ProfileComponent
       },
       {
         path: 'Inicio',
