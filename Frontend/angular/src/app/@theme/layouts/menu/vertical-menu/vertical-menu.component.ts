@@ -125,12 +125,12 @@ export class VerticalMenuComponent implements OnInit, OnDestroy {
   accountList = [
     {
       icon: 'ti ti-user',
-      title: 'My Account',
+      title: 'My Perfil',
       action: 'profile'
     },
     {
       icon: 'ti ti-settings',
-      title: 'Settings',
+      title: 'Configuracion',
       action: 'settings'
     },
     {
@@ -140,7 +140,7 @@ export class VerticalMenuComponent implements OnInit, OnDestroy {
     },
     {
       icon: 'ti ti-power',
-      title: 'Logout',
+      title: 'Cerrar Sesion',
       action: 'logout'
     }
   ];
