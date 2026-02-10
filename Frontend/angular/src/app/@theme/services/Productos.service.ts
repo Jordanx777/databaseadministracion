@@ -42,10 +42,16 @@ export interface Marca {
 }
 
 export interface Proveedor {
-  id: number;
+  id?: number;
   nombre: string;
-  descripcion?: string;
+  observaciones?: string;
+  nit: string;
+  correo_electronico: string;
+  telefono?: string;
+  ciudad?: string;
+  estado?: boolean;
   fecha_llegada?: string;
+  created_at?: string;
 }
 
 @Injectable({
@@ -96,7 +102,27 @@ export class ProductosService {
   }
 
   // PROVEEDORES
-  getProveedores(): Observable<any> {
-    return this.apiService.get('proveedores');
-  }
+getProveedores(): Observable<any> {
+  return this.apiService.get('proveedores');
+}
+
+getProveedor(id: number): Observable<any> {
+  return this.apiService.get(`proveedores/${id}`);
+}
+
+crearProveedor(proveedor: any): Observable<any> {
+  return this.apiService.post('proveedores', proveedor);
+}
+
+actualizarProveedor(id: number, proveedor: any): Observable<any> {
+  return this.apiService.put(`proveedores/${id}`, proveedor);
+}
+
+eliminarProveedor(id: number): Observable<any> {
+  return this.apiService.delete(`proveedores/${id}`);
+}
+
+getProveedoresActivos(): Observable<any> {
+  return this.apiService.get('proveedores/activos');
+}
 }
