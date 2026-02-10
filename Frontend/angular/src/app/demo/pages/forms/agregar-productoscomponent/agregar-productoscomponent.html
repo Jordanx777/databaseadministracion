@@ -1,123 +1,179 @@
 <div class="productos-container">
 
+  <!-- LOADING INICIAL -->
+  <div *ngIf="cargandoDatos" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Cargando datos...</p>
+  </div>
 
+  <mat-card *ngIf="!cargandoDatos" class="card-productos theme-card">
 
-<mat-card class="card-productos theme-card">
+    <!-- HEADER -->
+    <mat-card-header>
+      <mat-card-title>
+        {{ modoFormulario === 'agregar' ? 'Agregar producto' : 'Editar producto' }}
+      </mat-card-title>
+    </mat-card-header>
 
-  <!-- HEADER -->
-  <mat-card-header>
-    <mat-card-title>
-      {{ modoFormulario === 'agregar' ? 'Agregar producto' : 'Editar producto' }}
-    </mat-card-title>
-  </mat-card-header>
+    <mat-card-content>
 
-  <mat-card-content>
+      <form [formGroup]="formAgregar" (ngSubmit)="onSubmit()">
 
-    <form [formGroup]="formAgregar" (ngSubmit)="onSubmit()">
+        <!-- GRID -->
+        <div class="form-grid">
 
-      <!-- GRID -->
-      <div class="form-grid">
+          <!-- Nombre -->
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre del producto</mat-label>
+            <input matInput formControlName="nombre" placeholder="Ej: Camiseta Oversize">
+            <mat-error *ngIf="formAgregar.get('nombre')?.hasError('required')">
+              Campo obligatorio
+            </mat-error>
+          </mat-form-field>
 
-        <!-- Nombre -->
-        <mat-form-field appearance="outline">
-          <mat-label>Nombre del producto</mat-label>
-          <input matInput formControlName="nombre" placeholder="Ej: Camiseta Oversize">
-          <mat-error *ngIf="formAgregar.get('nombre')?.hasError('required')">
-            Campo obligatorio
-          </mat-error>
-        </mat-form-field>
+          <!-- Categoría -->
+          <mat-form-field appearance="outline">
+            <mat-label>Categoría</mat-label>
+            <mat-select formControlName="categoria_id">
+              <mat-option *ngFor="let cat of categorias" [value]="cat.id">
+                {{ cat.nombre }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formAgregar.get('categoria_id')?.hasError('required')">
+              Campo obligatorio
+            </mat-error>
+          </mat-form-field>
 
-        <!-- Categoría -->
-        <mat-form-field appearance="outline">
-          <mat-label>Categoría</mat-label>
-          <mat-select formControlName="categoria">
-            <mat-option *ngFor="let cat of categorias" [value]="cat.id">
-              {{ cat.nombre }}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="formAgregar.get('categoria')?.hasError('required')">
-            Campo obligatorio
-          </mat-error>
-        </mat-form-field>
+          <!-- Subcategoría (opcional, dependiente de categoría) -->
+          <mat-form-field appearance="outline">
+            <mat-label>Subcategoría</mat-label>
+            <mat-select formControlName="subcategoria_id" [disabled]="!formAgregar.get('categoria_id')?.value">
+              <mat-option [value]="null">Sin subcategoría</mat-option>
+              <mat-option *ngFor="let sub of subcategoriasFiltradas" [value]="sub.id">
+                {{ sub.nombre }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
 
-        <!-- Talla -->
-        <mat-form-field appearance="outline">
-          <mat-label>Talla</mat-label>
-          <mat-select formControlName="talla">
-            <mat-option *ngFor="let t of tallas" [value]="t">
-              {{ t }}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="formAgregar.get('talla')?.hasError('required')">
-            Campo obligatorio
-          </mat-error>
-        </mat-form-field>
+          <!-- Marca -->
+          <mat-form-field appearance="outline">
+            <mat-label>Marca</mat-label>
+            <mat-select formControlName="marca_id">
+              <mat-option *ngFor="let marca of marcas" [value]="marca.id">
+                {{ marca.nombre }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formAgregar.get('marca_id')?.hasError('required')">
+              Campo obligatorio
+            </mat-error>
+          </mat-form-field>
 
-        <!-- Color -->
-        <mat-form-field appearance="outline">
-          <mat-label>Color</mat-label>
-          <input matInput formControlName="color" placeholder="Ej: Negro">
-          <mat-error *ngIf="formAgregar.get('color')?.hasError('required')">
-            Campo obligatorio
-          </mat-error>
-        </mat-form-field>
+          <!-- Talla -->
+          <mat-form-field appearance="outline">
+            <mat-label>Talla</mat-label>
+            <mat-select formControlName="talla">
+              <mat-option *ngFor="let t of tallas" [value]="t">
+                {{ t }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formAgregar.get('talla')?.hasError('required')">
+              Campo obligatorio
+            </mat-error>
+          </mat-form-field>
 
-        <!-- Cantidad -->
-        <mat-form-field appearance="outline">
-          <mat-label>Cantidad</mat-label>
-          <input matInput type="number" formControlName="cantidad">
-          <mat-error *ngIf="formAgregar.get('cantidad')?.hasError('required')">
-            Campo obligatorio
-          </mat-error>
-        </mat-form-field>
+          <!-- Color -->
+          <mat-form-field appearance="outline">
+            <mat-label>Color</mat-label>
+            <input matInput formControlName="color" placeholder="Ej: Negro">
+            <mat-error *ngIf="formAgregar.get('color')?.hasError('required')">
+              Campo obligatorio
+            </mat-error>
+          </mat-form-field>
 
-        <!-- Precio compra -->
-        <mat-form-field appearance="outline">
-          <mat-label>Precio compra</mat-label>
-          <input matInput type="number" formControlName="precioCompra">
-          <mat-error *ngIf="formAgregar.get('precioCompra')?.hasError('required')">
-            Campo obligatorio
-          </mat-error>
-        </mat-form-field>
+          <!-- Género -->
+          <mat-form-field appearance="outline">
+            <mat-label>Género</mat-label>
+            <mat-select formControlName="genero">
+              <mat-option *ngFor="let g of generos" [value]="g">
+                {{ g }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
 
-        <!-- Precio venta -->
-        <mat-form-field appearance="outline">
-          <mat-label>Precio venta</mat-label>
-          <input matInput type="number" formControlName="precioVenta">
-          <mat-error *ngIf="formAgregar.get('precioVenta')?.hasError('required')">
-            Campo obligatorio
-          </mat-error>
-        </mat-form-field>
+          <!-- Stock (Cantidad) -->
+          <mat-form-field appearance="outline">
+            <mat-label>Stock</mat-label>
+            <input matInput type="number" formControlName="stock">
+            <mat-error *ngIf="formAgregar.get('stock')?.hasError('required')">
+              Campo obligatorio
+            </mat-error>
+            <mat-error *ngIf="formAgregar.get('stock')?.hasError('min')">
+              Debe ser mayor o igual a 0
+            </mat-error>
+          </mat-form-field>
 
-        <!-- Proveedor -->
-        <mat-form-field appearance="outline">
-          <mat-label>Proveedor</mat-label>
-          <mat-select formControlName="proveedor">
-            <mat-option *ngFor="let p of proveedores" [value]="p.id">
-              {{ p.nombre }}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="formAgregar.get('proveedor')?.hasError('required')">
-            Campo obligatorio
-          </mat-error>
-        </mat-form-field>
+          <!-- Precio compra -->
+          <mat-form-field appearance="outline">
+            <mat-label>Precio compra</mat-label>
+            <input matInput type="number" step="0.01" formControlName="precio_compra">
+            <mat-error *ngIf="formAgregar.get('precio_compra')?.hasError('required')">
+              Campo obligatorio
+            </mat-error>
+            <mat-error *ngIf="formAgregar.get('precio_compra')?.hasError('min')">
+              Debe ser mayor o igual a 0
+            </mat-error>
+          </mat-form-field>
 
-      </div>
-      
+          <!-- Precio venta -->
+          <mat-form-field appearance="outline">
+            <mat-label>Precio venta</mat-label>
+            <input matInput type="number" step="0.01" formControlName="precio_venta">
+            <mat-error *ngIf="formAgregar.get('precio_venta')?.hasError('required')">
+              Campo obligatorio
+            </mat-error>
+            <mat-error *ngIf="formAgregar.get('precio_venta')?.hasError('min')">
+              Debe ser mayor o igual a 0
+            </mat-error>
+          </mat-form-field>
 
-      <!-- BOTONES -->
-      <div class="acciones">
-        <button mat-flat-button class="guardar" color="primary" type="submit" >
-          Guardar
-        </button>
-        <button mat-stroked-button type="button" routerLink="/productos">
-          Cancelar
-        </button>
-      </div>
+          <!-- Proveedor -->
+          <mat-form-field appearance="outline">
+            <mat-label>Proveedor</mat-label>
+            <mat-select formControlName="proveedor_id">
+              <mat-option *ngFor="let p of proveedores" [value]="p.id">
+                {{ p.nombre }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formAgregar.get('proveedor_id')?.hasError('required')">
+              Campo obligatorio
+            </mat-error>
+          </mat-form-field>
 
-    </form>
+        </div>
 
-  </mat-card-content>
+        <!-- BOTONES -->
+        <div class="acciones">
+          <button 
+            mat-flat-button 
+            class="guardar" 
+            color="primary" 
+            type="submit"
+            [disabled]="cargando">
+            <mat-spinner *ngIf="cargando" diameter="20"></mat-spinner>
+            <span *ngIf="!cargando">{{ modoFormulario === 'agregar' ? 'Guardar' : 'Actualizar' }}</span>
+          </button>
+          <button 
+            mat-stroked-button 
+            type="button" 
+            (click)="cancelar()"
+            [disabled]="cargando">
+            Cancelar
+          </button>
+        </div>
 
-</mat-card>
+      </form>
+
+    </mat-card-content>
+
+  </mat-card>
 </div>
