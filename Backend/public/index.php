@@ -28,6 +28,11 @@ try {
     require_once __DIR__ . '/../src/Routes/api.php';
     require_once __DIR__ . '/../src/Routes/Roles/Roles.php';
     require_once __DIR__ . '/../src/Routes/Auth/Auth.php';
+    require_once __DIR__ . '/../src/Routes/Categorias.routes.php';
+    require_once __DIR__ . '/../src/Routes/Marcas.routes.php';
+    require_once __DIR__ . '/../src/Routes/Subcategorias.routes.php';
+    require_once __DIR__ . '/../src/Routes/Proveedores.routes.php';
+    require_once __DIR__ . '/../src/Routes/Productos.routes.php';
     
     // Ejecutar router
     $router->run();
