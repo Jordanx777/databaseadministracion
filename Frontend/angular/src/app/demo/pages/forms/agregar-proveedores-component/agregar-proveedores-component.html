@@ -17,9 +17,9 @@
 
       <div class="col-md-6">
         <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Nombre del proveedor</mat-label>
+          <mat-label>Nombre del proveedor *</mat-label>
           <input matInput formControlName="nombre" placeholder="Ej: Distribuidora ABC">
-          <mat-error *ngIf="proveedorForm.get('nombre')?.touched && proveedorForm.get('nombre')?.invalid">
+          <mat-error *ngIf="proveedorForm.get('nombre')?.hasError('required')">
             El nombre es obligatorio
           </mat-error>
         </mat-form-field>
@@ -27,9 +27,9 @@
 
       <div class="col-md-6">
         <mat-form-field appearance="outline" class="w-100">
-          <mat-label>NIT / Documento</mat-label>
-          <input matInput formControlName="nit" placeholder="Ej: 900123456">
-          <mat-error *ngIf="proveedorForm.get('nit')?.touched && proveedorForm.get('nit')?.invalid">
+          <mat-label>NIT / Documento *</mat-label>
+          <input matInput formControlName="nit" placeholder="Ej: 900123456-7">
+          <mat-error *ngIf="proveedorForm.get('nit')?.hasError('required')">
             El NIT es obligatorio
           </mat-error>
         </mat-form-field>
@@ -37,9 +37,12 @@
 
       <div class="col-md-6">
         <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Correo electrónico</mat-label>
+          <mat-label>Correo electrónico *</mat-label>
           <input matInput type="email" formControlName="correo" placeholder="proveedor@email.com">
-          <mat-error *ngIf="proveedorForm.get('correo')?.touched && proveedorForm.get('correo')?.invalid">
+          <mat-error *ngIf="proveedorForm.get('correo')?.hasError('required')">
+            El correo es obligatorio
+          </mat-error>
+          <mat-error *ngIf="proveedorForm.get('correo')?.hasError('email')">
             Ingresa un correo válido
           </mat-error>
         </mat-form-field>
@@ -49,14 +52,12 @@
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>Teléfono</mat-label>
           <input matInput type="tel" formControlName="telefono" placeholder="Ej: 3001234567">
-          <mat-error *ngIf="proveedorForm.get('telefono')?.touched && proveedorForm.get('telefono')?.invalid">
-            El teléfono es obligatorio
-          </mat-error>
+          <mat-hint>Opcional</mat-hint>
         </mat-form-field>
       </div>
 
       <!-- ================= UBICACIÓN ================= -->
-      <div class="col-12">
+      <div class="col-12 mt-4">
         <h5 class="section-title">Ubicación</h5>
       </div>
 
@@ -64,29 +65,31 @@
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>Ciudad</mat-label>
           <input matInput formControlName="ciudad" placeholder="Ej: Cartagena">
-          <mat-error *ngIf="proveedorForm.get('ciudad')?.touched && proveedorForm.get('ciudad')?.invalid">
-            La ciudad es obligatoria
-          </mat-error>
+          <mat-hint>Opcional</mat-hint>
         </mat-form-field>
       </div>
 
       <div class="col-md-6">
         <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Dirección</mat-label>
-          <input matInput formControlName="direccion" placeholder="Ej: Cra 10 # 25 - 30">
-          <mat-error *ngIf="proveedorForm.get('direccion')?.touched && proveedorForm.get('direccion')?.invalid">
-            La dirección es obligatoria
-          </mat-error>
+          <mat-label>Fecha de llegada estimada</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="fecha_llegada">
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+          <mat-hint>Opcional</mat-hint>
         </mat-form-field>
       </div>
 
       <!-- ================= ESTADO ================= -->
-      <div class="col-md-4">
+      <div class="col-12 mt-4">
+        <h5 class="section-title">Configuración</h5>
+      </div>
+
+      <div class="col-md-6">
         <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Estado</mat-label>
+          <mat-label>Estado *</mat-label>
           <mat-select formControlName="estado">
-            <mat-option value="activo">Activo</mat-option>
-            <mat-option value="inactivo">Inactivo</mat-option>
+            <mat-option [value]="true">Activo</mat-option>
+            <mat-option [value]="false">Inactivo</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
@@ -97,30 +100,45 @@
           <mat-label>Observaciones</mat-label>
           <textarea
             matInput
-            rows="3"
+            rows="4"
             formControlName="observaciones"
-            placeholder="Notas adicionales sobre el proveedor">
+            placeholder="Notas adicionales sobre el proveedor (productos que maneja, condiciones de pago, etc.)">
           </textarea>
+          <mat-hint>Opcional - Información adicional relevante</mat-hint>
         </mat-form-field>
       </div>
 
       <!-- ================= BOTONES ================= -->
-      <div class="col-12 text-end mt-3">
+      <div class="col-12 text-end mt-4">
         <button
           mat-stroked-button
           color="warn"
           type="button"
           class="me-2"
-          (click)="cancelar()">
+          (click)="cancelar()"
+          [disabled]="cargando">
           Cancelar
+        </button>
+
+        <button
+          mat-stroked-button
+          type="button"
+          class="me-2"
+          (click)="limpiarFormulario()"
+          [disabled]="cargando">
+          <!-- <mat-icon>refresh</mat-icon> -->
+          Limpiar
         </button>
 
         <button
           mat-raised-button
           color="primary"
           type="button"
-          (click)="guardarProveedor()">
-          Guardar proveedor
+          (click)="guardarProveedor()"
+          [disabled]="cargando || proveedorForm.invalid">
+          <mat-spinner *ngIf="cargando" diameter="20" class="me-2"></mat-spinner>
+          <span *ngIf="!cargando">Guardar proveedor</span>
+          <span *ngIf="cargando">Guardando...</span>
         </button>
       </div>
 
