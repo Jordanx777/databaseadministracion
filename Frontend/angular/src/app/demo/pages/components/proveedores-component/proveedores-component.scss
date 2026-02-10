@@ -12,6 +12,55 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 0;
+  min-width: 500px;
+  
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.badge-success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.badge-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.acciones {
+  button {
+    margin: 0 4px;
+  }
+}
+
 /* ===================== */
 /* TOOLBAR FILTRO */
 /* ===================== */
