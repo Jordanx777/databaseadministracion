@@ -16,6 +16,10 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 /* Servicios */
 import { ProductosService, Categoria, Subcategoria, Marca, Proveedor } from 'src/app/@theme/services/Productos.service';
 
+// variables de entorno
+import { environment } from 'src/environments/environment';
+console.log('URL de imágenes desde environment:', environment.imagesUrl);
+
 @Component({
   selector: 'app-agregar-productoscomponent',
   standalone: true,
@@ -55,6 +59,10 @@ export class AgregarProductoscomponent implements OnInit {
   tallas = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
   generos = ['Hombre', 'Mujer', 'Unisex', 'Niño', 'Niña'];
 
+  /** IMAGEN */
+  archivoSeleccionado: File | null = null;
+  vistaPrevia: string | null = null;
+
   /** LOADING */
   cargando = false;
   cargandoDatos = true;
@@ -65,7 +73,7 @@ export class AgregarProductoscomponent implements OnInit {
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private snackBar: MatSnackBar,
-    private cdr: ChangeDetectorRef // Agregar ChangeDetectorRef
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -86,30 +94,40 @@ export class AgregarProductoscomponent implements OnInit {
     this.formAgregar = this.fb.group({
       nombre: ['', Validators.required],
       categoria_id: ['', Validators.required],
-      subcategoria_id: [''],
+      subcategoria_id: [{value: '', disabled: true}], 
       marca_id: ['', Validators.required],
       talla: ['', Validators.required],
       color: ['', Validators.required],
       genero: [''],
+      imagen_url: [''],
       stock: [0, [Validators.required, Validators.min(0)]],
       precio_compra: [0, [Validators.required, Validators.min(0)]],
       precio_venta: [0, [Validators.required, Validators.min(0)]],
       proveedor_id: ['', Validators.required],
     });
 
-    // Listener para filtrar subcategorías cuando cambia la categoría
-    this.formAgregar.get('categoria_id')?.valueChanges.subscribe(categoriaId => {
+    // Listener para habilitar/deshabilitar subcategoría
+  this.formAgregar.get('categoria_id')?.valueChanges.subscribe(categoriaId => {
+    const subcategoriaControl = this.formAgregar.get('subcategoria_id');
+    
+    if (categoriaId) {
+      subcategoriaControl?.enable(); // ✅ Habilitar
       this.filtrarSubcategorias(categoriaId);
-      // Resetear subcategoría cuando cambia la categoría
-      this.formAgregar.patchValue({ subcategoria_id: '' });
-    });
-  }
+    } else {
+      subcategoriaControl?.disable(); // ✅ Deshabilitar
+      this.subcategoriasFiltradas = [];
+    }
+    
+    // Resetear valor
+    this.formAgregar.patchValue({ subcategoria_id: '' }, { emitEvent: false });
+  });
+}
+  
 
-  /** CARGAR DATOS INICIALES - CORREGIDO */
+  /** CARGAR DATOS INICIALES */
   cargarDatosIniciales(): void {
     this.cargandoDatos = true;
 
-    // Cargar todas las listas en paralelo
     Promise.all([
       this.productosService.getCategorias().toPromise(),
       this.productosService.getSubcategorias().toPromise(),
@@ -117,13 +135,11 @@ export class AgregarProductoscomponent implements OnInit {
       this.productosService.getProveedores().toPromise()
     ])
     .then(([catRes, subRes, marRes, provRes]) => {
-      // Manejar diferentes estructuras de respuesta
       this.categorias = this.extraerDatos(catRes);
       this.subcategorias = this.extraerDatos(subRes);
       this.marcas = this.extraerDatos(marRes);
       this.proveedores = this.extraerDatos(provRes);
       
-      // Usar setTimeout para evitar el error de ExpressionChanged
       setTimeout(() => {
         this.cargandoDatos = false;
         this.cdr.detectChanges();
@@ -140,29 +156,24 @@ export class AgregarProductoscomponent implements OnInit {
     });
   }
 
-  /** EXTRAER DATOS DE LA RESPUESTA - NUEVO MÉTODO */
+  /** EXTRAER DATOS DE LA RESPUESTA */
   private extraerDatos(response: any): any[] {
-    // Si la respuesta es null o undefined, retornar array vacío
     if (!response) {
       return [];
     }
     
-    // Si la respuesta tiene la propiedad 'data'
     if (response.data) {
       return Array.isArray(response.data) ? response.data : [];
     }
     
-    // Si la respuesta es directamente un array
     if (Array.isArray(response)) {
       return response;
     }
     
-    // Si tiene 'success' y 'data'
     if (response.success && response.data) {
       return Array.isArray(response.data) ? response.data : [];
     }
     
-    // Por defecto retornar array vacío
     return [];
   }
 
@@ -177,7 +188,44 @@ export class AgregarProductoscomponent implements OnInit {
     }
   }
 
-  /** CARGAR PRODUCTO PARA EDITAR - CORREGIDO */
+  /** MANEJAR SELECCIÓN DE ARCHIVO */
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      // Validar tipo de archivo
+      const tiposPermitidos = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+      if (!tiposPermitidos.includes(file.type)) {
+        this.mostrarMensaje('Solo se permiten imágenes (JPG, PNG, WEBP)', 'error');
+        event.target.value = ''; // Limpiar input
+        return;
+      }
+
+      // Validar tamaño (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.mostrarMensaje('La imagen no debe superar los 5MB', 'error');
+        event.target.value = ''; // Limpiar input
+        return;
+      }
+
+      this.archivoSeleccionado = file;
+
+      // Crear vista previa
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.vistaPrevia = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  /** LIMPIAR IMAGEN */
+  limpiarImagen(): void {
+    this.archivoSeleccionado = null;
+    this.vistaPrevia = null;
+    this.formAgregar.patchValue({ imagen_url: '' });
+  }
+
+  /** CARGAR PRODUCTO PARA EDITAR */
   cargarProducto(id: number): void {
     this.cargando = true;
     this.productosService.getProducto(id).subscribe({
@@ -190,7 +238,7 @@ export class AgregarProductoscomponent implements OnInit {
             this.filtrarSubcategorias(producto.categoria_id);
           }
           
-          // Luego cargar los datos
+          // Cargar los datos
           this.formAgregar.patchValue({
             nombre: producto.nombre,
             categoria_id: producto.categoria_id,
@@ -199,11 +247,20 @@ export class AgregarProductoscomponent implements OnInit {
             talla: producto.talla,
             color: producto.color,
             genero: producto.genero,
+            imagen_url: producto.imagen_url,
             stock: producto.stock,
             precio_compra: producto.precio_compra,
             precio_venta: producto.precio_venta,
             proveedor_id: producto.proveedor_id
           });
+
+          // Si hay imagen, mostrar vista previa con la URL completa
+          if (producto.imagen_url) {
+            // Asumiendo que tu API devuelve la ruta relativa de la imagen, concatenamos con la URL base de imágenes
+             this.vistaPrevia = environment.imagesUrl + producto.imagen_url;
+             console.log('URL de la imagen:', this.vistaPrevia);
+             console.log('URL de imágenes desde environment:', environment.imagesUrl+producto.imagen_url);
+          }
         } else {
           this.mostrarMensaje('Producto no encontrado', 'error');
         }
@@ -220,7 +277,7 @@ export class AgregarProductoscomponent implements OnInit {
     });
   }
 
-  /** EXTRAER DATOS DEL PRODUCTO - NUEVO MÉTODO */
+  /** EXTRAER DATOS DEL PRODUCTO */
   private extraerDatosProducto(response: any): any {
     if (!response) return null;
     
@@ -232,7 +289,6 @@ export class AgregarProductoscomponent implements OnInit {
       return response.data;
     }
     
-    // Si la respuesta es directamente el producto
     if (response.id) {
       return response;
     }
@@ -240,7 +296,7 @@ export class AgregarProductoscomponent implements OnInit {
     return null;
   }
 
-  /** GUARDAR PRODUCTO - CORREGIDO */
+  /** GUARDAR PRODUCTO */
   onSubmit(): void {
     if (this.formAgregar.invalid) {
       this.formAgregar.markAllAsTouched();
@@ -249,24 +305,50 @@ export class AgregarProductoscomponent implements OnInit {
     }
 
     this.cargando = true;
-    const producto = { ...this.formAgregar.value };
 
-    // Convertir valores numéricos
-    producto.stock = parseInt(producto.stock);
-    producto.precio_compra = parseFloat(producto.precio_compra);
-    producto.precio_venta = parseFloat(producto.precio_venta);
+    // Crear FormData para enviar archivo
+    const formData = new FormData();
+    
+    // Agregar todos los campos del formulario
+    const formValues = this.formAgregar.value;
+    
+    formData.append('nombre', formValues.nombre);
+    formData.append('categoria_id', formValues.categoria_id.toString());
+    formData.append('marca_id', formValues.marca_id.toString());
+    formData.append('talla', formValues.talla);
+    formData.append('color', formValues.color);
+    formData.append('stock', formValues.stock.toString());
+    formData.append('precio_compra', formValues.precio_compra.toString());
+    formData.append('precio_venta', formValues.precio_venta.toString());
+    formData.append('proveedor_id', formValues.proveedor_id.toString());
 
-    // Convertir string vacío a null para subcategoria_id si no está seleccionada
-    if (!producto.subcategoria_id || producto.subcategoria_id === '') {
-      producto.subcategoria_id = null;
+    // Campos opcionales
+    if (formValues.subcategoria_id) {
+      formData.append('subcategoria_id', formValues.subcategoria_id.toString());
+    }
+    
+    if (formValues.genero) {
+      formData.append('genero', formValues.genero);
     }
 
+    // Agregar la imagen si existe
+    if (this.archivoSeleccionado) {
+      formData.append('imagen', this.archivoSeleccionado, this.archivoSeleccionado.name);
+    }
+
+    // Log para debug
+    console.log('FormData siendo enviado:');
+    formData.forEach((value, key) => {
+      console.log(key + ':', value);
+    });
+
     const operacion$ = this.modoFormulario === 'agregar'
-      ? this.productosService.crearProducto(producto)
-      : this.productosService.actualizarProducto(this.idEdicion!, producto);
+      ? this.productosService.crearProducto(formData)
+      : this.productosService.actualizarProducto(this.idEdicion!, formData);
 
     operacion$.subscribe({
       next: (response) => {
+        console.log('Respuesta del servidor:', response);
         const success = this.verificarExito(response);
         
         if (success) {
@@ -277,7 +359,7 @@ export class AgregarProductoscomponent implements OnInit {
           
           // Navegar después de un pequeño delay
           setTimeout(() => {
-            this.router.navigate(['/productos']);
+            this.router.navigate(['component/producto']);
           }, 500);
         } else {
           const mensaje = response.message || 
@@ -302,7 +384,7 @@ export class AgregarProductoscomponent implements OnInit {
     });
   }
 
-  /** VERIFICAR ÉXITO DE LA RESPUESTA - NUEVO MÉTODO */
+  /** VERIFICAR ÉXITO DE LA RESPUESTA */
   private verificarExito(response: any): boolean {
     if (!response) return false;
     
@@ -322,7 +404,7 @@ export class AgregarProductoscomponent implements OnInit {
 
   /** CANCELAR */
   cancelar(): void {
-    this.router.navigate(['/productos']);
+    this.router.navigate(['component/addproducto']);
   }
 
   /** MOSTRAR MENSAJE */

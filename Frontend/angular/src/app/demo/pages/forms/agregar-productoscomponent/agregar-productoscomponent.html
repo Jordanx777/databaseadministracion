@@ -45,15 +45,16 @@
           </mat-form-field>
 
           <!-- Subcategoría (opcional, dependiente de categoría) -->
-          <mat-form-field appearance="outline">
-            <mat-label>Subcategoría</mat-label>
-            <mat-select formControlName="subcategoria_id" [disabled]="!formAgregar.get('categoria_id')?.value">
-              <mat-option [value]="null">Sin subcategoría</mat-option>
-              <mat-option *ngFor="let sub of subcategoriasFiltradas" [value]="sub.id">
-                {{ sub.nombre }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+          <!-- Subcategoría -->
+<mat-form-field appearance="outline">
+  <mat-label>Subcategoría</mat-label>
+  <mat-select formControlName="subcategoria_id">
+    <mat-option [value]="null">Sin subcategoría</mat-option>
+    <mat-option *ngFor="let sub of subcategoriasFiltradas" [value]="sub.id">
+      {{ sub.nombre }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>
 
           <!-- Marca -->
           <mat-form-field appearance="outline">
@@ -147,7 +148,52 @@
             <mat-error *ngIf="formAgregar.get('proveedor_id')?.hasError('required')">
               Campo obligatorio
             </mat-error>
-          </mat-form-field>
+          </mat-form-field> 
+          <!-- Imagen -->
+<div class="imagen-container">
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Imagen del producto</mat-label>
+    <input 
+      matInput 
+      readonly 
+      [value]="archivoSeleccionado ? archivoSeleccionado.name : 'Sin imagen seleccionada'"
+      placeholder="Seleccione una imagen">
+  </mat-form-field>
+  
+  <div class="imagen-acciones">
+    <button 
+      mat-raised-button 
+      color="primary" 
+      type="button"
+      (click)="fileInput.click()">
+      <mat-icon>cloud_upload</mat-icon>
+      Seleccionar imagen
+    </button>
+    
+    <button 
+      mat-raised-button 
+      color="warn" 
+      type="button"
+      *ngIf="archivoSeleccionado"
+      (click)="limpiarImagen()">
+      <mat-icon>delete</mat-icon>
+      Eliminar
+    </button>
+  </div>
+
+  <!-- Input oculto para archivo -->
+  <input 
+    #fileInput
+    type="file" 
+    accept="image/*"
+    (change)="onFileSelected($event)"
+    style="display: none;">
+
+  <!-- Vista previa -->
+  <div class="vista-previa" *ngIf="vistaPrevia">
+    <img [src]="vistaPrevia" alt="Vista previa">
+  </div>
+</div>
 
         </div>
 

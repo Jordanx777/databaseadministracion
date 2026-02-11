@@ -59,6 +59,34 @@ display: flex;
   }
 }
 
+.imagen-container {
+  grid-column: 1 / -1;
+  
+  .imagen-acciones {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    
+    button {
+      mat-icon {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+  
+  .vista-previa {
+    margin-top: 1rem;
+    text-align: center;
+    
+    img {
+      max-width: 300px;
+      max-height: 300px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+  }
+}
+
 // Estilos para snackbar
 ::ng-deep {
   .snackbar-success {
