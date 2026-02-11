@@ -2,16 +2,11 @@ import {
   Component,
   AfterViewInit,
   ViewChild,
-  TemplateRef
+  OnInit,
+   ChangeDetectorRef // ✅ Agregar esto
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormsModule,
-  ReactiveFormsModule,
-  FormBuilder,
-  FormGroup,
-  Validators
-} from '@angular/forms';
+import { Router } from '@angular/router';
 
 /* ===== ANGULAR MATERIAL ===== */
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -22,20 +17,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
-/* ===== INTERFACE ===== */
-export interface Producto {
-  nombre: string;
-  categoria_nombre: string;
-  talla: string;
-  color: string;
-  cantidad: number;
-  precioCompra: number;
-  precioVenta: number;
-  proveedor_nombre: string;
-}
+/* ===== SERVICIOS ===== */
+import { ProductosService, Producto } from 'src/app/@theme/services/Productos.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-productos-component',
@@ -44,9 +31,6 @@ export interface Producto {
   styleUrls: ['./productos-component.scss'],
   imports: [
     CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
@@ -55,72 +39,49 @@ export interface Producto {
     MatCardModule,
     MatIconModule,
     MatButtonModule,
-    MatDialogModule,
-    MatSelectModule
+    MatProgressSpinnerModule,
+    MatSnackBarModule
   ]
 })
-export class ProductosComponent implements AfterViewInit {
-
-  /* ===== MODAL ===== */
-  @ViewChild('modalProducto') modalProducto!: TemplateRef<any>;
-  dialogRef!: MatDialogRef<any>;
-
-  /* ===== FORM ===== */
-  formProducto!: FormGroup;
-  modoFormulario: 'agregar' | 'editar' = 'agregar';
-  productoEditando: Producto | null = null;
-
-  /* ===== SELECT DATA ===== */
-  categorias = ['Ropa', 'Accesorios'];
-  tallas = ['XS', 'S', 'M', 'L', 'XL'];
-  proveedores = ['Proveedor A', 'Proveedor B'];
+export class ProductosComponent implements OnInit, AfterViewInit {
 
   /* ===== COLUMNAS ===== */
   displayedColumns: string[] = [
+    'imagen',
     'nombre',
     'categoria',
     'talla',
     'color',
-    'cantidad',
-    'precioCompra',
-    'precioVenta',
+    'stock',
+    'precio_compra',
+    'precio_venta',
     'proveedor',
     'acciones'
   ];
 
   /* ===== DATA SOURCE ===== */
-  dataSource = new MatTableDataSource<Producto>([
-    {
-      nombre: 'Camiseta Oversize',
-      categoria_nombre: 'Ropa',
-      talla: 'M',
-      color: 'Negro',
-      cantidad: 12,
-      precioCompra: 30000,
-      precioVenta: 60000,
-      proveedor_nombre: 'Proveedor A'
-    },
-    {
-      nombre: 'Pantalón Cargo',
-      categoria_nombre: 'Ropa',
-      talla: 'L',
-      color: 'Verde',
-      cantidad: 4,
-      precioCompra: 45000,
-      precioVenta: 90000,
-      proveedor_nombre: 'Proveedor B'
-    }
-  ]);
-
+  dataSource = new MatTableDataSource<Producto>([]);
+  
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
+  /* ===== LOADING ===== */
+  cargando = true;
+
+  /* ===== URL DE IMÁGENES ===== */
+  baseUrlImagenes = environment.imagesUrl;
+
   constructor(
-    private fb: FormBuilder,
-    private dialog: MatDialog
+    private productosService: ProductosService,
+    private router: Router,
+    private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef // ✅ Inyectar ChangeDetectorRef
   ) {
-    this.crearFormulario();
     this.configurarFiltro();
+  }
+
+  ngOnInit(): void {
+    this.cargarProductos();
   }
 
   ngAfterViewInit(): void {
@@ -128,29 +89,62 @@ export class ProductosComponent implements AfterViewInit {
     this.dataSource.sort = this.sort;
   }
 
-  /* ===== FORM ===== */
-  crearFormulario(): void {
-    this.formProducto = this.fb.group({
-      nombre: ['', Validators.required],
-      categoria_nombre: ['', Validators.required],
-      talla: ['', Validators.required],
-      color: ['', Validators.required],
-      cantidad: [0, [Validators.required, Validators.min(0)]],
-      precioCompra: [0, [Validators.required, Validators.min(0)]],
-      precioVenta: [0, [Validators.required, Validators.min(0)]],
-      proveedor_nombre: ['', Validators.required]
+  /* ===== CARGAR PRODUCTOS ===== */
+  cargarProductos(): void {
+    this.cargando = true;
+    this.productosService.getProductos().subscribe({
+      next: (response) => {
+        console.log('Respuesta completa:', response);
+        const productos = this.extraerDatos(response);
+        console.log('Productos extraídos:', productos);
+        
+        this.dataSource.data = productos;
+        
+        // ✅ Usar setTimeout y detectChanges
+        setTimeout(() => {
+          this.cargando = false;
+          this.cdr.detectChanges();
+          console.log('Estado cargando:', this.cargando);
+        }, 100);
+      },
+      error: (error) => {
+        console.error('Error al cargar productos:', error);
+        this.mostrarMensaje('Error al cargar los productos', 'error');
+        
+        // ✅ También aquí
+        setTimeout(() => {
+          this.cargando = false;
+          this.cdr.detectChanges();
+        }, 100);
+      }
     });
+  }
+
+  /* ===== EXTRAER DATOS ===== */
+  private extraerDatos(response: any): any[] {
+    if (response?.data) return Array.isArray(response.data) ? response.data : [];
+    if (Array.isArray(response)) return response;
+    return [];
+  }
+
+  /* ===== OBTENER URL DE IMAGEN ===== */
+  getImagenUrl(producto: Producto): string {
+    if (producto.imagen_url) {
+      return this.baseUrlImagenes + producto.imagen_url;
+    }
+    return 'assets/images/no-image.png';
   }
 
   /* ===== FILTRO GLOBAL ===== */
   configurarFiltro(): void {
-    this.dataSource.filterPredicate = (data: Producto, filter: string) => {
+    this.dataSource.filterPredicate = (data: any, filter: string) => {
       const texto = `
-        ${data.nombre}
-        ${data.categoria_nombre}
-        ${data.talla}
-        ${data.color}
-        ${data.proveedor_nombre}
+        ${data.nombre || ''}
+        ${data.categoria_nombre || ''}
+        ${data.talla || ''}
+        ${data.color || ''}
+        ${data.marca_nombre || ''}
+        ${data.proveedor_nombre || ''}
       `.toLowerCase();
 
       return texto.includes(filter);
@@ -166,64 +160,37 @@ export class ProductosComponent implements AfterViewInit {
     }
   }
 
-  /* ===== MODAL ===== */
+  /* ===== ACCIONES ===== */
   agregarProducto(): void {
-    this.modoFormulario = 'agregar';
-    this.productoEditando = null;
-    this.formProducto.reset({
-      nombre: '',
-      categoria_nombre: '',
-      talla: '',
-      color: '',
-      cantidad: 0,
-      precioCompra: 0,
-      precioVenta: 0,
-      proveedor_nombre: ''
-    });
-
-    this.abrirModal();
+    this.router.navigate(['component/addproducto']);
   }
 
   editarProducto(producto: Producto): void {
-    this.modoFormulario = 'editar';
-    this.productoEditando = producto;
-    this.formProducto.patchValue(producto);
-
-    this.abrirModal();
-  }
-
-  abrirModal(): void {
-    this.dialogRef = this.dialog.open(this.modalProducto, {
-      width: '750px',
-      disableClose: true
-    });
-  }
-
-  cerrarModal(): void {
-    this.dialogRef.close();
-  }
-
-  /* ===== GUARDAR ===== */
-  guardar(): void {
-    if (this.formProducto.invalid) {
-      this.formProducto.markAllAsTouched();
-      return;
-    }
-
-    if (this.modoFormulario === 'agregar') {
-      this.dataSource.data = [
-        ...this.dataSource.data,
-        this.formProducto.value
-      ];
-    } else if (this.productoEditando) {
-      Object.assign(this.productoEditando, this.formProducto.value);
-      this.dataSource.data = [...this.dataSource.data];
-    }
-
-    this.cerrarModal();
+    this.router.navigate(['component/addproducto', producto.id]);
   }
 
   eliminarProducto(producto: Producto): void {
-    this.dataSource.data = this.dataSource.data.filter(p => p !== producto);
+    if (confirm(`¿Estás seguro de eliminar "${producto.nombre}"?`)) {
+      this.productosService.eliminarProducto(producto.id!).subscribe({
+        next: () => {
+          this.mostrarMensaje('Producto eliminado exitosamente', 'success');
+          this.cargarProductos(); // Recargar lista
+        },
+        error: (error) => {
+          console.error('Error al eliminar:', error);
+          this.mostrarMensaje('Error al eliminar el producto', 'error');
+        }
+      });
+    }
+  }
+
+  /* ===== MENSAJES ===== */
+  mostrarMensaje(mensaje: string, tipo: 'success' | 'error' | 'warning'): void {
+    this.snackBar.open(mensaje, 'Cerrar', {
+      duration: 3000,
+      horizontalPosition: 'end',
+      verticalPosition: 'top',
+      panelClass: [`snackbar-${tipo}`]
+    });
   }
 }
