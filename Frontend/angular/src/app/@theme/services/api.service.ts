@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-// import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
-//   private BASE_URL = environment.apiUrl;
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
 
-//   private BASE_URL = environment.apiUrl;
-  private BASE_URL = "http://localhost:8080/api/";
+  private BASE_URL = environment.apiUrl;
+  // private BASE_URL = "http://localhost:8080/api/";
 
   constructor(private http: HttpClient) {}
 
