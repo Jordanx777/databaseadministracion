@@ -1,7 +1,11 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
     
-    # Redirigir todo a index.php
+    # Permitir acceso directo a archivos en uploads
+    RewriteCond %{REQUEST_URI} ^/uploads/
+    RewriteRule ^ - [L]
+    
+    # Redirigir todo lo demás a index.php
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^ index.php [L]
