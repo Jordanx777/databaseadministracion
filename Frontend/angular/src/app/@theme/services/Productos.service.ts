@@ -70,13 +70,13 @@ export class ProductosService {
     return this.apiService.get(`productos/${id}`);
   }
 
-  crearProducto(producto: Producto): Observable<any> {
-    return this.apiService.post('productos', producto);
-  }
+  crearProducto(formData: FormData): Observable<any> {
+  return this.apiService.postFormData('CrearProductos', formData);
+}
 
-  actualizarProducto(id: number, producto: Producto): Observable<any> {
-    return this.apiService.put(`productos/${id}`, producto);
-  }
+actualizarProducto(id: number, formData: FormData): Observable<any> {
+  return this.apiService.putFormData(`productos/${id}`, formData);
+}
 
   eliminarProducto(id: number): Observable<any> {
     return this.apiService.delete(`productos/${id}`);
