@@ -1,0 +1,135 @@
+<div class="productos-container">
+
+  <mat-card class="card-productos">
+
+    <!-- LOADING -->
+    <div *ngIf="cargando" class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>Cargando ventas del día...</p>
+    </div>
+
+    <!-- CONTENIDO -->
+    <ng-container *ngIf="!cargando">
+
+      <!-- TOOLBAR -->
+      <div class="filtro-toolbar">
+
+        <!-- BUSCADOR -->
+        <mat-form-field appearance="outline" class="buscador">
+          <mat-label>Buscar venta</mat-label>
+          <input
+            matInput
+            placeholder="Producto, cliente, método..."
+            (keyup)="applyFilter($event)"
+          />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <!-- BOTÓN AGREGAR -->
+        <button
+          mat-raised-button
+          color="primary"
+          class="btn-agregar"
+          (click)="agregarVenta()"
+        >
+          <mat-icon>add</mat-icon>
+          Registrar venta
+        </button>
+
+      </div>
+
+      <!-- TABLA -->
+      <div class="tabla-wrapper">
+        <table mat-table [dataSource]="dataSource" matSort>
+
+          <!-- Producto -->
+          <ng-container matColumnDef="producto">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Producto</th>
+            <td mat-cell *matCellDef="let row">{{ row.producto }}</td>
+          </ng-container>
+
+          <!-- Cliente -->
+          <ng-container matColumnDef="cliente">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Cliente</th>
+            <td mat-cell *matCellDef="let row">{{ row.cliente }}</td>
+          </ng-container>
+
+          <!-- Cantidad -->
+          <ng-container matColumnDef="cantidad">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Cant</th>
+            <td mat-cell *matCellDef="let row">{{ row.cantidad }}</td>
+          </ng-container>
+
+          <!-- Precio -->
+          <ng-container matColumnDef="precio">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Precio</th>
+            <td mat-cell *matCellDef="let row">
+              {{ row.precio | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </td>
+          </ng-container>
+
+          <!-- Total -->
+          <ng-container matColumnDef="total">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Total</th>
+            <td mat-cell *matCellDef="let row">
+              <strong>
+                {{ row.total | currency:'COP':'symbol-narrow':'1.0-0' }}
+              </strong>
+            </td>
+          </ng-container>
+
+          <!-- Método -->
+          <ng-container matColumnDef="metodo">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Método</th>
+            <td mat-cell *matCellDef="let row">{{ row.metodo }}</td>
+          </ng-container>
+
+          <!-- Fecha -->
+          <ng-container matColumnDef="fecha">
+            <th mat-header-cell *matHeaderCellDef>Hora</th>
+            <td mat-cell *matCellDef="let row">
+              {{ row.fecha | date:'shortTime' }}
+            </td>
+          </ng-container>
+
+          <!-- Acciones -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let row" class="acciones">
+              <button
+                mat-icon-button
+                color="primary"
+                (click)="editarVenta(row)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                color="warn"
+                (click)="eliminarVenta(row)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell empty" [attr.colspan]="displayedColumns.length">
+              No hay ventas registradas hoy
+            </td>
+          </tr>
+
+        </table>
+      </div>
+
+      <mat-paginator
+        [pageSizeOptions]="[5,10,25,50]"
+        showFirstLastButtons>
+      </mat-paginator>
+
+    </ng-container>
+
+  </mat-card>
+
+</div>

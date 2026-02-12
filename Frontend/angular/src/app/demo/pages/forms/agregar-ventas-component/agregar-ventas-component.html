@@ -1,1 +1,130 @@
-<p>agregar-ventas-component works!</p>
+<div class="ventas-container">
+
+  <!-- LOADING -->
+  <div *ngIf="cargandoDatos" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Cargando datos...</p>
+  </div>
+
+  <mat-card *ngIf="!cargandoDatos" class="card-ventas theme-card">
+
+    <!-- HEADER -->
+    <mat-card-header>
+      <mat-card-title>
+        {{ modoFormulario === 'agregar' ? 'Agregar venta diaria' : 'Editar venta diaria' }}
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+
+      <form [formGroup]="formVentas" (ngSubmit)="onSubmit()">
+
+        <div class="form-grid">
+
+          <!-- Producto -->
+          <mat-form-field appearance="outline">
+            <mat-label>Producto</mat-label>
+            <mat-select formControlName="producto_id">
+              <mat-option *ngFor="let p of productos" [value]="p.id">
+                {{ p.nombre }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formVentas.get('producto_id')?.hasError('required')">
+              Campo obligatorio
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Cliente -->
+          <mat-form-field appearance="outline">
+            <mat-label>Cliente</mat-label>
+            <mat-select formControlName="cliente_id">
+              <mat-option [value]="null">Venta sin cliente</mat-option>
+              <mat-option *ngFor="let c of clientes" [value]="c.id">
+                {{ c.nombre }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Cantidad -->
+          <mat-form-field appearance="outline">
+            <mat-label>Cantidad</mat-label>
+            <input matInput type="number" formControlName="cantidad">
+            <mat-error *ngIf="formVentas.get('cantidad')?.hasError('required')">
+              Campo obligatorio
+            </mat-error>
+            <mat-error *ngIf="formVentas.get('cantidad')?.hasError('min')">
+              Mínimo 1
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Precio unitario -->
+          <mat-form-field appearance="outline">
+            <mat-label>Precio unitario</mat-label>
+            <input matInput type="number" formControlName="precio_unitario">
+            <mat-error *ngIf="formVentas.get('precio_unitario')?.hasError('required')">
+              Campo obligatorio
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Total -->
+          <mat-form-field appearance="outline">
+            <mat-label>Total</mat-label>
+            <input matInput type="number" formControlName="total" readonly>
+          </mat-form-field>
+
+          <!-- Método de pago -->
+          <mat-form-field appearance="outline">
+            <mat-label>Método de pago</mat-label>
+            <mat-select formControlName="metodo_pago">
+              <mat-option *ngFor="let m of metodosPago" [value]="m">
+                {{ m }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formVentas.get('metodo_pago')?.hasError('required')">
+              Campo obligatorio
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Fecha -->
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha de venta</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="fecha">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+
+          <!-- Observaciones -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Observaciones</mat-label>
+            <textarea matInput rows="3" formControlName="observaciones"></textarea>
+          </mat-form-field>
+
+        </div>
+
+        <!-- BOTONES -->
+        <div class="acciones">
+          <button 
+            mat-flat-button 
+            color="primary" 
+            type="submit"
+            [disabled]="cargando">
+            <mat-spinner *ngIf="cargando" diameter="20"></mat-spinner>
+            <span *ngIf="!cargando">
+              {{ modoFormulario === 'agregar' ? 'Guardar venta' : 'Actualizar venta' }}
+            </span>
+          </button>
+
+          <button 
+            mat-stroked-button 
+            type="button" 
+            (click)="cancelar()"
+            [disabled]="cargando">
+            Cancelar
+          </button>
+        </div>
+
+      </form>
+
+    </mat-card-content>
+  </mat-card>
+</div>

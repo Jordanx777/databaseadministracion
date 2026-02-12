@@ -42,6 +42,13 @@ export const menus: Navigation[] = [
         classes: 'nav-item',
         url: '/component/addproducto', // URL corregida
         icon: '#custom-plus-circle'
+      } , {
+        id: 'catalogo',
+        title: 'Catálogo de Productos',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/component/catalogo', // URL corregida
+        icon: '#custom-list'
       }
     ]
   },
@@ -83,6 +90,13 @@ export const menus: Navigation[] = [
         classes: 'nav-item',
         url: '/component/addventas',
         icon: '#custom-cart'
+      },{
+        id: 'ventas-diarias',
+        title: 'Ventas Diarias',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/component/ventas-diarias',
+        icon: '#custom-chart-bar'
       }
     ]
   },

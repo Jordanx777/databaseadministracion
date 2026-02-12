@@ -61,6 +61,13 @@ const routes: Routes = [
       }, 
 
       {
+        path: 'catalogo',
+        loadComponent: () =>
+  import('./catalogo-component/catalogo-component')
+    .then(m => m.CatalogoComponent)
+      },
+
+      {
 
 
         path: 'pagos-pendientes',
@@ -74,6 +81,13 @@ const routes: Routes = [
        loadComponent: () =>
   import('./proveedores-component/proveedores-component')
     .then(m => m.ProveedoresComponent)
+      },
+
+      {
+        path: 'ventas-diarias',
+       loadComponent: () =>
+  import('./ventas-diarias-component/ventas-diarias-component')
+    .then(m => m.VentasDiariasComponent)
       },
 
       /*-- -- -- -- -- -- -- */
