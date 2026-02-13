@@ -5,7 +5,7 @@ use App\Controllers\ProveedoresController;
 $router->get('/api/proveedores', [ProveedoresController::class, 'getAllProveedores']);
 
 // GET - Obtener proveedor por ID
-$router->get('/api/proveedores/{id}', [ProveedoresController::class, 'getProveedorById']);
+// $router->get('/api/proveedores/{id}', [ProveedoresController::class, 'getProveedorById']);
 
 // POST - Crear proveedor
 $router->post('/api/proveedores', [ProveedoresController::class, 'crearProveedor']);
@@ -14,8 +14,8 @@ $router->post('/api/proveedores', [ProveedoresController::class, 'crearProveedor
 $router->put('/api/proveedores/{id}', [ProveedoresController::class, 'updateProveedor']);
 
 // DELETE - Eliminar proveedor
-$router->delete('/api/proveedores/{id}', [ProveedoresController::class, 'deleteProveedor']);
+$router->delete('/api/deleteproveedores/{id}', [ProveedoresController::class, 'deleteProveedor']);
 
 // GET - Obtener proveedores activos
-$router->get('/api/proveedores/activos', [ProveedoresController::class, 'getProveedoresActivos']);
+$router->get('/api/proveedores/activos', [ProveedoresController::class, 'getProveedoresActivoss']);
 ?>
