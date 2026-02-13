@@ -18,7 +18,6 @@ import { ProductosService, Categoria, Subcategoria, Marca, Proveedor } from 'src
 
 // variables de entorno
 import { environment } from 'src/environments/environment';
-console.log('URL de imágenes desde environment:', environment.imagesUrl);
 
 @Component({
   selector: 'app-agregar-productoscomponent',
@@ -132,7 +131,7 @@ export class AgregarProductoscomponent implements OnInit {
       this.productosService.getCategorias().toPromise(),
       this.productosService.getSubcategorias().toPromise(),
       this.productosService.getMarcas().toPromise(),
-      this.productosService.getProveedores().toPromise()
+      this.productosService.getProveedoresActivos().toPromise()
     ])
     .then(([catRes, subRes, marRes, provRes]) => {
       this.categorias = this.extraerDatos(catRes);
@@ -258,8 +257,6 @@ export class AgregarProductoscomponent implements OnInit {
           if (producto.imagen_url) {
             // Asumiendo que tu API devuelve la ruta relativa de la imagen, concatenamos con la URL base de imágenes
              this.vistaPrevia = environment.imagesUrl + producto.imagen_url;
-             console.log('URL de la imagen:', this.vistaPrevia);
-             console.log('URL de imágenes desde environment:', environment.imagesUrl+producto.imagen_url);
           }
         } else {
           this.mostrarMensaje('Producto no encontrado', 'error');
@@ -337,9 +334,7 @@ export class AgregarProductoscomponent implements OnInit {
     }
 
     // Log para debug
-    console.log('FormData siendo enviado:');
     formData.forEach((value, key) => {
-      console.log(key + ':', value);
     });
 
     const operacion$ = this.modoFormulario === 'agregar'
@@ -348,7 +343,6 @@ export class AgregarProductoscomponent implements OnInit {
 
     operacion$.subscribe({
       next: (response) => {
-        console.log('Respuesta del servidor:', response);
         const success = this.verificarExito(response);
         
         if (success) {
