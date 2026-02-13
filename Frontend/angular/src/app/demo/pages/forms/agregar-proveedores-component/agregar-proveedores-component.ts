@@ -89,11 +89,8 @@ export class AgregarProveedoresComponent implements OnInit {
       proveedor.estado = proveedor.estado === 'true' || proveedor.estado === 'activo';
     }
 
-    console.log('Enviando proveedor:', proveedor);
-
     this.productosService.crearProveedor(proveedor).subscribe({
       next: (response) => {
-        console.log('Respuesta del servidor:', response);
         
         if (this.verificarExito(response)) {
           this.mostrarMensaje('Proveedor creado exitosamente', 'success');
