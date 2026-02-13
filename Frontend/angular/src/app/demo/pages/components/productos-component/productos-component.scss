@@ -1,17 +1,26 @@
-.productos-container {
-  display: flex;
-  justify-content: center;
-  padding: 24px;
-}
+// ===================================================
+// VARIABLES
+// ===================================================
+@use 'sass:color';
 
-.card-productos {
-  width: 100%;
-  max-width: 1200px;
-  padding: 24px;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-}
+$primary: #3f51b5;
+$accent: #ff4081;
+$success: #4caf50;
+$warning: #ff9800;
+$danger: #f44336;
+$text-main: #1a1a2e;
+$text-muted: #78788c;
+$border: #e8e8f0;
+$bg-light: #f8f8fc;
+$radius: 10px;
+$radius-sm: 6px;
 
+// Colores derivados (reemplazan darken/lighten)
+$primary-dark: color.adjust($primary, $lightness: -10%);
+
+// ===================================================
+// CONTENEDOR PRINCIPAL
+// ===================================================
 .productos-container {
   padding: 1.5rem;
 }
@@ -19,192 +28,501 @@
 .card-productos {
   padding: 1.5rem;
   min-height: 400px;
+  border-radius: $radius !important;
 }
 
+// ===================================================
+// LOADING
+// ===================================================
 .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem;
+  padding: 4rem 2rem;
   gap: 1rem;
-  
+
   p {
-    color: #666;
-    font-size: 1rem;
+    color: $text-muted;
+    font-size: 0.95rem;
+    margin: 0;
   }
 }
 
-.filtro-toolbar {
+// ===================================================
+// HEADER DE LA TABLA
+// ===================================================
+.tabla-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
   gap: 1rem;
   flex-wrap: wrap;
+}
+
+.header-info {
+  .tabla-titulo {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: $text-main;
+    margin: 0 0 2px;
+  }
+
+  .tabla-subtitulo {
+    font-size: 0.85rem;
+    color: $text-muted;
+  }
+}
+
+.header-acciones {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 
   .buscador {
-    flex: 1;
-    max-width: 400px;
-    min-width: 250px;
+    width: 280px;
+    .mat-mdc-form-field-subscript-wrapper { display: none; }
   }
 
   .btn-agregar {
-    mat-icon {
-      margin-right: 0.5rem;
+    height: 48px;
+    padding: 0 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+
+    mat-icon { margin-right: 6px; }
+  }
+}
+
+// ===================================================
+// TABLA
+// ===================================================
+.tabla-wrapper {
+  overflow-x: auto;
+  border-radius: $radius-sm;
+  border: 1px solid $border;
+  margin-bottom: 0.5rem;
+}
+
+.tabla-productos {
+  width: 100%;
+
+  // Header
+  .mat-mdc-header-cell {
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $text-muted;
+    background: $bg-light;
+    border-bottom: 2px solid $border;
+    padding: 12px 16px;
+    white-space: nowrap;
+  }
+
+  // Celdas
+  .mat-mdc-cell {
+    padding: 10px 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid $border;
+    color: $text-main;
+  }
+
+  // Fila hover
+  .fila-producto {
+    transition: background 0.15s ease;
+    &:hover {
+      background: rgba($primary, 0.03);
     }
   }
 }
 
-.tabla-wrapper {
-  overflow-x: auto;
-  margin-bottom: 1rem;
-}
-
-table {
-  width: 100%;
+// ===================================================
+// CELDA IMAGEN
+// ===================================================
+.img-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: $radius-sm;
+  overflow: hidden;
+  border: 1px solid $border;
+  background: $bg-light;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .producto-imagen {
-  width: 50px;
-  height: 50px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 4px;
-  border: 1px solid #ddd;
   display: block;
+}
+
+// ===================================================
+// CELDA NOMBRE
+// ===================================================
+.producto-nombre {
+  display: block;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: $text-main;
+}
+
+.producto-meta {
+  display: block;
+  font-size: 0.78rem;
+  color: $text-muted;
+  margin-top: 2px;
+}
+
+// ===================================================
+// BADGES
+// ===================================================
+.cat-badge {
+  display: inline-block;
+  background: rgba($primary, 0.1);
+  color: $primary;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.subcat {
+  display: block;
+  font-size: 0.75rem;
+  color: $text-muted;
+  margin-top: 3px;
+}
+
+.talla-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 28px;
+  border: 1.5px solid $border;
+  border-radius: $radius-sm;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: $text-main;
 }
 
 .color-badge {
   display: inline-block;
-  padding: 4px 12px;
-  border-radius: 12px;
-  background-color: #e0e0e0;
-  color: #333;
-  font-size: 0.85rem;
-  font-weight: 500;
+  background: $bg-light;
+  color: $text-main;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  border: 1px solid $border;
 }
 
-.badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 12px;
-  background-color: #4caf50;
-  color: white;
-  font-weight: 500;
-  font-size: 0.85rem;
-
-  &.badge-low {
-    background-color: #f44336;
-  }
-}
-
-.acciones {
-  white-space: nowrap;
-  
-  button {
-    margin: 0 2px;
-  }
-}
-
-.empty {
-  text-align: center;
-  padding: 2rem !important;
-  color: #999;
-  font-style: italic;
-}
-
-/* ===================== */
-/* TOOLBAR FILTRO */
-/* ===================== */
-.filtro-toolbar {
-  display: flex;
-  justify-content: space-between;
+.stock-badge {
+  display: inline-flex;
   align-items: center;
-  gap: 24px;              // 👈 MÁS ESPACIO REAL
-  margin-bottom: 20px;
-  flex-wrap: nowrap;      // 👈 CLAVE para que no se pegue
+  justify-content: center;
+  min-width: 36px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: white;
+
+  &.stock-ok    { background: $success; }
+  &.stock-low   { background: $warning; }
+  &.stock-empty { background: $danger; }
 }
 
-.buscador {
-  flex: 1 1 auto;         // 👈 puede crecer pero no empuja
-  max-width: 420px;
-}
-
-.btn-agregar {
-  flex-shrink: 0;         // 👈 evita que se aplaste
+// ===================================================
+// PRECIO
+// ===================================================
+.precio {
+  font-size: 0.88rem;
+  font-weight: 500;
   white-space: nowrap;
-  height: 40px;
+
+  &.precio-venta {
+    font-weight: 700;
+    color: $primary;
+  }
 }
 
-/* ===================== */
-/* TABLA */
-/* ===================== */
-.tabla-wrapper {
-  overflow-x: auto;
+// ===================================================
+// ACCIONES
+// ===================================================
+.acciones-cell {
+  white-space: nowrap;
+
+  button {
+    transition: transform 0.15s ease;
+    &:hover { transform: scale(1.1); }
+  }
 }
 
-table {
-  width: 100%;
-  border-spacing: 0 8px;
+// ===================================================
+// EMPTY STATE
+// ===================================================
+.empty-state {
+  text-align: center !important;
+  padding: 3rem 1rem !important;
+  color: $text-muted;
+
+  mat-icon {
+    font-size: 3rem;
+    width: 3rem;
+    height: 3rem;
+    display: block;
+    margin: 0 auto 0.5rem;
+    opacity: 0.4;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
 }
 
-th {
-  font-weight: 600;
-  color: #555;
-}
-
-td {
-  background: #fafafa;
-}
-
-tr.mat-row {
-  border-radius: 12px;
-}
-
-/* ===================== */
-/* BADGE */
-/* ===================== */
-.badge {
-  background: #e3f2fd;
-  color: #1976d2;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-weight: 600;
-}
-
-/* ===================== */
-/* ACCIONES */
-/* ===================== */
-.acciones {
+// ===================================================
+// ===== MODAL EDITAR =====
+// ===================================================
+.modal-editar-container {
+  background: white;
+  border-radius: $radius;
+  overflow: hidden;
+  max-height: 90vh;
   display: flex;
-  gap: 8px;
+  flex-direction: column;
 }
 
-/* ===================== */
-/* SIN DATOS */
-/* ===================== */
-.empty {
-  text-align: center;
-  padding: 24px;
-  color: #999;
-  font-style: italic;
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, $primary 0%, $primary-dark 100%);
+  color: white;
+  flex-shrink: 0;
+
+  .modal-header-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .modal-icon {
+    font-size: 2rem;
+    width: 2rem;
+    height: 2rem;
+    opacity: 0.9;
+  }
+
+  .modal-titulo {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0 0 2px;
+  }
+
+  .modal-subtitulo {
+    font-size: 0.82rem;
+    opacity: 0.75;
+    margin: 0;
+  }
+
+  .btn-cerrar {
+    color: white;
+    opacity: 0.8;
+    &:hover { opacity: 1; }
+  }
 }
 
-/* ===================== */
-/* RESPONSIVE */
-/* ===================== */
-@media (max-width: 768px) {
-  .filtro-toolbar {
-    flex-direction: column;
-    align-items: stretch;
+.modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+// Grid del formulario
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.25rem 1rem;
+
+  .span-2 {
+    grid-column: 1 / -1;
   }
 
-  .buscador {
-    max-width: 100%;
-  }
-
-  .btn-agregar {
+  mat-form-field {
     width: 100%;
-    justify-content: center;
+  }
+}
+
+// Sección imagen
+.divider-imagen {
+  margin: 1rem 0 !important;
+}
+
+.imagen-section {
+  padding: 0.5rem 0 1rem;
+}
+
+.imagen-titulo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: $text-main;
+  margin: 0 0 1rem;
+
+  mat-icon {
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    color: $primary;
+  }
+}
+
+.imagen-content {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.vista-previa-container {
+  flex-shrink: 0;
+}
+
+.imagen-preview {
+  width: 110px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: $radius-sm;
+  border: 2px solid $border;
+  display: block;
+}
+
+.imagen-placeholder {
+  width: 110px;
+  height: 110px;
+  border-radius: $radius-sm;
+  border: 2px dashed $border;
+  background: $bg-light;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  mat-icon {
+    font-size: 2rem;
+    width: 2rem;
+    height: 2rem;
+    color: #ccc;
+  }
+
+  span {
+    font-size: 0.75rem;
+    color: $text-muted;
+  }
+}
+
+.imagen-controles {
+  flex: 1;
+  min-width: 200px;
+}
+
+.imagen-hint {
+  font-size: 0.8rem;
+  color: $text-muted;
+  margin: 0 0 0.75rem;
+}
+
+.imagen-botones {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+
+  button {
+    mat-icon { margin-right: 4px; }
+  }
+}
+
+.imagen-nueva {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: $success;
+  margin: 0.75rem 0 0;
+  font-weight: 500;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+// Footer del modal
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+
+  button {
+    min-width: 130px;
+    height: 44px;
+
+    mat-spinner {
+      display: inline-block;
+      margin-right: 6px;
+    }
+
+    mat-icon {
+      margin-right: 6px;
+    }
+  }
+}
+
+// Loading de selects dentro del modal
+.loading-selects {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  gap: 1rem;
+
+  p {
+    color: $text-muted;
+    margin: 0;
+    font-size: 0.9rem;
+  }
+}
+
+
+// ===================================================
+// ESTILOS GLOBALES PARA EL PANEL DEL DIALOG
+// ===================================================
+// Estos deben ir en styles.scss o en el componente con :host ::ng-deep
+::ng-deep .modal-editar-producto {
+  .mat-mdc-dialog-container {
+    border-radius: $radius !important;
+    padding: 0 !important;
+    overflow: hidden;
+  }
+
+  .mat-mdc-dialog-surface {
+    border-radius: $radius !important;
+    overflow: hidden;
   }
 }
