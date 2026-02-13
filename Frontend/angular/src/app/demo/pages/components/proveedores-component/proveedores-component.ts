@@ -23,6 +23,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { BehaviorSubject } from 'rxjs';
 
 // Servicios
 import { ProductosService } from 'src/app/@theme/services/Productos.service';
@@ -69,7 +70,7 @@ export class ProveedoresComponent implements OnInit, AfterViewInit {
   dialogRef!: MatDialogRef<any>;
 
   // Loading
-  cargando = false;
+  cargando$ = new BehaviorSubject<boolean>(false);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -95,7 +96,7 @@ export class ProveedoresComponent implements OnInit, AfterViewInit {
 
   /** CARGAR PROVEEDORES */
   cargarProveedores(): void {
-    this.cargando = true;
+    this.cargando$.next(true);
     
     this.productosService.getProveedores().subscribe({
       next: (response) => {
@@ -103,7 +104,7 @@ export class ProveedoresComponent implements OnInit, AfterViewInit {
         this.dataSource.data = proveedores;
         
         setTimeout(() => {
-          this.cargando = false;
+         this.cargando$.next(false);
           this.cdr.detectChanges();
         });
       },
@@ -112,7 +113,7 @@ export class ProveedoresComponent implements OnInit, AfterViewInit {
         this.mostrarMensaje('Error al cargar los proveedores', 'error');
         
         setTimeout(() => {
-          this.cargando = false;
+          this.cargando$.next(false);
           this.cdr.detectChanges();
         });
       }
@@ -168,7 +169,7 @@ export class ProveedoresComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    this.cargando = true;
+    this.cargando$.next(true);
     const datosActualizados = this.editarForm.value;
 
     this.productosService.actualizarProveedor(this.proveedorSeleccionado.id!, datosActualizados).subscribe({
@@ -180,12 +181,12 @@ export class ProveedoresComponent implements OnInit, AfterViewInit {
         } else {
           this.mostrarMensaje(response.message || 'Error al actualizar proveedor', 'error');
         }
-        this.cargando = false;
+        this.cargando$.next(false);
       },
       error: (error) => {
         console.error('Error:', error);
         this.mostrarMensaje('Error al actualizar el proveedor', 'error');
-        this.cargando = false;
+        this.cargando$.next(false);
       }
     });
   }
@@ -208,9 +209,10 @@ export class ProveedoresComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    this.cargando = true;
+    this.cargando$.next(true);
+    const id = row.id!;
 
-    this.productosService.eliminarProveedor(row.id!).subscribe({
+    this.productosService.eliminarProveedor(id).subscribe({
       next: (response) => {
         if (this.verificarExito(response)) {
           this.mostrarMensaje('Proveedor eliminado exitosamente', 'success');
@@ -218,12 +220,11 @@ export class ProveedoresComponent implements OnInit, AfterViewInit {
         } else {
           this.mostrarMensaje(response.message || 'Error al eliminar proveedor', 'error');
         }
-        this.cargando = false;
       },
       error: (error) => {
         console.error('Error:', error);
         this.mostrarMensaje('Error al eliminar el proveedor', 'error');
-        this.cargando = false;
+        this.cargando$.next(false);
       }
     });
   }

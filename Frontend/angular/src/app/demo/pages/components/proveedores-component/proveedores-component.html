@@ -3,7 +3,7 @@
   <mat-card class="card-productos">
 
     <!-- LOADING OVERLAY -->
-    <div *ngIf="cargando" class="loading-overlay">
+    <div *ngIf="cargando$.value" class="loading-overlay">
       <mat-spinner></mat-spinner>
     </div>
 
@@ -27,7 +27,7 @@
         color="primary"
         class="btn-agregar"
         (click)="agregarProveedor()"
-        [disabled]="cargando"
+        [disabled]="cargando$.value"
       >
         <mat-icon>add</mat-icon>
         Agregar proveedor
