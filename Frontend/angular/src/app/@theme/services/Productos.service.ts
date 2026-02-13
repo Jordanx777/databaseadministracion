@@ -75,11 +75,11 @@ export class ProductosService {
 }
 
 actualizarProducto(id: number, formData: FormData): Observable<any> {
-  return this.apiService.putFormData(`productos/${id}`, formData);
+  return this.apiService.putFormData(`ActualizarProductos/${id}`, formData);
 }
 
   eliminarProducto(id: number): Observable<any> {
-    return this.apiService.delete(`productos/${id}`);
+    return this.apiService.delete(`deleteproductos/${id}`);
   }
 
   // CATEGORÍAS
@@ -106,9 +106,9 @@ getProveedores(): Observable<any> {
   return this.apiService.get('proveedores');
 }
 
-getProveedor(id: number): Observable<any> {
-  return this.apiService.get(`proveedores/${id}`);
-}
+// getProveedor(id: number): Observable<any> {
+//   return this.apiService.get(`proveedores/${id}`);
+// }
 
 crearProveedor(proveedor: any): Observable<any> {
   return this.apiService.post('proveedores', proveedor);
@@ -119,7 +119,7 @@ actualizarProveedor(id: number, proveedor: any): Observable<any> {
 }
 
 eliminarProveedor(id: number): Observable<any> {
-  return this.apiService.delete(`proveedores/${id}`);
+  return this.apiService.delete(`deleteproveedores/${id}`);
 }
 
 getProveedoresActivos(): Observable<any> {
