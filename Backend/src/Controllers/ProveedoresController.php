@@ -1,16 +1,21 @@
 <?php
+
 namespace App\Controllers;
+
 use App\Models\ProveedoresModel;
 use App\Helpers\ResponseHelper;
 
-class ProveedoresController {
+class ProveedoresController
+{
     private $proveedoresModel;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->proveedoresModel = new ProveedoresModel();
     }
 
-    public function getAllProveedores() {
+    public function getAllProveedores()
+    {
         try {
             $proveedores = $this->proveedoresModel->getAllProveedores();
             ResponseHelper::success($proveedores, 'Proveedores obtenidos exitosamente');
@@ -19,54 +24,60 @@ class ProveedoresController {
         }
     }
 
-    public function getProveedorById($id) {
+    // public function getProveedorById(array $params)
+    // {
+    //     try {
+    //         $id = isset($params['id']) ? (int)$params['id'] : null;
+    //         error_log("Obteniendo proveedor por ID: $id");
+    //         $proveedor = $this->proveedoresModel->getProveedorById($id);
+    //         if ($proveedor) {
+    //             ResponseHelper::success($proveedor, 'Proveedor obtenido exitosamente');
+    //         } else {
+    //             ResponseHelper::notFound('Proveedor no encontrado');
+    //         }
+    //     } catch (\Exception $e) {
+    //         ResponseHelper::error($e->getMessage(), 500);
+    //     }
+    // }
+
+    public function crearProveedor()
+    {
         try {
-            $proveedor = $this->proveedoresModel->getProveedorById($id);
-            if ($proveedor) {
-                ResponseHelper::success($proveedor, 'Proveedor obtenido exitosamente');
+            $data = json_decode(file_get_contents('php://input'), true);
+
+            if (empty($data)) {
+                ResponseHelper::error('No se recibieron datos para crear el proveedor', 400);
+                return;
+            }
+
+            $camposRequeridos = ['nombre', 'nit', 'correo'];
+            foreach ($camposRequeridos as $campo) {
+                if (empty($data[$campo])) {
+                    ResponseHelper::error("El campo '$campo' es obligatorio", 400);
+                    return;
+                }
+            }
+
+            $id = $this->proveedoresModel->createProveedor($data);
+
+            if ($id) {
+                ResponseHelper::created(['id' => $id], 'Proveedor creado exitosamente');
             } else {
-                ResponseHelper::notFound('Proveedor no encontrado');
+                ResponseHelper::error('No se pudo crear el proveedor');
             }
         } catch (\Exception $e) {
             ResponseHelper::error($e->getMessage(), 500);
         }
     }
 
-    public function crearProveedor()
-{
-    try {
-        $data = json_decode(file_get_contents('php://input'), true);
 
-        if (empty($data)) {
-            ResponseHelper::error('No se recibieron datos para crear el proveedor', 400);
-            return;
-        }
-
-        $camposRequeridos = ['nombre', 'nit', 'correo'];
-        foreach ($camposRequeridos as $campo) {
-            if (empty($data[$campo])) {
-                ResponseHelper::error("El campo '$campo' es obligatorio", 400);
-                return;
-            }
-        }
-
-        $id = $this->proveedoresModel->createProveedor($data);
-
-        if ($id) {
-            ResponseHelper::created(['id' => $id], 'Proveedor creado exitosamente');
-        } else {
-            ResponseHelper::error('No se pudo crear el proveedor');
-        }
-
-    } catch (\Exception $e) {
-        ResponseHelper::error($e->getMessage(), 500);
-    }
-}
-
-
-    public function updateProveedor($id, $data) {
+    public function updateProveedor(array $params)
+    {
         try {
+            $id = isset($params['id']) ? (int)$params['id'] : null;
             // Validar que se recibieron datos
+            $data = json_decode(file_get_contents('php://input'), true);
+            error_log("Datos recibidos para actualizar proveedor ID $id: " . print_r($data, true)); // Log para depuración
             if (empty($data)) {
                 ResponseHelper::error('No se recibieron datos para actualizar el proveedor', 400);
                 return;
@@ -83,9 +94,21 @@ class ProveedoresController {
         }
     }
 
-    public function deleteProveedor($id) {
+    public function deleteProveedor(array $params)
+    {
         try {
+
+            $id = isset($params['id']) ? (int)$params['id'] : null;
+
+            if (!$id) {
+                ResponseHelper::error('ID del proveedor no proporcionado', 400);
+                return;
+            }
+
+            error_log("Intentando eliminar proveedor ID $id");
+
             $result = $this->proveedoresModel->deleteProveedor($id);
+
             if ($result) {
                 ResponseHelper::success(['id' => $id], 'Proveedor eliminado exitosamente');
             } else {
@@ -96,7 +119,9 @@ class ProveedoresController {
         }
     }
 
-    public function getProveedoresActivos() {
+
+    public function getProveedoresActivoss()
+    {
         try {
             $proveedores = $this->proveedoresModel->getProveedoresActivos();
             ResponseHelper::success($proveedores, 'Proveedores activos obtenidos exitosamente');
@@ -105,4 +130,3 @@ class ProveedoresController {
         }
     }
 }
-?>
