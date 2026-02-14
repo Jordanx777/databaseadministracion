@@ -1,22 +1,29 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-
-/*aca van las rutas */
+/* aca van las rutas */
 
 const routes: Routes = [
   {
     path: '',
+    loadComponent: () =>
+      import('../landing/pagina-principal-component/pagina-principal-component')
+        .then(m => m.PaginaPrincipalComponent),
+  },
+
+  {
+    path: '',
     children: [
+
       {
         path: 'typography',
-        loadComponent: () => import('./typography/typography.component')
+        loadComponent: () =>
+          import('./typography/typography.component')
       },
 
+      /* rutas de forms */
 
-      /*rutas de forms */
-
-        {
+      {
         path: 'addproducto',
         loadComponent: () =>
           import('../forms/agregar-productoscomponent/agregar-productoscomponent')
@@ -30,46 +37,37 @@ const routes: Routes = [
             .then(m => m.AgregarProveedoresComponent),
       },
 
-
       {
         path: 'addventas',
         loadComponent: () =>
           import('../forms/agregar-ventas-component/agregar-ventas-component')
             .then(m => m.AgregarVentasComponent),
-      }, 
-      
+      },
+
       {
-
-
         path: 'adddeudores',
         loadComponent: () =>
           import('../forms/agregar-clientes-saldo-component/agregar-clientes-saldo-component')
             .then(m => m.AgregarClientesSaldoComponent),
-
       },
 
-      /*-- -- -- -- -- -- */
-
-      /*rutas de pages */
+      /* rutas de pages */
 
       {
         path: 'producto',
-       loadComponent: () =>
-  import('./productos-component/productos-component')
-    .then(m => m.ProductosComponent)
-
-      }, 
+        loadComponent: () =>
+          import('./productos-component/productos-component')
+            .then(m => m.ProductosComponent)
+      },
 
       {
         path: 'catalogo',
         loadComponent: () =>
-  import('./catalogo-component/catalogo-component')
-    .then(m => m.CatalogoComponent)
+          import('./catalogo-component/catalogo-component')
+            .then(m => m.CatalogoComponent)
       },
 
       {
-
-
         path: 'pagos-pendientes',
         loadComponent: () =>
           import('./pagos-pendientes-component/pagos-pendientes-component')
@@ -78,23 +76,22 @@ const routes: Routes = [
 
       {
         path: 'proveedor',
-       loadComponent: () =>
-  import('./proveedores-component/proveedores-component')
-    .then(m => m.ProveedoresComponent)
+        loadComponent: () =>
+          import('./proveedores-component/proveedores-component')
+            .then(m => m.ProveedoresComponent)
       },
 
       {
         path: 'ventas-diarias',
-       loadComponent: () =>
-  import('./ventas-diarias-component/ventas-diarias-component')
-    .then(m => m.VentasDiariasComponent)
+        loadComponent: () =>
+          import('./ventas-diarias-component/ventas-diarias-component')
+            .then(m => m.VentasDiariasComponent)
       },
-
-      /*-- -- -- -- -- -- -- */
 
       {
         path: 'color',
-        loadComponent: () => import('./color/color.component')
+        loadComponent: () =>
+          import('./color/color.component')
       }
     ]
   }

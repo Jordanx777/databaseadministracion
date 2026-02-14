@@ -6,15 +6,21 @@ import { Inicio } from './inicio/inicio';
 import { ProfileComponent } from './demo/pages/profile/profile';
 
 const routes: Routes = [
+
+  // ✅ LANDING PRINCIPAL
+  {
+    path: '',
+    loadComponent: () =>
+      import('./demo/pages/landing/pagina-principal-component/pagina-principal-component')
+        .then(m => m.PaginaPrincipalComponent),
+    pathMatch: 'full'
+  },
+
+  // ✅ ADMIN
   {
     path: '',
     component: AdminComponent,
     children: [
-      {
-        path: '',
-        redirectTo: '/dashboard',
-        pathMatch: 'full'
-      },
       {
         path: 'profile',
         component: ProfileComponent
