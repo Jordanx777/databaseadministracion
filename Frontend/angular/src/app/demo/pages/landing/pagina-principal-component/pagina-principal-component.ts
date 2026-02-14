@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 // --- Módulos de Angular Material ---
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -16,6 +17,7 @@ import { MatListModule } from '@angular/material/list';
   imports: [
     CommonModule,
     // Registramos todos los módulos aquí
+    RouterModule,
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,

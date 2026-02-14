@@ -6,7 +6,10 @@
       <a mat-list-item (click)="sidenav.close()" href="#trust">Confianza</a>
       <a mat-list-item (click)="sidenav.close()" href="#cta">Empezar</a>
       <mat-divider></mat-divider>
-      <a mat-list-item (click)="sidenav.close()" class="login-link">Iniciar Sesión</a>
+      <!-- hago la llamada al login {
+        path: 'login',
+        loadComponent: () => import('./login/login.component')
+      }, -->
     </mat-nav-list>
   </mat-sidenav>
 
@@ -21,9 +24,16 @@
       <span class="spacer"></span>
 
       <div class="desktop-links">
-        <button mat-button href="#features">Funciones</button>
-        <button mat-button href="#trust">Por qué nosotros</button>
-        <button mat-raised-button color="accent" class="nav-cta-btn">Probar Gratis</button>
+        <button mat-button (click)="scrollTo('features')">Funciones</button>
+        <button mat-button (click)="scrollTo('trust')">Por qué nosotros</button>
+        <button mat-button (click)="scrollTo('cta')">Empezar</button>
+        <button 
+  mat-stroked-button 
+  color="accent" 
+  class="login-btn"
+  routerLink="/auth/login">
+  Iniciar Sesión
+</button>
       </div>
     </mat-toolbar>
 
@@ -42,7 +52,10 @@
           </div>
         </div>
         <div class="hero-image-wrapper mat-elevation-z8">
-          <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2426&q=80" alt="Dashboard del software InvConta Pro" class="hero-img">
+          <img 
+  src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1000&q=80"
+  alt="Dashboard del software InvConta Pro"
+  class="hero-img">
         </div>
       </div>
     </header>
@@ -116,9 +129,16 @@
       <div class="container cta-content">
         <h2>¿Listo para modernizar tu negocio?</h2>
         <p>Únete a miles de empresarios que ya optimizaron su gestión. Prueba gratis por 14 días, sin tarjeta de crédito.</p>
-        <button mat-raised-button color="accent" class="cta-btn-large bounce-action">
+        <!-- <button mat-raised-button color="accent" class="cta-btn-large bounce-action">
           Crear mi Cuenta Gratuita
-        </button>
+        </button> -->
+        <button 
+  mat-raised-button 
+  color="accent" 
+  class="cta-btn-large bounce-action"
+  routerLink="/auth/register">
+  Crear mi Cuenta Gratuita
+</button>
       </div>
     </section>
 
