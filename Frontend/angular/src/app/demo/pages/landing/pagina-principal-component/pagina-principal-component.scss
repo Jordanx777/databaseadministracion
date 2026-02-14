@@ -1,0 +1,365 @@
+// --- Variables y Configuración Global ---
+:host {
+  // Ajusta estos colores si cambias tu tema de Material
+  --primary-color: #3f51b5; // Indigo aproximado
+  --accent-color: #ff4081;  // Pink aproximado
+  --text-dark: #333;
+  --text-light: #666;
+  --section-spacing: 80px 20px;
+  --border-radius-lg: 16px;
+
+  font-family: 'Roboto', sans-serif;
+  display: block;
+  height: 100vh; // Necesario para el sidenav container
+}
+
+// Utilidad para centrar contenido
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+// --- Estructura Sidenav ---
+.sidenav-container {
+  height: 100%;
+}
+
+.mobile-sidenav {
+  width: 250px;
+  .login-link {
+      color: var(--primary-color);
+      font-weight: 500;
+  }
+}
+
+// --- Navbar ---
+.main-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #fff !important; // Forzamos fondo blanco para look moderno
+  color: var(--text-dark) !important;
+
+  .logo {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    &::before {
+        content: 'bar_chart'; // Icono simple como parte del logo
+        font-family: 'Material Icons';
+        margin-right: 8px;
+        font-size: 24px;
+    }
+  }
+
+  .mobile-menu-btn {
+    display: none; // Oculto en escritorio
+    color: var(--text-dark);
+  }
+
+  .desktop-links {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .nav-cta-btn {
+        border-radius: 20px;
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+  }
+}
+
+
+// --- Hero Section ---
+.hero-section {
+  padding: 100px 20px 120px; // Más espacio arriba por el navbar sticky
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%); // Fondo sutil
+
+  .hero-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr; // Dos columnas en escritorio
+    gap: 60px;
+    align-items: center;
+  }
+
+  .hero-text {
+    h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 24px;
+      color: var(--text-dark);
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--text-light);
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+  }
+
+  .hero-image-wrapper {
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    // Un pequeño truco de rotación para darle dinamismo
+    transform: perspective(1000px) rotateY(-5deg) rotateX(2deg);
+    transition: transform 0.5s ease;
+
+    &:hover {
+        transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
+    }
+
+    .hero-img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+  }
+}
+
+// --- Botones Generales ---
+.cta-btn-large {
+  padding: 12px 32px !important;
+  font-size: 1.1rem !important;
+  border-radius: 8px !important;
+}
+
+
+// --- Trust Section (Estadísticas) ---
+.trust-section {
+    background: var(--primary-color);
+    color: white;
+    padding: 40px 20px;
+
+    .trust-grid {
+        display: flex;
+        justify-content: space-around;
+        text-align: center;
+        flex-wrap: wrap;
+        gap: 30px;
+    }
+
+    .trust-item {
+        display: flex;
+        flex-direction: column;
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+    }
+}
+
+
+// --- Features Section ---
+.features-section {
+  padding: var(--section-spacing);
+  background-color: #fff;
+
+  .section-header {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto 60px;
+    h2 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+    p {
+        font-size: 1.2rem;
+        color: var(--text-light);
+    }
+  }
+
+  .cards-grid {
+    // La magia de CSS Grid para hacer tarjetas responsivas automáticamente
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+  }
+
+  .feature-card {
+    padding: 32px 24px;
+    border-radius: var(--border-radius-lg) !important;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: none !important; // Quitamos la sombra por defecto para usar hover
+
+    &:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+      border-color: transparent;
+    }
+
+    .card-icon-header {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 24px;
+        mat-icon {
+            font-size: 32px;
+            width: 32px;
+            height: 32px;
+        }
+
+        // Colores distintos para cada icono
+        &.color-1 { background: #e3f2fd; color: #1976d2; }
+        &.color-2 { background: #e8f5e9; color: #388e3c; }
+        &.color-3 { background: #fff3e0; color: #f57c00; }
+    }
+
+    mat-card-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    mat-card-content p {
+      color: var(--text-light);
+      line-height: 1.6;
+      font-size: 1rem;
+    }
+  }
+}
+
+
+// --- CTA Section Final ---
+.cta-section {
+  position: relative;
+  padding: 100px 20px;
+  text-align: center;
+  color: white;
+  // Imagen de fondo de oficina/negocio
+  background: url('https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center;
+  background-size: cover;
+
+  // Capa oscura superpuesta para que el texto se lea
+  .cta-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(var(--primary-color), 0.85); // Azul oscuro transparente
+      z-index: 1;
+  }
+
+  .cta-content {
+    position: relative;
+    z-index: 2; // Texto por encima de la capa oscura
+    max-width: 800px;
+
+    h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+    p {
+        font-size: 1.25rem;
+        margin-bottom: 40px;
+        opacity: 0.9;
+    }
+  }
+}
+
+// --- Footer ---
+.footer-section {
+    background: #1a1a2e; // Color muy oscuro
+    color: #aab2bd;
+    padding: 60px 20px 20px;
+
+    .footer-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        gap: 40px;
+        margin-bottom: 40px;
+    }
+
+    .brand-col {
+        .logo { color: white; font-size: 1.5rem; font-weight: 700; }
+        p { margin-top: 16px; max-width: 300px; }
+    }
+
+    h4 { color: white; margin-bottom: 20px; font-weight: 500; }
+
+    a {
+        display: block;
+        color: inherit;
+        text-decoration: none;
+        margin-bottom: 12px;
+        transition: color 0.2s;
+        &:hover { color: var(--accent-color); }
+    }
+
+    .footer-bottom {
+        text-align: center;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        font-size: 0.9rem;
+    }
+}
+
+
+// =========================================
+// RESPONSIVE MEDIA QUERIES
+// =========================================
+@media (max-width: 960px) {
+    // Hero: Cambia de 2 columnas a 1 columna
+    .hero-section {
+        padding-top: 60px;
+        text-align: center;
+        .hero-container {
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+        .hero-text {
+            h1 { font-size: 2.5rem; }
+            .hero-actions { justify-content: center; }
+        }
+        // Resetea la transformación de la imagen en tablet/móvil
+        .hero-image-wrapper { transform: none; max-width: 80%; margin: 0 auto; }
+    }
+
+    // Footer: Cambia a 1 columna
+    .footer-section .footer-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 30px;
+    }
+}
+
+
+@media (max-width: 768px) {
+    // Navbar: Muestra botón menú, oculta enlaces escritorio
+    .main-navbar {
+        .mobile-menu-btn { display: block; }
+        .desktop-links { display: none; }
+    }
+
+    .hero-text h1 { font-size: 2rem; }
+
+    .trust-section .trust-grid { flex-direction: column; gap: 20px; }
+
+    .cta-section h2 { font-size: 2rem; }
+}
