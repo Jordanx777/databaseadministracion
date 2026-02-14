@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AdminComponent } from './demo/layout/admin';
 import { EmptyComponent } from './demo/layout/empty';
-import { Inicio } from './inicio/inicio';
 import { ProfileComponent } from './demo/pages/profile/profile';
 
 const routes: Routes = [
@@ -24,10 +23,6 @@ const routes: Routes = [
       {
         path: 'profile',
         component: ProfileComponent
-      },
-      {
-        path: 'Inicio',
-        component: Inicio
       },
       {
         path: 'dashboard',
