@@ -8,7 +8,7 @@ class AuthController {
     
     // POST /api/auth/register
     public function register(): void {
-        // ✅ Asegurar que siempre retorne JSON
+        //  Asegurar que siempre retorne JSON
         header('Content-Type: application/json; charset=UTF-8');
         
         try {
