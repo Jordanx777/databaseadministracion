@@ -1,5 +1,5 @@
 // Angular import
-import { Component, inject, input, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, input, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, Location, LocationStrategy } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -19,23 +19,26 @@ import { Router } from '@angular/router';
   styleUrls: ['./vertical-menu.component.scss']
 })
 export class VerticalMenuComponent implements OnInit, OnDestroy {
-  private location = inject(Location);
-  private locationStrategy = inject(LocationStrategy);
-  private authService = inject(AuthService);
-  private router = inject(Router);
+  private location           = inject(Location);
+  private locationStrategy   = inject(LocationStrategy);
+  private authService        = inject(AuthService);
+  private router             = inject(Router);
+  private cdr                = inject(ChangeDetectorRef); //  Necesario para evitar NG0100
 
   // public props
   menus = input.required<NavigationItem[]>();
   currentUser: User | null = null;
-  
+
   private destroy$ = new Subject<void>();
 
   ngOnInit() {
-    // Suscribirse a los cambios del usuario
+    //  Se suscribe a los cambios del usuario y fuerza detección de cambios
+    // Esto evita el error NG0100 (ExpressionChangedAfterItHasBeenCheckedError)
     this.authService.currentUser$
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => {
         this.currentUser = user;
+        this.cdr.detectChanges(); //  Notificar a Angular del cambio asíncrono
       });
   }
 
@@ -47,7 +50,7 @@ export class VerticalMenuComponent implements OnInit, OnDestroy {
   // Obtener iniciales del usuario
   getUserInitials(): string {
     if (!this.currentUser) return 'U';
-    const nombre = this.currentUser.nombre?.charAt(0) || '';
+    const nombre   = this.currentUser.nombre?.charAt(0)   || '';
     const apellido = this.currentUser.apellido?.charAt(0) || '';
     return (nombre + apellido).toUpperCase() || 'U';
   }
@@ -65,36 +68,26 @@ export class VerticalMenuComponent implements OnInit, OnDestroy {
 
   // Manejar acciones del menú de cuenta
   handleAccountAction(action: string) {
-    switch(action) {
-      case 'profile':
-        this.router.navigate(['/profile']);
-        break;
-      case 'settings':
-        this.router.navigate(['/settings']);
-        break;
-      case 'lock':
-        this.router.navigate(['/lock-screen']);
-        break;
-      case 'logout':
-        this.logout();
-        break;
+    switch (action) {
+      case 'profile':  this.router.navigate(['/profile']);      break;
+      case 'settings': this.router.navigate(['/settings']);     break;
+      case 'lock':     this.router.navigate(['/lock-screen']);  break;
+      case 'logout':   this.logout();                           break;
     }
   }
 
   // Cerrar sesión
   logout() {
-  this.authService.logout().subscribe({
-    next: () => {
-      // Navega a la ruta relativa 'login' o usa '/auth/login' si auth es el módulo padre
-      this.router.navigate(['/auth/login']); // o simplemente ['login'] si estás en el contexto correcto
-    },
-    error: (error) => {
-      console.error('Error al cerrar sesión:', error);
-      // Aún así redirigir al login
-      this.router.navigate(['/auth/login']);
-    }
-  });
-}
+    this.authService.logout().subscribe({
+      next: () => {
+        this.router.navigate(['/auth/login']);
+      },
+      error: (error) => {
+        console.error('Error al cerrar sesión:', error);
+        this.router.navigate(['/auth/login']);
+      }
+    });
+  }
 
   // public method
   fireOutClick() {
@@ -104,10 +97,10 @@ export class VerticalMenuComponent implements OnInit, OnDestroy {
       current_url = baseHref + this.location.path();
     }
     const link = "a.nav-link[ href='" + current_url + "' ]";
-    const ele = document.querySelector(link);
+    const ele  = document.querySelector(link);
     if (ele !== null && ele !== undefined) {
-      const parent = ele.parentElement;
-      const up_parent = parent?.parentElement?.parentElement;
+      const parent      = ele.parentElement;
+      const up_parent   = parent?.parentElement?.parentElement;
       const last_parent = up_parent?.parentElement;
       if (parent?.classList.contains('coded-hasmenu')) {
         parent.classList.add('coded-trigger');
@@ -123,25 +116,9 @@ export class VerticalMenuComponent implements OnInit, OnDestroy {
   }
 
   accountList = [
-    {
-      icon: 'ti ti-user',
-      title: 'My Perfil',
-      action: 'profile'
-    },
-    {
-      icon: 'ti ti-settings',
-      title: 'Configuracion',
-      action: 'settings'
-    },
-    {
-      icon: 'ti ti-lock',
-      title: 'Lock Screen',
-      action: 'lock'
-    },
-    {
-      icon: 'ti ti-power',
-      title: 'Cerrar Sesion',
-      action: 'logout'
-    }
+    { icon: 'ti ti-user',     title: 'My Perfil',      action: 'profile'  },
+    { icon: 'ti ti-settings', title: 'Configuracion',  action: 'settings' },
+    { icon: 'ti ti-lock',     title: 'Lock Screen',    action: 'lock'     },
+    { icon: 'ti ti-power',    title: 'Cerrar Sesion',  action: 'logout'   }
   ];
 }
