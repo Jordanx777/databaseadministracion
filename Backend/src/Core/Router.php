@@ -46,7 +46,7 @@ class Router {
                     [$controllerClass, $methodName] = $route['handler'];
                     
                     
-                    // ✅ CORRECCIÓN: Verificar que la clase existe
+                    //  CORRECCIÓN: Verificar que la clase existe
                     if (!class_exists($controllerClass)) {
                         http_response_code(500);
                         echo json_encode([
@@ -58,7 +58,7 @@ class Router {
                     
                     $controllerInstance = new $controllerClass();
                     
-                    // ✅ CORRECCIÓN: Si no hay parámetros, llamar sin argumentos
+                    //  CORRECCIÓN: Si no hay parámetros, llamar sin argumentos
                     if (empty($params)) {
                         $controllerInstance->$methodName();
                     } else {
