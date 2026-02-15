@@ -110,10 +110,10 @@ export class AgregarProductoscomponent implements OnInit {
     const subcategoriaControl = this.formAgregar.get('subcategoria_id');
     
     if (categoriaId) {
-      subcategoriaControl?.enable(); // ✅ Habilitar
+      subcategoriaControl?.enable(); //  Habilitar
       this.filtrarSubcategorias(categoriaId);
     } else {
-      subcategoriaControl?.disable(); // ✅ Deshabilitar
+      subcategoriaControl?.disable(); //  Deshabilitar
       this.subcategoriasFiltradas = [];
     }
     
