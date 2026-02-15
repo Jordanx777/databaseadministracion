@@ -11,6 +11,7 @@ import { SharedModule } from 'src/app/demo/shared/shared.module';
   styleUrls: ['./toolbar-right.component.scss']
 })
 export class NavRightComponent {
+  
   // public props
   mainCards = [
     {
