@@ -23,10 +23,24 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { BehaviorSubject } from 'rxjs';
 
 // Servicios
 import { ProductosService } from 'src/app/@theme/services/Productos.service';
+
+export interface Proveedor {
+  id?: number;
+  nombre: string;
+  observaciones?: string;
+  nit: string;
+  correo: string;
+  telefono?: string;
+  ciudad?: string;
+  estado?: boolean;
+  fecha_llegada?: string;
+  created_at?: string;
+}
 
 @Component({
   selector: 'app-proveedores-component',
@@ -46,6 +60,7 @@ import { ProductosService } from 'src/app/@theme/services/Productos.service';
     MatDialogModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
+    MatTooltipModule,
   ],
   templateUrl: './proveedores-component.html',
   styleUrl: './proveedores-component.scss',
@@ -66,10 +81,9 @@ export class ProveedoresComponent implements OnInit, AfterViewInit {
 
   editarForm!: FormGroup;
   proveedorSeleccionado!: Proveedor;
-
   dialogRef!: MatDialogRef<any>;
 
-  // Loading
+  // ✅ BehaviorSubject expuesto como observable para usar con async pipe
   cargando$ = new BehaviorSubject<boolean>(false);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -97,21 +111,20 @@ export class ProveedoresComponent implements OnInit, AfterViewInit {
   /** CARGAR PROVEEDORES */
   cargarProveedores(): void {
     this.cargando$.next(true);
-    
+
     this.productosService.getProveedores().subscribe({
       next: (response) => {
         const proveedores = this.extraerDatos(response);
         this.dataSource.data = proveedores;
-        
+        // ✅ setTimeout evita el ExpressionChangedAfterChecked
         setTimeout(() => {
-         this.cargando$.next(false);
+          this.cargando$.next(false);
           this.cdr.detectChanges();
         });
       },
       error: (error) => {
         console.error('Error al cargar proveedores:', error);
         this.mostrarMensaje('Error al cargar los proveedores', 'error');
-        
         setTimeout(() => {
           this.cargando$.next(false);
           this.cdr.detectChanges();
@@ -131,7 +144,6 @@ export class ProveedoresComponent implements OnInit, AfterViewInit {
   applyFilter(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.dataSource.filter = value.trim().toLowerCase();
-
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
     }
@@ -146,13 +158,13 @@ export class ProveedoresComponent implements OnInit, AfterViewInit {
     this.proveedorSeleccionado = { ...row };
 
     this.editarForm = this.fb.group({
-      nombre: [row.nombre, Validators.required],
-      nit: [row.nit, Validators.required],
-      correo: [row.correo, [Validators.required, Validators.email]],
-      telefono: [row.telefono],
-      ciudad: [row.ciudad],
+      nombre:        [row.nombre,        Validators.required],
+      nit:           [row.nit,           Validators.required],
+      correo:        [row.correo,        [Validators.required, Validators.email]],
+      telefono:      [row.telefono],
+      ciudad:        [row.ciudad],
       observaciones: [row.observaciones],
-      estado: [row.estado ?? true, Validators.required],
+      estado:        [row.estado ?? true, Validators.required],
     });
 
     this.dialogRef = this.dialog.open(this.editarProveedorDialog, {
@@ -176,22 +188,27 @@ export class ProveedoresComponent implements OnInit, AfterViewInit {
       next: (response) => {
         if (this.verificarExito(response)) {
           this.mostrarMensaje('Proveedor actualizado exitosamente', 'success');
-          this.cargarProveedores();
           this.dialogRef.close();
+          this.cargarProveedores();
         } else {
           this.mostrarMensaje(response.message || 'Error al actualizar proveedor', 'error');
         }
-        this.cargando$.next(false);
+        setTimeout(() => {
+          this.cargando$.next(false);
+          this.cdr.detectChanges();
+        });
       },
       error: (error) => {
         console.error('Error:', error);
         this.mostrarMensaje('Error al actualizar el proveedor', 'error');
-        this.cargando$.next(false);
+        setTimeout(() => {
+          this.cargando$.next(false);
+          this.cdr.detectChanges();
+        });
       }
     });
   }
 
-  /** VERIFICAR ÉXITO DE LA RESPUESTA */
   private verificarExito(response: any): boolean {
     if (!response) return false;
     if (response.hasOwnProperty('success')) return response.success === true;
@@ -210,26 +227,31 @@ export class ProveedoresComponent implements OnInit, AfterViewInit {
     }
 
     this.cargando$.next(true);
-    const id = row.id!;
 
-    this.productosService.eliminarProveedor(id).subscribe({
+    this.productosService.eliminarProveedor(row.id!).subscribe({
       next: (response) => {
         if (this.verificarExito(response)) {
           this.mostrarMensaje('Proveedor eliminado exitosamente', 'success');
           this.cargarProveedores();
         } else {
           this.mostrarMensaje(response.message || 'Error al eliminar proveedor', 'error');
+          setTimeout(() => {
+            this.cargando$.next(false);
+            this.cdr.detectChanges();
+          });
         }
       },
       error: (error) => {
         console.error('Error:', error);
         this.mostrarMensaje('Error al eliminar el proveedor', 'error');
-        this.cargando$.next(false);
+        setTimeout(() => {
+          this.cargando$.next(false);
+          this.cdr.detectChanges();
+        });
       }
     });
   }
 
-  /** MOSTRAR MENSAJE */
   mostrarMensaje(mensaje: string, tipo: 'success' | 'error' | 'warning'): void {
     this.snackBar.open(mensaje, 'Cerrar', {
       duration: 3000,
@@ -238,18 +260,4 @@ export class ProveedoresComponent implements OnInit, AfterViewInit {
       panelClass: [`snackbar-${tipo}`]
     });
   }
-}
-
-/* ================= INTERFACE ================= */
-export interface Proveedor {
-  id?: number;
-  nombre: string;
-  observaciones?: string;
-  nit: string;
-  correo: string;
-  telefono?: string;
-  ciudad?: string;
-  estado?: boolean;
-  fecha_llegada?: string;
-  created_at?: string;
 }

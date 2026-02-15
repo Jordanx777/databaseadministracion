@@ -2,8 +2,8 @@
 
   <mat-card class="card-productos">
 
-    <!-- LOADING OVERLAY -->
-    <div *ngIf="cargando$.value" class="loading-overlay">
+    <!-- ✅ LOADING OVERLAY — usa async pipe en lugar de cargando$.value -->
+    <div *ngIf="cargando$ | async" class="loading-overlay">
       <mat-spinner></mat-spinner>
     </div>
 
@@ -27,7 +27,7 @@
         color="primary"
         class="btn-agregar"
         (click)="agregarProveedor()"
-        [disabled]="cargando$.value"
+        [disabled]="cargando$ | async"
       >
         <mat-icon>add</mat-icon>
         Agregar proveedor
@@ -84,20 +84,21 @@
         <!-- ACCIONES -->
         <ng-container matColumnDef="acciones">
           <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <!-- ✅ async pipe en los botones también -->
           <td mat-cell *matCellDef="let row" class="acciones">
-            <button 
-              mat-icon-button 
-              color="primary" 
+            <button
+              mat-icon-button
+              color="primary"
               (click)="editarProveedor(row)"
-              [disabled]="cargando"
+              [disabled]="cargando$ | async"
               matTooltip="Editar">
               <mat-icon>edit</mat-icon>
             </button>
-            <button 
-              mat-icon-button 
-              color="warn" 
+            <button
+              mat-icon-button
+              color="warn"
               (click)="eliminarProveedor(row)"
-              [disabled]="cargando"
+              [disabled]="cargando$ | async"
               matTooltip="Eliminar">
               <mat-icon>delete</mat-icon>
             </button>
@@ -111,7 +112,7 @@
         <!-- EMPTY -->
         <tr class="mat-row" *matNoDataRow>
           <td class="mat-cell empty" colspan="7">
-            {{ cargando ? 'Cargando proveedores...' : 'No hay proveedores registrados' }}
+            No hay proveedores registrados
           </td>
         </tr>
 
@@ -128,10 +129,16 @@
 
 </div>
 
+
 <!-- ================= MODAL EDITAR PROVEEDOR ================= -->
 <ng-template #editarProveedorDialog>
 
-  <h2 mat-dialog-title>Editar proveedor</h2>
+  <div class="modal-header-custom">
+    <h2 mat-dialog-title>Editar proveedor</h2>
+    <button mat-icon-button (click)="cerrarDialog()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
 
   <form [formGroup]="editarForm" mat-dialog-content class="dialog-form">
 
@@ -188,20 +195,21 @@
   </form>
 
   <div mat-dialog-actions align="end">
-    <button 
-      mat-stroked-button 
-      color="warn" 
+    <button
+      mat-stroked-button
+      color="warn"
       (click)="cerrarDialog()"
-      [disabled]="cargando">
+      [disabled]="cargando$ | async">
       Cancelar
     </button>
-    <button 
-      mat-raised-button 
-      color="primary" 
+    <button
+      mat-raised-button
+      color="primary"
       (click)="guardarEdicion()"
-      [disabled]="cargando || editarForm.invalid">
-      <mat-spinner *ngIf="cargando" diameter="20"></mat-spinner>
-      <span *ngIf="!cargando">Guardar</span>
+      [disabled]="(cargando$ | async) || editarForm.invalid">
+      <!-- ✅ async pipe también aquí -->
+      <mat-spinner *ngIf="cargando$ | async" diameter="20"></mat-spinner>
+      <span *ngIf="!(cargando$ | async)">Guardar</span>
     </button>
   </div>
 
