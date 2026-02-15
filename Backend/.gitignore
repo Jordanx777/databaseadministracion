@@ -11,7 +11,8 @@ composer.lock
 /logs/*.log
 
 # Uploads (opcional, dependiendo si quieres versionar las imágenes)
-/uploads/*
+# public/uploads/*
+# public/uploads/
 !/uploads/.gitkeep
 
 # IDE
