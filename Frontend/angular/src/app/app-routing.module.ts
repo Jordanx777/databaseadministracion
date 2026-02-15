@@ -4,9 +4,12 @@ import { AdminComponent } from './demo/layout/admin';
 import { EmptyComponent } from './demo/layout/empty';
 import { ProfileComponent } from './demo/pages/profile/profile';
 
+//  Guard de autenticación
+import { authGuard } from 'src/app/@theme/guards/auth.guard';
+
 const routes: Routes = [
 
-  // ✅ LANDING PRINCIPAL
+  //  LANDING PRINCIPAL - pública
   {
     path: '',
     loadComponent: () =>
@@ -15,10 +18,11 @@ const routes: Routes = [
     pathMatch: 'full'
   },
 
-  // ✅ ADMIN
+  //  RUTAS PROTEGIDAS - requieren autenticación
   {
     path: '',
     component: AdminComponent,
+    canActivate: [authGuard], //  Protege todo el layout admin y sus hijos
     children: [
       {
         path: 'profile',
@@ -30,7 +34,8 @@ const routes: Routes = [
       },
       {
         path: 'component',
-        loadChildren: () => import('./demo/pages/components/component.module').then((m) => m.ComponentModule)
+        loadChildren: () =>
+          import('./demo/pages/components/component.module').then((m) => m.ComponentModule)
       },
       {
         path: 'sample-page',
@@ -38,6 +43,8 @@ const routes: Routes = [
       }
     ]
   },
+
+  //  RUTAS PÚBLICAS - login, register
   {
     path: '',
     component: EmptyComponent,
@@ -47,6 +54,12 @@ const routes: Routes = [
         loadChildren: () => import('./demo/pages/auth/auth.module').then((m) => m.AuthModule)
       }
     ]
+  },
+
+  //  Ruta comodín - redirigir a landing
+  {
+    path: '**',
+    redirectTo: ''
   }
 ];
 
