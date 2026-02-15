@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, filter, map } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 export interface User {
@@ -28,16 +28,30 @@ export interface LoginData {
   password: string;
 }
 
+// null = todavía verificando | User = autenticado | false = no autenticado
+type AuthState = User | null | false;
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
+
+  // null = cargando, false = no autenticado, User = autenticado
+  private authState = new BehaviorSubject<AuthState>(null);
+
+  // Observable del usuario actual (null si no autenticado o cargando)
+  public currentUser$ = this.authState.asObservable().pipe(
+    map(state => (state === false ? null : state))
+  );
+
+  //  Solo emite cuando checkAuthStatus() ya terminó
+  // true = autenticado, false = no autenticado
+  public authReady$ = this.authState.asObservable().pipe(
+    filter((state): state is User | false => state !== null),
+    map(state => state !== false)
+  );
 
   constructor(private apiService: ApiService) {
-    // console.log('🔧 AuthService - Inicializando...');
     this.checkAuthStatus();
   }
 
@@ -45,10 +59,8 @@ export class AuthService {
   register(data: RegisterData): Observable<any> {
     return this.apiService.post('auth/register', data).pipe(
       tap((response: any) => {
-        // console.log('📝 AuthService - Respuesta de registro:', response);
         if (response.status === 'success') {
-          // console.log('✅ AuthService - Usuario registrado:', response.data.user);
-          this.currentUserSubject.next(response.data.user);
+          this.authState.next(response.data.user);
         }
       })
     );
@@ -58,11 +70,8 @@ export class AuthService {
   login(data: LoginData): Observable<any> {
     return this.apiService.post('auth/login', data).pipe(
       tap((response: any) => {
-        // console.log('🔐 AuthService - Respuesta de login:', response);
         if (response.status === 'success') {
-          // console.log('✅ AuthService - Actualizando usuario actual:', response.data.user);
-          this.currentUserSubject.next(response.data.user);
-          // console.log('✅ AuthService - Usuario actualizado en BehaviorSubject');
+          this.authState.next(response.data.user);
         }
       })
     );
@@ -72,44 +81,36 @@ export class AuthService {
   logout(): Observable<any> {
     return this.apiService.post('auth/logout', {}).pipe(
       tap(() => {
-        // console.log('👋 AuthService - Cerrando sesión...');
-        this.currentUserSubject.next(null);
+        this.authState.next(false);
       })
     );
   }
 
-  // Verificar estado de autenticación
+  // Verificar estado de autenticación al iniciar la app
   checkAuthStatus(): void {
-    // console.log('🔍 AuthService - Verificando sesión en el servidor...');
     this.apiService.get<any>('auth/me').subscribe({
       next: (response) => {
-        // console.log('📥 AuthService - Respuesta de /me:', response);
         if (response.status === 'success') {
-          // console.log('✅ AuthService - Sesión activa:', response.data.user);
-          this.currentUserSubject.next(response.data.user);
+          this.authState.next(response.data.user); //  Autenticado
         } else {
-          // console.log('❌ AuthService - No hay sesión activa');
-          this.currentUserSubject.next(null);
+          this.authState.next(false); //  No autenticado
         }
       },
-      error: (error) => {
-        console.error('❌ AuthService - Error al verificar sesión:', error);
-        this.currentUserSubject.next(null);
+      error: () => {
+        this.authState.next(false); //  Error = no autenticado
       }
     });
   }
 
-  // Obtener usuario actual
+  // Obtener usuario actual de forma síncrona
   getCurrentUser(): User | null {
-    const user = this.currentUserSubject.value;
-    // console.log('👤 AuthService - Usuario actual:', user);
-    return user;
+    const state = this.authState.value;
+    return (state === null || state === false) ? null : state;
   }
 
-  // Verificar si está autenticado
+  // Solo usar cuando el estado ya está resuelto
   isAuthenticated(): boolean {
-    const isAuth = this.currentUserSubject.value !== null;
-    // console.log('🔒 AuthService - ¿Está autenticado?', isAuth);
-    return isAuth;
+    const state = this.authState.value;
+    return state !== null && state !== false;
   }
 }
