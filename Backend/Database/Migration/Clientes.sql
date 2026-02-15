@@ -1,3 +1,4 @@
+-- Tabla CLIENTES (se mantiene)
 CREATE TABLE clientes (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(200) NOT NULL,
@@ -6,6 +7,7 @@ CREATE TABLE clientes (
     direccion TEXT,
     referencia VARCHAR(200),
     limite_credito DECIMAL(10,2) DEFAULT 0,
+    tipo VARCHAR(20) DEFAULT 'regular', -- 'regular', 'ocasional'
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
