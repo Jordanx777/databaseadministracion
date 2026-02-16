@@ -1,4 +1,5 @@
-@import '../../../styles/theme-palette-colors.scss';
+@use 'sass:map';
+@use '../../../../@theme/styles/theme-palette-colors' as themes;
 
 ::ng-deep.dropdown-notification {
   min-width: 450px !important;
@@ -74,18 +75,21 @@
 
   .user-followers {
     margin: 16px 0px;
-    color: map-get($grey-theme, contrast, 500);
+    // ✅ map-get anidado → dos map.get() encadenados
+    color: map.get(map.get(themes.$grey-theme, contrast), 500);
   }
 
   .upgrade-button {
-    background: map-get($yellow-theme, 500) !important;
-    color: map-get($grey-theme, contrast, 800) !important;
+    // ✅ map-get($yellow-theme, 500) → map.get(themes.$yellow-theme, 500)
+    background: map.get(themes.$yellow-theme, 500) !important;
+    color: map.get(map.get(themes.$grey-theme, contrast), 800) !important;
 
     &.mdc-button {
       border-radius: 20px;
     }
   }
 }
+
 ::ng-deep.user-account-card {
   background-image: url('../../../../../assets/images/layout/img-profile-card.jpg');
 }
