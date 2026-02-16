@@ -1,140 +1,287 @@
 <?php
 namespace App\Models;
+
 use App\Config\Database;
 use PDO;
 
-class ProductosModel {
+class ProductosModel
+{
     private $pdo;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->pdo = Database::connect();
     }
 
-    public function getAllProductos() {
+    // ─────────────────────────────────────────────────────────────────────────
+    // LECTURAS
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function getAllProductos(): array
+    {
         $stmt = $this->pdo->prepare("
-            SELECT 
+            SELECT
                 p.*,
-                c.nombre as categoria_nombre,
-                s.nombre as subcategoria_nombre,
-                m.nombre as marca_nombre,
-                pr.nombre as proveedor_nombre
+                c.nombre  AS categoria_nombre,
+                s.nombre  AS subcategoria_nombre,
+                m.nombre  AS marca_nombre,
+                pr.nombre AS proveedor_nombre,
+                COALESCE(SUM(v.stock), 0) AS stock_total
             FROM productos p
-            LEFT JOIN categorias c ON p.categoria_id = c.id
-            LEFT JOIN subcategorias s ON p.subcategoria_id = s.id
-            LEFT JOIN marcas m ON p.marca_id = m.id
-            LEFT JOIN proveedores pr ON p.proveedor_id = pr.id
+            LEFT JOIN categorias         c  ON p.categoria_id   = c.id
+            LEFT JOIN subcategorias      s  ON p.subcategoria_id = s.id
+            LEFT JOIN marcas             m  ON p.marca_id        = m.id
+            LEFT JOIN proveedores        pr ON p.proveedor_id    = pr.id
+            LEFT JOIN producto_variantes v  ON v.producto_id     = p.id
+            GROUP BY p.id, c.nombre, s.nombre, m.nombre, pr.nombre
             ORDER BY p.created_at DESC
         ");
         $stmt->execute();
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-    }
+        $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    public function getProductoById($id) {
-        $stmt = $this->pdo->prepare("SELECT 
-                p.*,
-                c.nombre as categoria_nombre,
-                s.nombre as subcategoria_nombre,
-                m.nombre as marca_nombre,
-                pr.nombre as proveedor_nombre
-            FROM productos p
-            LEFT JOIN categorias c ON p.categoria_id = c.id
-            LEFT JOIN subcategorias s ON p.subcategoria_id = s.id
-            LEFT JOIN marcas m ON p.marca_id = m.id
-            LEFT JOIN proveedores pr ON p.proveedor_id = pr.id
-            WHERE p.id = ?");
-        $stmt->execute([$id]);
-        return $stmt->fetch(\PDO::FETCH_ASSOC);
-    }
-
-    public function createProducto($data) {
-        $stmt = $this->pdo->prepare("
-            INSERT INTO productos (
-                nombre, categoria_id, subcategoria_id, marca_id, proveedor_id,
-                talla, color, genero, stock, precio_compra, precio_venta, imagen_url
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ");
-        
-        $resultado = $stmt->execute([
-            $data['nombre'],
-            $data['categoria_id'],
-            $data['subcategoria_id'] ?? null,
-            $data['marca_id'],
-            $data['proveedor_id'],
-            $data['talla'],
-            $data['color'],
-            $data['genero'] ?? null,
-            $data['stock'],
-            $data['precio_compra'],
-            $data['precio_venta'],
-            $data['imagen_url'] ?? null
-        ]);
-
-        return $resultado ? $this->pdo->lastInsertId() : false;
-    }
-
-    public function updateProducto($id, $data) {
-        $campos = [];
-        $valores = [];
-
-        foreach ($data as $campo => $valor) {
-            $campos[] = "$campo = ?";
-            $valores[] = $valor;
+        foreach ($productos as &$producto) {
+            $producto['variantes'] = $this->getVariantesByProducto($producto['id']);
         }
+        unset($producto);
 
-        $valores[] = $id;
-        $sql = "UPDATE productos SET " . implode(', ', $campos) . ", updated_at = CURRENT_TIMESTAMP WHERE id = ?";
-        
-        $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute($valores);
+        return $productos;
     }
-    // Métodos adicionales útiles
-    public function getProductosPorCategoria($categoriaId) {
-        $sql = "
-            SELECT 
+
+    public function getProductoById(int $id): array|false
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT
                 p.*,
-                c.nombre as categoria_nombre,
-                s.nombre as subcategoria_nombre,
-                m.nombre as marca_nombre,
-                pr.nombre as proveedor_nombre
+                c.nombre  AS categoria_nombre,
+                s.nombre  AS subcategoria_nombre,
+                m.nombre  AS marca_nombre,
+                pr.nombre AS proveedor_nombre
             FROM productos p
-            LEFT JOIN categorias c ON p.categoria_id = c.id
-            LEFT JOIN subcategorias s ON p.subcategoria_id = s.id
-            LEFT JOIN marcas m ON p.marca_id = m.id
-            LEFT JOIN proveedores pr ON p.proveedor_id = pr.id
-            WHERE p.categoria_id = ?
-            ORDER BY p.created_at DESC
-        ";
-        
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([$categoriaId]);
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            LEFT JOIN categorias    c  ON p.categoria_id   = c.id
+            LEFT JOIN subcategorias s  ON p.subcategoria_id = s.id
+            LEFT JOIN marcas        m  ON p.marca_id        = m.id
+            LEFT JOIN proveedores   pr ON p.proveedor_id    = pr.id
+            WHERE p.id = ?
+        ");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-     public function deleteProducto($id) {
+    /** ✅ Ahora incluye genero en la consulta */
+    public function getVariantesByProducto(int $productoId): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT id, producto_id, talla, color, genero, stock, estado
+            FROM producto_variantes
+            WHERE producto_id = ?
+            ORDER BY talla, color
+        ");
+        $stmt->execute([$productoId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // CREAR
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function createProducto(array $data, array $variantes): int|false
+    {
+        try {
+            $this->pdo->beginTransaction();
+
+            // ✅ Insertar producto padre — sin genero, talla, color, stock
+            $stmt = $this->pdo->prepare("
+                INSERT INTO productos (
+                    nombre, categoria_id, subcategoria_id, marca_id, proveedor_id,
+                    precio_compra, precio_venta, imagen_url
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([
+                $data['nombre'],
+                $data['categoria_id'],
+                $data['subcategoria_id'] ?? null,
+                $data['marca_id'],
+                $data['proveedor_id'],
+                $data['precio_compra'],
+                $data['precio_venta'],
+                $data['imagen_url'] ?? null,
+            ]);
+
+            $productoId = (int)$this->pdo->lastInsertId();
+
+            // Insertar variantes con genero
+            $this->insertarVariantes($productoId, $variantes);
+
+            $this->pdo->commit();
+            return $productoId;
+        } catch (\Exception $e) {
+            $this->pdo->rollBack();
+            error_log("Error en createProducto: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // ACTUALIZAR
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function updateProducto(int $id, array $data, ?array $variantes = null): bool
+    {
+        try {
+            $this->pdo->beginTransaction();
+
+            // Actualizar producto padre
+            if (!empty($data)) {
+                $campos = []; $valores = [];
+                foreach ($data as $campo => $valor) {
+                    $campos[]  = "$campo = ?";
+                    $valores[] = $valor;
+                }
+                $valores[] = $id;
+                $sql  = "UPDATE productos SET " . implode(', ', $campos) . ", updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->execute($valores);
+            }
+
+            // Sincronizar variantes si se enviaron
+            if ($variantes !== null) {
+                $this->sincronizarVariantes($id, $variantes);
+            }
+
+            $this->pdo->commit();
+            return true;
+        } catch (\Exception $e) {
+            $this->pdo->rollBack();
+            error_log("Error en updateProducto: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // DELETE
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function deleteProducto(int $id): bool
+    {
+        // Las variantes se eliminan por ON DELETE CASCADE
         $stmt = $this->pdo->prepare("DELETE FROM productos WHERE id = ?");
         return $stmt->execute([$id]);
     }
 
-    public function getProductosConBajoStock($limite = 5) {
-        $sql = "
-            SELECT 
-                p.*,
-                c.nombre as categoria_nombre,
-                s.nombre as subcategoria_nombre,
-                m.nombre as marca_nombre,
-                pr.nombre as proveedor_nombre
+    // ─────────────────────────────────────────────────────────────────────────
+    // HELPERS PRIVADOS
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /** ✅ INSERT incluye genero */
+    private function insertarVariantes(int $productoId, array $variantes): void
+    {
+        $stmt = $this->pdo->prepare("
+            INSERT INTO producto_variantes (producto_id, talla, color, genero, stock)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT (producto_id, talla, color)
+            DO UPDATE SET
+                genero     = EXCLUDED.genero,
+                stock      = EXCLUDED.stock,
+                updated_at = CURRENT_TIMESTAMP
+        ");
+
+        foreach ($variantes as $v) {
+            $stmt->execute([
+                $productoId,
+                $v['talla'],
+                $v['color'],
+                $v['genero'],                  // ✅
+                (int)($v['stock'] ?? 0),
+            ]);
+        }
+    }
+
+    /**
+     * Sincroniza variantes en UPDATE:
+     * - Con id  → actualiza
+     * - Sin id  → inserta
+     * - Ausentes → elimina
+     */
+    private function sincronizarVariantes(int $productoId, array $variantes): void
+    {
+        $idsRecibidos = array_filter(
+            array_column($variantes, 'id'),
+            fn($id) => $id !== null && $id !== ''
+        );
+
+        // Eliminar variantes que ya no están
+        if (!empty($idsRecibidos)) {
+            $placeholders = implode(',', array_fill(0, count($idsRecibidos), '?'));
+            $stmt = $this->pdo->prepare("
+                DELETE FROM producto_variantes
+                WHERE producto_id = ? AND id NOT IN ($placeholders)
+            ");
+            $stmt->execute(array_merge([$productoId], array_values($idsRecibidos)));
+        } else {
+            $stmt = $this->pdo->prepare("DELETE FROM producto_variantes WHERE producto_id = ?");
+            $stmt->execute([$productoId]);
+        }
+
+        // ✅ UPDATE y INSERT incluyen genero
+        $stmtUpdate = $this->pdo->prepare("
+            UPDATE producto_variantes
+            SET talla = ?, color = ?, genero = ?, stock = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ? AND producto_id = ?
+        ");
+        $stmtInsert = $this->pdo->prepare("
+            INSERT INTO producto_variantes (producto_id, talla, color, genero, stock)
+            VALUES (?, ?, ?, ?, ?)
+        ");
+
+        foreach ($variantes as $v) {
+            $talla  = $v['talla'];
+            $color  = $v['color'];
+            $genero = $v['genero'];             // ✅
+            $stock  = (int)($v['stock'] ?? 0);
+
+            if (!empty($v['id'])) {
+                $stmtUpdate->execute([$talla, $color, $genero, $stock, (int)$v['id'], $productoId]);
+            } else {
+                $stmtInsert->execute([$productoId, $talla, $color, $genero, $stock]);
+            }
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // MÉTODOS EXTRA
+    // ─────────────────────────────────────────────────────────────────────────
+
+    public function getProductosPorCategoria(int $categoriaId): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT p.*, c.nombre AS categoria_nombre, m.nombre AS marca_nombre,
+                   COALESCE(SUM(v.stock), 0) AS stock_total
             FROM productos p
             LEFT JOIN categorias c ON p.categoria_id = c.id
-            LEFT JOIN subcategorias s ON p.subcategoria_id = s.id
-            LEFT JOIN marcas m ON p.marca_id = m.id
-            LEFT JOIN proveedores pr ON p.proveedor_id = pr.id
-            WHERE p.stock <= ?
-            ORDER BY p.stock ASC
-        ";
-        
-        $stmt = $this->pdo->prepare($sql);
+            LEFT JOIN marcas     m ON p.marca_id     = m.id
+            LEFT JOIN producto_variantes v ON v.producto_id = p.id
+            WHERE p.categoria_id = ?
+            GROUP BY p.id, c.nombre, m.nombre
+            ORDER BY p.created_at DESC
+        ");
+        $stmt->execute([$categoriaId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getProductosConBajoStock(int $limite = 5): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT p.*, c.nombre AS categoria_nombre, m.nombre AS marca_nombre,
+                   COALESCE(SUM(v.stock), 0) AS stock_total
+            FROM productos p
+            LEFT JOIN categorias c ON p.categoria_id = c.id
+            LEFT JOIN marcas     m ON p.marca_id     = m.id
+            LEFT JOIN producto_variantes v ON v.producto_id = p.id
+            GROUP BY p.id, c.nombre, m.nombre
+            HAVING COALESCE(SUM(v.stock), 0) <= ?
+            ORDER BY stock_total ASC
+        ");
         $stmt->execute([$limite]);
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-?>
