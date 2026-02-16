@@ -1,3 +1,8 @@
+// ✅ Este archivo define los mapas de colores del tema.
+// Se importa con @use en lugar de @import desde otros archivos SCSS.
+// Ejemplo de uso: @use '../../../@theme/styles/theme-palette-colors' as themes;
+//                 color: map.get(themes.$blue-theme, 500);
+
 $grey-theme: (
   50: #fff,
   100: #f8f9fa,
