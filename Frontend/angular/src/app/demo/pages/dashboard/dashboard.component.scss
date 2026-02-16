@@ -1,4 +1,6 @@
-@import '../../../@theme/styles/theme-palette-colors.scss';
+// ✅ Usar @use en lugar de @import (deprecado en Dart Sass 3.0)
+@use 'sass:map';
+@use '../../../@theme/styles/theme-palette-colors' as themes;
 
 .able-user-group .avatar {
   width: 30px;
@@ -42,7 +44,8 @@
 
   .dot {
     border-radius: 50%;
-    background: map-get($yellow-theme, 500);
+    // ✅ map.get() en lugar de map-get() (deprecado)
+    background: map.get(themes.$yellow-theme, 500);
 
     &.primary {
       background: var(--primary-500);
