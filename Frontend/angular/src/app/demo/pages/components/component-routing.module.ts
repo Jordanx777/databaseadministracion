@@ -29,6 +29,13 @@ const routes: Routes = [
           import('../forms/agregar-productoscomponent/agregar-productoscomponent')
             .then(m => m.AgregarProductoscomponent),
       },
+      {
+        // ✅ Ruta de EDICIÓN — mismo componente, recibe el id
+        path: 'addproducto/:id',
+        loadComponent: () =>
+          import('../forms/agregar-productoscomponent/agregar-productoscomponent')
+            .then(m => m.AgregarProductoscomponent),
+      },
 
       {
         path: 'addproveedor',
