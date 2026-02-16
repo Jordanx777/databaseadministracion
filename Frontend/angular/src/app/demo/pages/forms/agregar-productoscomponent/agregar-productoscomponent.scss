@@ -157,3 +157,118 @@ display: flex;
 .guardar:active:not([disabled]) {
   transform: translateY(-1px);
 }
+/* ── Sección titulos ─────────────────────────────────────────────────── */
+.seccion-titulo {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mat-app-text-color, #333);
+  margin: 24px 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  .seccion-hint {
+    font-size: 12px;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: rgba(0,0,0,.45);
+  }
+}
+
+/* ── Grid datos generales ────────────────────────────────────────────── */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0 16px;
+}
+
+/* ── Variantes ───────────────────────────────────────────────────────── */
+.variantes-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.variantes-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 48px;
+  gap: 8px;
+  padding: 0 4px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(0,0,0,.5);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.variante-fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 48px;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 4px;
+
+  .variante-campo {
+    width: 100%;
+  }
+}
+
+.agregar-variante-btn {
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+// stock
+.mat
+
+/* ── Imagen ──────────────────────────────────────────────────────────── */
+.imagen-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 8px;
+
+  .full-width {
+    width: 100%;
+  }
+
+  .imagen-acciones {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .vista-previa {
+    img {
+      max-width: 200px;
+      max-height: 200px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,.12);
+      object-fit: cover;
+    }
+  }
+}
+
+/* ── Botones finales ─────────────────────────────────────────────────── */
+.acciones {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+
+  .guardar {
+    min-width: 160px;
+  }
+}
+
+/* ── Loading ─────────────────────────────────────────────────────────── */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  gap: 16px;
+  color: rgba(0,0,0,.5);
+}
