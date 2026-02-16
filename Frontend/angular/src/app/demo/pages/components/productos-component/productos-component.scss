@@ -509,6 +509,212 @@ $primary-dark: color.adjust($primary, $lightness: -10%);
   }
 }
 
+/* ── Variantes cell ──────────────────────────────────────────────────── */
+.variantes-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 0;
+
+  mat-chip-set {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  // Chips más compactos
+  mat-chip {
+    font-size: 11px !important;
+    min-height: 24px !important;
+    padding: 0 8px !important;
+    white-space: nowrap;
+  }
+}
+
+.btn-mas-variantes {
+  font-size: 11px;
+  line-height: 22px;
+  padding: 0 4px;
+  min-width: unset;
+  color: rgba(0, 0, 0, 0.45);
+
+  &:hover {
+    color: var(--mat-primary);
+  }
+}
+
+.sin-variantes {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.35);
+  font-style: italic;
+}
+
+/* ── Stock badges ────────────────────────────────────────────────────── */
+.stock-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+
+  &.stock-ok {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+  &.stock-low {
+    background: #fff8e1;
+    color: #f57f17;
+  }
+  &.stock-empty {
+    background: #ffebee;
+    color: #c62828;
+  }
+}
+
+/* ── Tabla general ───────────────────────────────────────────────────── */
+.tabla-wrapper {
+  overflow-x: auto;
+}
+
+.tabla-productos {
+  width: 100%;
+
+  // La columna variantes puede ser más ancha
+  .mat-column-variantes {
+    min-width: 220px;
+    max-width: 340px;
+  }
+
+  .mat-column-imagen {
+    width: 64px;
+    padding-right: 8px;
+  }
+
+  .mat-column-stock_total {
+    width: 90px;
+    text-align: center;
+  }
+
+  .mat-column-acciones {
+    width: 90px;
+    text-align: right;
+  }
+}
+
+/* ── Imagen ──────────────────────────────────────────────────────────── */
+.img-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,.1);
+  background: #f5f5f5;
+}
+
+.producto-imagen {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Nombre + meta ───────────────────────────────────────────────────── */
+.producto-nombre {
+  display: block;
+  font-weight: 500;
+  font-size: 13px;
+}
+.producto-meta {
+  display: block;
+  font-size: 11px;
+  color: rgba(0,0,0,.45);
+}
+
+/* ── Categoría ───────────────────────────────────────────────────────── */
+.categoria-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cat-badge {
+  font-size: 12px;
+  font-weight: 500;
+}
+.subcat {
+  font-size: 11px;
+  color: rgba(0,0,0,.45);
+}
+
+/* ── Precios ─────────────────────────────────────────────────────────── */
+.precio {
+  font-size: 13px;
+  white-space: nowrap;
+}
+.precio-venta {
+  font-weight: 600;
+  color: #1b5e20;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────── */
+.tabla-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px 16px 8px;
+}
+.tabla-titulo {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+.tabla-subtitulo {
+  font-size: 12px;
+  color: rgba(0,0,0,.45);
+}
+.header-acciones {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.buscador {
+  width: 240px;
+}
+
+/* ── Loading ─────────────────────────────────────────────────────────── */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  gap: 16px;
+  color: rgba(0,0,0,.45);
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 40px 0 !important;
+  color: rgba(0,0,0,.35);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+  p { margin: 8px 0 0; }
+}
+
+
+/* ── Acciones cell ───────────────────────────────────────────────────── */
+.acciones-cell {
+  white-space: nowrap;
+}
 
 // ===================================================
 // ESTILOS GLOBALES PARA EL PANEL DEL DIALOG
