@@ -1,7 +1,6 @@
 // angular import
 import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError, RouterModule } from '@angular/router';
-
 // project import
 import { SharedModule } from './demo/shared/shared.module';
 
