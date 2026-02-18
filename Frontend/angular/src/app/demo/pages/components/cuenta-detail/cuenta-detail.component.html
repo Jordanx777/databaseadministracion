@@ -1,0 +1,87 @@
+<!-- components/cuenta-detail/cuenta-detail.component.html -->
+<div class="cuenta-detail-container">
+  
+    <!-- (click)="router.navigate(['/cuentas'])" -->
+  <!-- Header -->
+  <div class="page-header">
+    <button class="btn-sm btn-secondary">
+      ← Volver
+    </button>
+    <h1>Historial de {{ clienteNombre }}</h1>
+  </div>
+<!-- | currency:'COP':'symbol-narrow':'1.0-0' -->
+  <!-- Resumen -->
+  <div class="resumen-card">
+    <div class="resumen-item">
+      <span class="label">Total Compras:</span>
+      <span class="value">{{ totalVentas || 0  }}</span>
+    </div>
+    <!-- currency:'COP':'symbol-narrow':'1.0-0' -->
+    <div class="resumen-item">
+      <span class="label">Total Pagado:</span>
+      <span class="value success">{{ totalPagado || 0  }}</span>
+    </div>
+    <!-- currency:'COP':'symbol-narrow':'1.0-0' -->
+    <div class="resumen-item">
+      <span class="label">Saldo Pendiente:</span>
+      <span class="value danger">{{ saldoPendiente || 0  }}</span>
+    </div>
+  </div>
+
+  <!-- Historial de Ventas -->
+  <div class="historial" *ngIf="!loading">
+    <div class="venta-card" *ngFor="let venta of historial">
+      
+      <div class="venta-header">
+        <div>
+          <h3>{{ venta.numero_factura }}</h3>
+          <span class="fecha">{{ venta.fecha_venta | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <span class="badge" 
+              [class.badge-success]="venta.estado_venta === 'pagada'"
+              [class.badge-warning]="venta.estado_venta === 'pendiente'">
+          {{ venta.estado_venta }}
+        </span>
+      </div>
+
+      <div class="venta-productos">
+        <h4>Productos:</h4>
+        <ul>
+          <li *ngFor="let prod of venta.productos">
+            {{ prod.cantidad }}x {{ prod.producto }} 
+            ({{ prod.marca }}, {{ prod.talla }}, {{ prod.color }})
+            - {{ prod.precio | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </li>
+        </ul>
+      </div>
+
+      <div class="venta-pagos" *ngIf="venta.pagos && venta.pagos.length > 0">
+        <h4>Pagos Realizados:</h4>
+        <ul>
+          <li *ngFor="let pago of venta.pagos">
+            {{ pago.fecha | date:'dd/MM/yyyy' }} - 
+            {{ pago.monto | currency:'COP':'symbol-narrow':'1.0-0' }}
+            ({{ pago.metodo }})
+            <span *ngIf="pago.referencia"> - Ref: {{ pago.referencia }}</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="venta-footer">
+        <div class="montos">
+          <span>Total: {{ venta.monto_venta | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+          <span>Pagado: {{ venta.total_pagado | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+          <span class="saldo">Saldo: {{ venta.saldo_pendiente | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+        </div>
+        
+        <button class="btn-sm btn-success" 
+                *ngIf="venta.saldo_pendiente > 0"
+                (click)="registrarPago(venta.venta_id)">
+          💰 Registrar Pago
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
