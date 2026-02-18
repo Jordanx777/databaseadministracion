@@ -52,6 +52,23 @@ export const menus: Navigation[] = [
       }
     ]
   },
+
+  {
+    id: 'Clientes',
+    title: 'Clientes',
+    type: 'group',
+    icon: 'icon-navigation',
+    children: [
+      {
+        id: 'clientes',
+        title: 'Clientes',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/component/Clientes',
+        icon: '#custom-people'
+      },
+    ]
+  },
   {
     id: 'Proveedores',
     title: 'Proveedores',
@@ -108,11 +125,11 @@ export const menus: Navigation[] = [
     icon: 'icon-navigation',
     children: [
       {
-        id: 'pagos-pendientes',
-        title: 'Pagos Pendientes',
+        id: 'cuentas-cobrar',
+        title: 'Cuentas por Cobrar',
         type: 'item',
         classes: 'nav-item',
-        url: '/component/pagos-pendientes',
+        url: '/component/cuentas-cobrar',
         icon: '#custom-wallet'
       }, 
       {
