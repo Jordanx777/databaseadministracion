@@ -85,7 +85,7 @@
           <span class="credito"
             [class.has-credit]="c.limite_credito > 0"
             [class.no-credit]="!c.limite_credito">
-            {{ c.limite_credito > 0 ? (c.limite_credito | currency:'COP':'symbol':'1.0-0') : 'Sin crédito' }}
+            {{ c.limite_credito > 0 ? formatCredito(c.limite_credito) : 'Sin crédito' }}
           </span>
         </td>
         <td>
