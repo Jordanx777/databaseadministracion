@@ -22,8 +22,8 @@ import { MatChipsModule } from '@angular/material/chips';
 
 /* Servicios */
 import { ProductosService } from 'src/app/@theme/services/Productos.service';
-// import { ClientesService } from 'src/app/@theme/services/';
-// import { VentasService } from 'src/app/@theme/services/Ventas.services'; // ← crear después
+import { ClientesService } from 'src/app/@theme/services/Cliente.service';
+import { VentasService } from 'src/app/@theme/services/Ventas.services';
 
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -71,7 +71,6 @@ export class AgregarVentasComponent implements OnInit {
 
   formVenta!: FormGroup;
 
-  /* ===== DATOS ===== */
   clientes: any[] = [];
   clientesFiltrados!: Observable<any[]>;
   productos: any[] = [];
@@ -96,24 +95,21 @@ export class AgregarVentasComponent implements OnInit {
     { value: 'tarjeta', label: 'Tarjeta' }
   ];
 
-  /* ===== CARRITO ===== */
   carrito: ItemCarrito[] = [];
   columnasCarrito = ['producto', 'variante', 'cantidad', 'precio_unitario', 'subtotal', 'acciones'];
 
-  /* ===== TOTALES ===== */
   subtotal = 0;
   descuento = 0;
   total = 0;
 
-  /* ===== LOADING ===== */
-  // cargando = false;
-  // cargandoDatos = true;
+  cargando = false;
+  cargandoDatos = true;
 
   constructor(
     private fb: FormBuilder,
     private productosService: ProductosService,
-    // private clientesService: ClientesService,
-    // private ventasService: VentasService,
+    private clientesService: ClientesService,
+    private ventasService: VentasService,
     private router: Router,
     private snackBar: MatSnackBar,
     private cdr: ChangeDetectorRef
@@ -125,38 +121,27 @@ export class AgregarVentasComponent implements OnInit {
     this.configurarAutocompletes();
   }
 
-  // ─── FORMULARIO ────────────────────────────────────────────────────────────
-
   crearFormulario(): void {
     this.formVenta = this.fb.group({
-      // Cliente
       tipo_cliente: ['registrado', Validators.required],
       cliente_id: [''],
       cliente_nombre: [''],
       cliente_telefono: [''],
       cliente_referencia: [''],
-
-      // Producto a agregar (no va en el submit final)
       producto_busqueda: [''],
       variante_seleccionada: [''],
       cantidad_agregar: [1, [Validators.min(1)]],
-
-      // Venta
       subtotal: [0],
       descuento: [0, [Validators.min(0)]],
       total: [0],
       tipo_pago: ['contado', Validators.required],
       notas: [''],
-
-      // Pagos iniciales (solo si tipo_pago = contado o mixto)
       pagos: this.fb.array([])
     });
 
-    // Listener tipo_cliente
     this.formVenta.get('tipo_cliente')?.valueChanges.subscribe(tipo => {
       const clienteIdCtrl = this.formVenta.get('cliente_id');
       const nombreCtrl = this.formVenta.get('cliente_nombre');
-
       if (tipo === 'registrado') {
         clienteIdCtrl?.setValidators([Validators.required]);
         nombreCtrl?.clearValidators();
@@ -168,23 +153,18 @@ export class AgregarVentasComponent implements OnInit {
       nombreCtrl?.updateValueAndValidity();
     });
 
-    // Listener tipo_pago
     this.formVenta.get('tipo_pago')?.valueChanges.subscribe(tipo => {
       if (tipo === 'contado') {
-        // Contado: agregar pago por el total
         this.pagos.clear();
         this.agregarPago();
         this.pagos.at(0).patchValue({ monto: this.total });
       } else if (tipo === 'mixto') {
-        // Mixto: permitir uno o más pagos
         if (this.pagos.length === 0) this.agregarPago();
       } else {
-        // Crédito: limpiar pagos
         this.pagos.clear();
       }
     });
 
-    // Listener descuento
     this.formVenta.get('descuento')?.valueChanges.subscribe(() => {
       this.calcularTotales();
     });
@@ -211,25 +191,22 @@ export class AgregarVentasComponent implements OnInit {
     this.pagos.removeAt(index);
   }
 
-  // ─── CARGAR DATOS ──────────────────────────────────────────────────────────
-
   cargarDatosIniciales(): void {
-    // this.cargandoDatos = true;
-
+    this.cargandoDatos = true;
     Promise.all([
-      // this.clientesService.getClientes().toPromise(),
+      this.clientesService.getAll().toPromise(),
       this.productosService.getProductos().toPromise()
     ])
-    // .then(([clientesRes, productosRes]) => {
-    //   this.clientes = this.extraerDatos(clientesRes);
-    //   this.productos = this.extraerDatos(productosRes);
-    //   this.cargandoDatos = false;
-    //   this.cdr.detectChanges();
-    // })
+    .then(([clientesRes, productosRes]) => {
+      this.clientes = this.extraerDatos(clientesRes);
+      this.productos = this.extraerDatos(productosRes);
+      this.cargandoDatos = false;
+      this.cdr.detectChanges();
+    })
     .catch(err => {
       console.error('Error cargando datos:', err);
       this.mostrarMensaje('Error al cargar datos del formulario', 'error');
-      // this.cargandoDatos = false;
+      this.cargandoDatos = false;
       this.cdr.detectChanges();
     });
   }
@@ -240,16 +217,11 @@ export class AgregarVentasComponent implements OnInit {
     return [];
   }
 
-  // ─── AUTOCOMPLETES ─────────────────────────────────────────────────────────
-
   configurarAutocompletes(): void {
-    // Clientes
     this.clientesFiltrados = this.formVenta.get('cliente_id')!.valueChanges.pipe(
       startWith(''),
       map(value => this._filtrarClientes(value || ''))
     );
-
-    // Productos
     this.productosFiltrados = this.formVenta.get('producto_busqueda')!.valueChanges.pipe(
       startWith(''),
       map(value => this._filtrarProductos(value || ''))
@@ -283,8 +255,6 @@ export class AgregarVentasComponent implements OnInit {
     return producto ? `${producto.nombre} - ${producto.marca_nombre}` : '';
   }
 
-  // ─── CARRITO ───────────────────────────────────────────────────────────────
-
   agregarAlCarrito(): void {
     const productoSeleccionado = this.formVenta.get('producto_busqueda')?.value;
     const varianteId = this.formVenta.get('variante_seleccionada')?.value;
@@ -295,20 +265,17 @@ export class AgregarVentasComponent implements OnInit {
       return;
     }
 
-    // Buscar la variante en el producto
     const variante = productoSeleccionado.variantes?.find((v: any) => v.id === varianteId);
     if (!variante) {
       this.mostrarMensaje('Variante no encontrada', 'error');
       return;
     }
 
-    // Validar stock
     if (cantidad > variante.stock) {
       this.mostrarMensaje(`Stock insuficiente (disponible: ${variante.stock})`, 'warning');
       return;
     }
 
-    // Verificar si ya existe en el carrito
     const existe = this.carrito.find(item =>
       item.producto_id === productoSeleccionado.id && item.variante_id === varianteId
     );
@@ -333,7 +300,6 @@ export class AgregarVentasComponent implements OnInit {
       this.carrito.push(item);
     }
 
-    // Limpiar formulario de producto
     this.formVenta.patchValue({
       producto_busqueda: '',
       variante_seleccionada: '',
@@ -362,8 +328,6 @@ export class AgregarVentasComponent implements OnInit {
     this.calcularTotales();
   }
 
-  // ─── TOTALES ───────────────────────────────────────────────────────────────
-
   calcularTotales(): void {
     this.subtotal = this.carrito.reduce((sum, item) => sum + item.subtotal, 0);
     this.descuento = Number(this.formVenta.get('descuento')?.value || 0);
@@ -374,7 +338,6 @@ export class AgregarVentasComponent implements OnInit {
       total: this.total
     }, { emitEvent: false });
 
-    // Si es contado, actualizar el monto del pago
     if (this.formVenta.get('tipo_pago')?.value === 'contado' && this.pagos.length > 0) {
       this.pagos.at(0).patchValue({ monto: this.total }, { emitEvent: false });
     }
@@ -384,10 +347,7 @@ export class AgregarVentasComponent implements OnInit {
     return this.pagos.controls.reduce((sum, ctrl) => sum + Number(ctrl.value.monto || 0), 0);
   }
 
-  // ─── SUBMIT ────────────────────────────────────────────────────────────────
-
   onSubmit(): void {
-    // Validaciones
     if (this.carrito.length === 0) {
       this.mostrarMensaje('Agregue al menos un producto al carrito', 'warning');
       return;
@@ -408,13 +368,11 @@ export class AgregarVentasComponent implements OnInit {
 
     const tipoPago = this.formVenta.get('tipo_pago')?.value;
 
-    // Validar crédito solo para clientes registrados
     if (tipoPago === 'credito' && tipoCliente === 'ocasional') {
       this.mostrarMensaje('Las ventas a crédito requieren cliente registrado', 'warning');
       return;
     }
 
-    // Validar pagos según tipo
     const totalPagos = this.getTotalPagos();
     if (tipoPago === 'contado' && totalPagos !== this.total) {
       this.mostrarMensaje('El pago debe ser igual al total en ventas de contado', 'warning');
@@ -425,24 +383,18 @@ export class AgregarVentasComponent implements OnInit {
       return;
     }
 
-    // this.cargando = true;
+    this.cargando = true;
 
-    // Armar payload
     const venta = {
-      // Cliente
-      cliente_id: tipoCliente === 'registrado' ? clienteId : null,
+      cliente_id: tipoCliente === 'registrado' ? (clienteId?.id || clienteId) : null,
       cliente_nombre: tipoCliente === 'ocasional' ? clienteNombre : null,
       cliente_telefono: this.formVenta.get('cliente_telefono')?.value || null,
       cliente_referencia: this.formVenta.get('cliente_referencia')?.value || null,
-
-      // Totales
       subtotal: this.subtotal,
       descuento: this.descuento,
       total: this.total,
       tipo_pago: tipoPago,
       notas: this.formVenta.get('notas')?.value || null,
-
-      // Detalles (productos)
       detalles: this.carrito.map(item => ({
         producto_id: item.producto_id,
         variante_id: item.variante_id,
@@ -453,33 +405,21 @@ export class AgregarVentasComponent implements OnInit {
         color_vendido: item.color,
         genero_vendido: item.genero
       })),
-
-      // Pagos iniciales (si aplica)
       pagos: tipoPago !== 'credito' ? this.pagos.value : []
     };
 
-    console.log('Venta a registrar:', venta);
-
-    // ❗ DESCOMENTAR cuando tengas el servicio
-    // this.VentasService.crearVenta(venta).subscribe({
-    //   next: (response) => {
-    //     this.mostrarMensaje('Venta registrada exitosamente', 'success');
-    //     this.router.navigate(['component/ventas-diarias']);
-    //     this.cargando = false;
-    //   },
-    //   error: (error) => {
-    //     console.error('Error:', error);
-    //     this.mostrarMensaje('Error al registrar la venta', 'error');
-    //     this.cargando = false;
-    //   }
-    // });
-
-    // Por ahora solo simulamos
-    // setTimeout(() => {
-    //   this.mostrarMensaje('Venta registrada (simulación)', 'success');
-    //   this.cargando = false;
-    //   // this.router.navigate(['component/ventas-diarias']);
-    // }, 1000);
+    this.ventasService.crearVenta(venta).subscribe({
+      next: (response) => {
+        this.mostrarMensaje('Venta registrada exitosamente', 'success');
+        this.router.navigate(['component/ventas-diarias']);
+        this.cargando = false;
+      },
+      error: (error) => {
+        console.error('Error:', error);
+        this.mostrarMensaje('Error al registrar la venta', 'error');
+        this.cargando = false;
+      }
+    });
   }
 
   cancelar(): void {
