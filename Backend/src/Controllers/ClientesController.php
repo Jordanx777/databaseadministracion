@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\ClientesModel;
 
 use Exception;
+use App\Helpers\ResponseHelper;
 
 class ClientesController
 {
@@ -67,6 +68,25 @@ class ClientesController
     {
         // Implementar lógica para obtener un cliente por ID
     }
+
+    public function searchClientes(array $params = [])
+{
+    try {
+        // ✅ Los parámetros GET vienen en $_GET, no en $params
+        $query = $_GET['query'] ?? '';
+        
+        // Si no hay búsqueda, devolver todos los clientes
+        if (empty(trim($query))) {
+            return $this->getAllClientes();
+        }
+        
+        $clientes = $this->model->searchByName($query);
+        
+        ResponseHelper::success($clientes, 'Clientes encontrados');
+    } catch (Exception $e) {
+        ResponseHelper::error('Error al buscar clientes: ' . $e->getMessage(), 500);
+    }
+}
 
     public function updateCliente(array $params)
     {
