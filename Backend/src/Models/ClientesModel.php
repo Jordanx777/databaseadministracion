@@ -27,6 +27,25 @@ class ClientesModel
             return [];
         }
     }
+
+        // ─── SEARCH BY NAME ─────────────────────────────────────────────────────
+    public function searchByName($query)
+    {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT * FROM clientes 
+                WHERE (nombre LIKE :query OR apodo LIKE :query OR telefono LIKE :query)
+                  AND activo = true
+                ORDER BY nombre ASC
+            ");
+            $stmt->execute([':query' => '%' . $query . '%']);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\Exception $e) {
+            error_log("Error en searchByName: " . $e->getMessage());
+            return [];
+        }
+    }
+
     public function create($nombre, $apodo, $telefono, $direccion, $referencias, $limite_credito, $tipo)
     {
         try {
