@@ -22,6 +22,12 @@ export class ClientesService {
     return this.apiService.get<Cliente[]>(`clientes`);
   }
 
+  // obtener clientes segun la busqueda
+    //  Buscar clientes (si está vacío, devuelve todos desde el backend)
+  getClientes(busqueda: string) {
+    return this.apiService.get<Cliente[]>(`clientes/buscar?query=${encodeURIComponent(busqueda)}`);
+  }
+
   create(data: Partial<Cliente>){ 
     return this.apiService.post<Cliente>(`clientes/agregar`, data);
   }
