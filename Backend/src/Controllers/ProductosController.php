@@ -32,6 +32,25 @@ class ProductosController
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // SEARCH
+    public function searchProductos()
+{
+    try {
+        $query = $_GET['query'] ?? '';
+        
+        // ✅ Si está vacío, devolver todos los productos
+        if (empty(trim($query))) {
+            return $this->getAllProductos();
+        }
+        
+        $productos = $this->productosModel->searchProductos($query);
+        ResponseHelper::success($productos, 'Productos encontrados');
+    } catch (\Exception $e) {
+        ResponseHelper::error($e->getMessage(), 500);
+    }
+}
+
+    // ─────────────────────────────────────────────────────────────────────────
     // GET ONE
     // ─────────────────────────────────────────────────────────────────────────
     public function getProductoById(array $params)
