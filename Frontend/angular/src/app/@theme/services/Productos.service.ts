@@ -66,6 +66,11 @@ export class ProductosService {
     return this.apiService.get('productos');
   }
 
+      //  Buscar Productos (si está vacío, devuelve todos desde el backend)
+  searchProductos(busqueda: string): Observable<any> {
+    return this.apiService.get(`productos/buscar?query=${encodeURIComponent(busqueda)}`);
+  }
+
   getProducto(id: number): Observable<any> {
     return this.apiService.get(`productos/${id}`);
   }
