@@ -24,6 +24,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { ProductosService } from 'src/app/@theme/services/Productos.service';
 import { ClientesService } from 'src/app/@theme/services/Cliente.service';
 import { VentasService } from 'src/app/@theme/services/Ventas.services';
+import { AuthService } from 'src/app/@theme/services/auth.service';
 
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -110,6 +111,7 @@ export class AgregarVentasComponent implements OnInit {
     private productosService: ProductosService,
     private clientesService: ClientesService,
     private ventasService: VentasService,
+    private authService: AuthService,   //  AQUI
     private router: Router,
     private snackBar: MatSnackBar,
     private cdr: ChangeDetectorRef
@@ -385,7 +387,15 @@ export class AgregarVentasComponent implements OnInit {
 
     this.cargando = true;
 
+    const currentUser = this.authService.getCurrentUser();
+
+    if (!currentUser) {
+      this.mostrarMensaje('Sesión no válida. Inicie sesión nuevamente.', 'error');
+      return;
+    }
+
     const venta = {
+      usuario_id: currentUser.id_usuario, // 👈 NUEVO CAMPO
       cliente_id: tipoCliente === 'registrado' ? (clienteId?.id || clienteId) : null,
       cliente_nombre: tipoCliente === 'ocasional' ? clienteNombre : null,
       cliente_telefono: this.formVenta.get('cliente_telefono')?.value || null,
@@ -407,11 +417,12 @@ export class AgregarVentasComponent implements OnInit {
       })),
       pagos: tipoPago !== 'credito' ? this.pagos.value : []
     };
+    console.log('Venta a registrar:', venta);
 
     this.ventasService.crearVenta(venta).subscribe({
       next: (response) => {
         this.mostrarMensaje('Venta registrada exitosamente', 'success');
-        this.router.navigate(['component/ventas-diarias']);
+        // this.router.navigate(['component/ventas-diarias']);
         this.cargando = false;
       },
       error: (error) => {
