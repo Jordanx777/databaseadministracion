@@ -45,13 +45,29 @@ export interface PagoInicial {
   providedIn: 'root'
 })
 export class VentasService {
-  private apiUrl = `${environment.apiUrl}/ventas`;
 
   constructor(private apiService: ApiService) {}
 
   // Crear venta
   crearVenta(venta: Venta): Observable<any> {
-  return this.apiService.post('/ventas', venta);  
+  return this.apiService.post('ventas', venta);  
+  }
+
+  /**
+   * Obtener todas las ventas con filtros opcionales
+   */
+  obtenerTodas(filtros?: any): Observable<any> {
+    let params = new URLSearchParams();
+    
+    if (filtros) {
+      Object.keys(filtros).forEach(key => {
+        if (filtros[key]) {
+          params.append(key, filtros[key]);
+        }
+      });
+    }
+    
+    return this.apiService.get(`ventas?${params.toString()}`);
   }
 
   // Listar ventas
@@ -59,9 +75,13 @@ export class VentasService {
 //     return this.apiService.get<any>(this.apiUrl, { params });
 //   }
 
+obtenerPorId(id: number): Observable<any> {
+    return this.apiService.get<any>(`ventas/${id}`);
+  }
+
   // Obtener una venta
   obtenerVenta(id: number): Observable<any> {
-    return this.apiService.get<any>(`${this.apiUrl}/${id}`);
+    return this.apiService.get<any>(`ventas/${id}`);
   }
 
   // Actualizar estado de venta
@@ -70,8 +90,11 @@ export class VentasService {
 //   }
 
   // Cancelar venta
-  cancelarVenta(id: number): Observable<any> {
-    return this.apiService.delete<any>(`${this.apiUrl}/${id}`);
+  // cancelarVenta(id: number): Observable<any> {
+  //   return this.apiService.delete<any>(`${this.apiUrl}/${id}`);
+  // }
+  cancelar(id: number): Observable<any> {
+    return this.apiService.put<any>(`ventas/${id}/cancelar`, {});
   }
 
   // Ventas del día
