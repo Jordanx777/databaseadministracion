@@ -34,6 +34,7 @@ try {
     require_once __DIR__ . '/../src/Routes/Proveedores.routes.php';
     require_once __DIR__ . '/../src/Routes/Productos.routes.php';
     require_once __DIR__ . '/../src/Routes/Clientes.router.php';
+    require_once __DIR__ . '/../src/Routes/Ventas.routes.php';
     
     // Ejecutar router
     $router->run();
