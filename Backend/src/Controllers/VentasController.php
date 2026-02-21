@@ -80,58 +80,58 @@ class VentasController {
      * Obtener todas las ventas
      * GET /api/ventas
      */
-    public function obtenerTodas() {
-        try {
-            $filtros = $_GET ?? [];
-            $ventas = $this->ventaModel->obtenerTodas($filtros);
-            
-            http_response_code(200);
-            echo json_encode([
-                'success' => true,
-                'data' => $ventas,
-                'total' => count($ventas)
-            ]);
-            
-        } catch (\Exception $e) {
-            http_response_code(500);
+    public function obtenerVentasCompletas() {
+    try {
+        $filtros = $_GET ?? [];
+        $ventas = $this->ventaModel->obtenerVentasCompletas($filtros);
+        
+        http_response_code(200);
+        echo json_encode([
+            'success' => true,
+            'data' => $ventas,
+            'total' => count($ventas)
+        ]);
+        
+    } catch (\Exception $e) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Error al obtener ventas: ' . $e->getMessage()
+        ]);
+    }
+}
+
+/**
+ * Obtener venta completa por ID
+ * GET /api/ventas/completas/:id
+ */
+public function obtenerVentaCompletaPorId($id) {
+    try {
+        $venta = $this->ventaModel->obtenerVentaCompletaPorId($id);
+        
+        if (!$venta) {
+            http_response_code(404);
             echo json_encode([
                 'success' => false,
-                'message' => 'Error al obtener ventas: ' . $e->getMessage()
+                'message' => 'Venta no encontrada'
             ]);
+            return;
         }
+        
+        http_response_code(200);
+        echo json_encode([
+            'success' => true,
+            'data' => $venta
+        ]);
+        
+    } catch (\Exception $e) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Error al obtener la venta: ' . $e->getMessage()
+        ]);
     }
-    
-    /**
-     * Obtener una venta por ID
-     * GET /api/ventas/:id
-     */
-    public function obtenerPorId($id) {
-        try {
-            $venta = $this->ventaModel->obtenerPorId($id);
-            
-            if (!$venta) {
-                http_response_code(404);
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'Venta no encontrada'
-                ]);
-                return;
-            }
-            
-            http_response_code(200);
-            echo json_encode([
-                'success' => true,
-                'data' => $venta
-            ]);
-            
-        } catch (\Exception $e) {
-            http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'message' => 'Error al obtener la venta: ' . $e->getMessage()
-            ]);
-        }
-    }
+}
     
     /**
      * Cancelar una venta
