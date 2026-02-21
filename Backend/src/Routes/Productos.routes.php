@@ -2,6 +2,7 @@
 use App\Controllers\ProductosController;
 // GET - Obtener todos los productos
 $router->get('/api/productos', [ProductosController::class, 'getAllProductos']);
+$router->get('/api/productos/buscar', [ProductosController::class, 'searchProductos']);
 $router->post('/api/CrearProductos', [ProductosController::class, 'crearProducto']);
 $router->get('/api/productos/{id}', [ProductosController::class, 'getProductoById']);
 $router->put('/api/ActualizarProductos/{id}', [ProductosController::class, 'actualizarProducto']);

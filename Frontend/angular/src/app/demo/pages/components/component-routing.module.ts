@@ -75,10 +75,16 @@ const routes: Routes = [
       },
 
       {
-        path: 'pagos-pendientes',
+        path: 'cuentas-cobrar',
         loadComponent: () =>
-          import('./pagos-pendientes-component/pagos-pendientes-component')
-            .then(m => m.PagosPendientesComponent),
+          import('./cuentas-cobrar-component/cuentas-cobrar-component')
+            .then(m => m.CuentasCobrarComponent),
+      },
+      {
+        path: 'Clientes',
+        loadComponent: ()=>
+          import('./clientes-component/clientes.component')
+        .then(m=> m.ClientesComponent)
       },
 
       {

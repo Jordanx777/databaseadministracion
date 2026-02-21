@@ -47,6 +47,40 @@ class ProductosModel
         return $productos;
     }
 
+    // ┌────────────────────────────────────────────────────────────────────────
+    // BUSQUEDAS
+    // ─────────────────────────────────────────────────────────────────────────
+    public function searchProductos($query): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT
+                p.*,
+                c.nombre  AS categoria_nombre,
+                s.nombre  AS subcategoria_nombre,
+                m.nombre  AS marca_nombre,
+                pr.nombre AS proveedor_nombre,
+                COALESCE(SUM(v.stock), 0) AS stock_total
+            FROM productos p
+            LEFT JOIN categorias         c  ON p.categoria_id   = c.id
+            LEFT JOIN subcategorias      s  ON p.subcategoria_id = s.id
+            LEFT JOIN marcas             m  ON p.marca_id        = m.id
+            LEFT JOIN proveedores        pr ON p.proveedor_id    = pr.id
+            LEFT JOIN producto_variantes v  ON v.producto_id     = p.id
+            WHERE p.nombre LIKE :query OR m.nombre LIKE :query OR c.nombre LIKE :query
+            GROUP BY p.id, c.nombre, s.nombre, m.nombre, pr.nombre
+            ORDER BY p.created_at DESC
+        ");
+        $stmt->execute([':query' => '%' . $query . '%']);
+        $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($productos as &$producto) {
+            $producto['variantes'] = $this->getVariantesByProducto($producto['id']);
+        }
+        unset($producto);
+
+        return $productos;
+    }
+
     public function getProductoById(int $id): array|false
     {
         $stmt = $this->pdo->prepare("

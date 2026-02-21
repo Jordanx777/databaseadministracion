@@ -1,0 +1,382 @@
+/* ── Header ──────────────────────────────────────────────────────────── */
+.tabla-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px 16px 8px;
+}
+
+.header-info {
+  .tabla-titulo {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .tabla-subtitulo {
+    display: block;
+    font-size: 13px;
+    color: rgba(0,0,0,.5);
+    margin-bottom: 8px;
+  }
+  .total-deuda {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #e3f2fd;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #1565c0;
+
+    mat-icon { font-size: 18px; width: 18px; height: 18px; }
+    strong { font-weight: 600; }
+  }
+}
+
+.header-acciones {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.buscador { width: 260px; }
+
+/* ── Tabla ───────────────────────────────────────────────────────────── */
+.tabla-wrapper {
+  overflow-x: auto;
+}
+
+.tabla-cuentas {
+  width: 100%;
+
+  .mat-column-nombre { min-width: 180px; }
+  .mat-column-saldo_pendiente { font-weight: 600; }
+  .mat-column-acciones { width: 100px; text-align: right; }
+}
+
+/* ── Cliente cell ────────────────────────────────────────────────────── */
+.cliente-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cliente-nombre {
+  font-weight: 500;
+  font-size: 14px;
+}
+.cliente-meta {
+  font-size: 11px;
+  color: rgba(0,0,0,.45);
+}
+
+/* ── Badges ──────────────────────────────────────────────────────────── */
+.tipo-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+
+  &.badge-registrado {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+  &.badge-ocasional {
+    background: #fff8e1;
+    color: #f57f17;
+  }
+}
+
+.mora-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+
+  &.mora-baja {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+  &.mora-media {
+    background: #fff8e1;
+    color: #f57f17;
+  }
+  &.mora-alta {
+    background: #ffebee;
+    color: #c62828;
+  }
+}
+
+/* ── Precios ─────────────────────────────────────────────────────────── */
+.precio {
+  font-size: 13px;
+  white-space: nowrap;
+}
+.precio-pagado {
+  color: #2e7d32;
+  font-weight: 500;
+}
+.precio-pendiente {
+  color: #c62828;
+  font-weight: 600;
+}
+
+.center { text-align: center; }
+
+/* ── Loading ─────────────────────────────────────────────────────────── */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  gap: 16px;
+  color: rgba(0,0,0,.45);
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 40px 0 !important;
+  color: rgba(0,0,0,.35);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+  p { margin: 8px 0 0; }
+}
+
+/* ── Modales ─────────────────────────────────────────────────────────── */
+.modal-pago-container,
+.modal-historial-container {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+}
+
+.modal-header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .modal-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    color: var(--mat-primary);
+  }
+
+  .modal-titulo {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .modal-subtitulo {
+    font-size: 13px;
+    color: rgba(0,0,0,.5);
+    margin: 2px 0 0;
+  }
+}
+
+.btn-cerrar {
+  opacity: 0.6;
+  &:hover { opacity: 1; }
+}
+
+.modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* ── Resumen deuda ───────────────────────────────────────────────────── */
+.resumen-deuda {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.resumen-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.resumen-label {
+  font-size: 12px;
+  color: rgba(0,0,0,.5);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.resumen-valor {
+  font-size: 16px;
+  font-weight: 600;
+
+  &.saldo { color: #c62828; }
+  &.mora { color: #f57f17; }
+}
+
+/* ── Form grid ───────────────────────────────────────────────────────── */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0 16px;
+  margin: 20px 0;
+
+  .span-2 { grid-column: span 2; }
+}
+
+.modal-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 16px;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+/* ── Historial ───────────────────────────────────────────────────────── */
+.loading-historial,
+.sin-historial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  color: rgba(0,0,0,.4);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+  }
+}
+
+.historial-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.historial-item {
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f5f5f5;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+}
+
+.item-info {
+  h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 2px;
+  }
+  .item-fecha {
+    font-size: 12px;
+    color: rgba(0,0,0,.5);
+  }
+}
+
+.item-montos {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .monto-venta {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .estado-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+
+    &.estado-pendiente {
+      background: #fff8e1;
+      color: #f57f17;
+    }
+    &.estado-pagada {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    &.estado-cancelada {
+      background: #ffebee;
+      color: #c62828;
+    }
+  }
+}
+
+.item-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.productos-vendidos,
+.pagos-realizados {
+  font-size: 13px;
+
+  strong {
+    display: block;
+    margin-bottom: 6px;
+    color: rgba(0,0,0,.7);
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 20px;
+    list-style: disc;
+
+    li {
+      margin: 4px 0;
+      color: rgba(0,0,0,.65);
+    }
+  }
+}
+
+.item-saldo {
+  display: flex;
+  gap: 16px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(0,0,0,.08);
+  font-size: 13px;
+  font-weight: 500;
+
+  .saldo-pendiente {
+    color: #c62828;
+    font-weight: 600;
+  }
+}

@@ -1,0 +1,536 @@
+// ══════════════════════════════════════════════════════
+//  Variables — tema claro
+// ══════════════════════════════════════════════════════
+$bg:        #f4f5f7;
+$surface:   #ffffff;
+$surface2:  #f8f9fb;
+$border:    #e4e7ec;
+$border2:   #d0d5dd;
+
+$accent:    #c9a227;   // dorado cálido
+$accent-dk: #a07d15;
+
+$text:      #1a1c21;
+$text2:     #4a5568;
+$text3:     #9aa5b4;
+
+$danger:    #e05a3a;
+$success:   #2e9e5b;
+$regular:   #2563eb;
+$ocasional: #7c3aed;
+
+$radius:    10px;
+$shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+$shadow-md: 0 4px 16px rgba(0,0,0,.10);
+
+// ══════════════════════════════════════════════════════
+//  Host
+// ══════════════════════════════════════════════════════
+:host {
+  display: block;
+  background: $bg;
+  min-height: 100vh;
+  padding: 0 0 40px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+// ══════════════════════════════════════════════════════
+//  Header
+// ══════════════════════════════════════════════════════
+.page-header {
+  background: $surface;
+  border-bottom: 1px solid $border;
+  padding: 20px 32px;
+}
+
+.header-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 26px;
+  letter-spacing: -.4px;
+  color: $accent;
+  margin: 0;
+
+  .header-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: $text3;
+    font-weight: 400;
+    margin-left: 10px;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  Stats
+// ══════════════════════════════════════════════════════
+.stats-row {
+  display: flex;
+  gap: 12px;
+  padding: 24px 32px 0;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: $radius;
+  padding: 16px 22px;
+  flex: 1;
+  min-width: 140px;
+  box-shadow: $shadow-sm;
+
+  .stat-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: $text;
+
+    &.accent { color: $accent; }
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: $text3;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    margin-top: 2px;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  Toolbar
+// ══════════════════════════════════════════════════════
+.toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 20px 32px;
+  flex-wrap: wrap;
+}
+
+.search-wrap {
+  flex: 1;
+  min-width: 220px;
+  position: relative;
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $text3;
+    pointer-events: none;
+  }
+
+  .search-input {
+    width: 100%;
+    background: $surface;
+    border: 1px solid $border;
+    color: $text;
+    padding: 10px 14px 10px 40px;
+    border-radius: $radius;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    box-shadow: $shadow-sm;
+
+    &::placeholder { color: $text3; }
+    &:focus {
+      border-color: $accent;
+      box-shadow: 0 0 0 3px rgba($accent, .12);
+    }
+  }
+}
+
+.filter-select {
+  background: $surface;
+  border: 1px solid $border;
+  color: $text;
+  padding: 10px 14px;
+  border-radius: $radius;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  box-shadow: $shadow-sm;
+  transition: border-color .2s;
+
+  &:focus { border-color: $accent; }
+}
+
+// ══════════════════════════════════════════════════════
+//  Buttons
+// ══════════════════════════════════════════════════════
+.btn {
+  padding: 10px 20px;
+  border-radius: $radius;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all .2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+
+  &.btn-primary {
+    background: $accent;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba($accent, .35);
+    &:hover { background: $accent-dk; }
+  }
+
+  &.btn-ghost {
+    background: transparent;
+    color: $text2;
+    border: 1px solid $border2;
+    &:hover { border-color: $text2; color: $text; }
+  }
+
+  &.btn-danger {
+    background: transparent;
+    color: $danger;
+    border: 1px solid $danger;
+    &:hover { background: $danger; color: #fff; }
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  Table
+// ══════════════════════════════════════════════════════
+.table-wrap {
+  padding: 0 32px 32px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: $surface;
+  border-radius: $radius;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+  border: 1px solid $border;
+}
+
+thead th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: $text3;
+  font-weight: 600;
+  padding: 12px 16px;
+  background: $surface2;
+  border-bottom: 1px solid $border;
+}
+
+tbody tr {
+  border-bottom: 1px solid $border;
+  transition: background .15s;
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: $surface2; }
+}
+
+tbody td {
+  padding: 14px 16px;
+  font-size: 14px;
+  color: $text;
+  vertical-align: middle;
+
+  &.text-muted { color: $text2; }
+  &.text-sm    { font-size: 13px; }
+  &.cell-address { max-width: 200px; }
+}
+
+// ── Avatar ──────────────────────────────────
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba($accent, .1);
+  border: 1.5px solid rgba($accent, .25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Serif Display', serif;
+  font-size: 14px;
+  color: $accent;
+  flex-shrink: 0;
+}
+
+.client-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.client-name  { font-weight: 500; }
+.client-apodo { font-size: 12px; color: $text3; margin-top: 1px; }
+
+// ── Badges ──────────────────────────────────
+.badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+
+  &.badge-regular   { background: rgba($regular, .1);   color: $regular; }
+  &.badge-ocasional { background: rgba($ocasional, .1); color: $ocasional; }
+}
+
+// ── Crédito ─────────────────────────────────
+.credito {
+  font-family: 'DM Serif Display', serif;
+  font-size: 14px;
+
+  &.has-credit { color: $success; }
+  &.no-credit  { color: $text3; font-family: 'DM Sans', sans-serif; font-size: 13px; }
+}
+
+// ── Acciones ────────────────────────────────
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1px solid $border;
+  background: transparent;
+  color: $text2;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .2s;
+
+  &:hover {
+    border-color: $accent;
+    color: $accent;
+    background: rgba($accent, .06);
+  }
+
+  &.del:hover {
+    border-color: $danger;
+    color: $danger;
+    background: rgba($danger, .06);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  Empty State
+// ══════════════════════════════════════════════════════
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: $text3;
+  background: $surface;
+  border-top: 1px solid $border;
+
+  .empty-icon  { font-size: 44px; margin-bottom: 12px; }
+  .empty-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: $text2; margin-bottom: 6px; }
+  p            { font-size: 14px; }
+}
+
+// ══════════════════════════════════════════════════════
+//  Overlay & Modals
+// ══════════════════════════════════════════════════════
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+
+  &.open { display: flex; }
+}
+
+// ── Modal principal ──────────────────────────
+.modal {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: $shadow-md;
+  animation: slideUp .25s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.modal-header {
+  padding: 24px 28px 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.modal-title    { font-family: 'DM Serif Display', serif; font-size: 22px; color: $accent; }
+.modal-subtitle { font-size: 13px; color: $text3; margin-top: 3px; }
+
+.close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: $text3;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color .2s, background .2s;
+
+  &:hover { color: $text; background: $surface2; }
+}
+
+.modal-body   { padding: 24px 28px; }
+
+.modal-footer {
+  padding: 20px 28px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid $border;
+}
+
+// ── Form grid ────────────────────────────────
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  .full { grid-column: 1 / -1; }
+}
+
+.field {
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: $text2;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    margin-bottom: 7px;
+
+    .required { color: $danger; }
+  }
+
+  input, select, textarea {
+    width: 100%;
+    background: $surface2;
+    border: 1px solid $border;
+    color: $text;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+
+    &::placeholder { color: $text3; }
+
+    &:focus {
+      border-color: $accent;
+      box-shadow: 0 0 0 3px rgba($accent, .12);
+      background: $surface;
+    }
+
+    &.invalid {
+      border-color: $danger;
+      box-shadow: 0 0 0 3px rgba($danger, .1);
+    }
+  }
+
+  textarea { resize: vertical; min-height: 72px; }
+
+  .field-hint  { font-size: 11px; color: $text3; margin-top: 4px; }
+  .field-error { font-size: 11px; color: $danger; margin-top: 4px; }
+}
+
+// ── Confirm modal ────────────────────────────
+.confirm-modal {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 380px;
+  padding: 32px;
+  text-align: center;
+  box-shadow: $shadow-md;
+  animation: slideUp .25s ease;
+}
+
+.confirm-icon {
+  width: 56px;
+  height: 56px;
+  background: rgba($danger, .08);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  color: $danger;
+}
+
+.confirm-title   { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 8px; color: $text; }
+.confirm-text    { font-size: 14px; color: $text2; line-height: 1.6; }
+.confirm-actions { display: flex; gap: 10px; justify-content: center; margin-top: 24px; }
+
+// ══════════════════════════════════════════════════════
+//  Toast
+// ══════════════════════════════════════════════════════
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: $surface;
+  border: 1px solid $border;
+  border-left: 4px solid $success;
+  border-radius: $radius;
+  padding: 14px 20px;
+  font-size: 14px;
+  color: $text;
+  z-index: 2000;
+  display: none;
+  box-shadow: $shadow-md;
+  max-width: 300px;
+  animation: fadeIn .3s ease;
+
+  &.show  { display: block; }
+  &.error { border-left-color: $danger; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ══════════════════════════════════════════════════════
+//  Responsive
+// ══════════════════════════════════════════════════════
+@media (max-width: 768px) {
+  .page-header,
+  .stats-row,
+  .toolbar,
+  .table-wrap { padding-left: 16px; padding-right: 16px; }
+
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid .full { grid-column: 1; }
+
+  .stats-row { gap: 8px; }
+  .stat-card { min-width: 120px; padding: 12px 14px; }
+  .stat-card .stat-value { font-size: 22px; }
+}

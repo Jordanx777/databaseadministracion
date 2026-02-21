@@ -1,0 +1,368 @@
+<div class="cuentas-container">
+
+  <mat-card class="card-cuentas">
+
+    <!-- LOADING -->
+    <div *ngIf="cargando" class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Cargando cuentas por cobrar...</p>
+    </div>
+
+    <!-- CONTENIDO -->
+    <ng-container *ngIf="!cargando">
+
+      <!-- HEADER -->
+      <div class="tabla-header">
+        <div class="header-info">
+          <h2 class="tabla-titulo">Cuentas por cobrar</h2>
+          <span class="tabla-subtitulo">
+            {{ dataSource.data.length }} clientes con saldo pendiente
+          </span>
+          <div class="total-deuda">
+            <mat-icon>account_balance_wallet</mat-icon>
+            <span>Total por cobrar: <strong>{{ totalDeuda | currency:'COP':'symbol-narrow':'1.0-0' }}</strong></span>
+          </div>
+        </div>
+
+        <div class="header-acciones">
+          <mat-form-field appearance="outline" class="buscador">
+            <mat-label>Buscar</mat-label>
+            <input matInput placeholder="Nombre, teléfono..." (keyup)="applyFilter($event)">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- TABLA -->
+      <div class="tabla-wrapper">
+        <table mat-table [dataSource]="dataSource" matSort class="tabla-cuentas">
+
+          <!-- Nombre -->
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Cliente</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="cliente-cell">
+                <span class="cliente-nombre">{{ row.nombre }}</span>
+                <span class="cliente-meta" *ngIf="row.apodo">{{ row.apodo }}</span>
+                <span class="cliente-meta" *ngIf="row.referencia">Ref: {{ row.referencia }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Tipo -->
+          <ng-container matColumnDef="tipo_cliente">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="tipo-badge" [ngClass]="getTipoClienteBadge(row.tipo_cliente)">
+                {{ row.tipo_cliente }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Teléfono -->
+          <ng-container matColumnDef="telefono">
+            <th mat-header-cell *matHeaderCellDef>Teléfono</th>
+            <td mat-cell *matCellDef="let row">{{ row.telefono || 'N/A' }}</td>
+          </ng-container>
+
+          <!-- Total ventas -->
+          <ng-container matColumnDef="total_ventas">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Total ventas</th>
+            <td mat-cell *matCellDef="let row" class="precio">
+              {{ row.total_ventas | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </td>
+          </ng-container>
+
+          <!-- Total pagado -->
+          <ng-container matColumnDef="total_pagado">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Pagado</th>
+            <td mat-cell *matCellDef="let row" class="precio precio-pagado">
+              {{ row.total_pagado | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </td>
+          </ng-container>
+
+          <!-- Saldo pendiente -->
+          <ng-container matColumnDef="saldo_pendiente">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Saldo pendiente</th>
+            <td mat-cell *matCellDef="let row" class="precio precio-pendiente">
+              <strong>{{ row.saldo_pendiente | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+            </td>
+          </ng-container>
+
+          <!-- Núm facturas -->
+          <ng-container matColumnDef="num_facturas">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Facturas</th>
+            <td mat-cell *matCellDef="let row" class="center">
+              <mat-chip highlighted>{{ row.num_facturas }}</mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Días mora -->
+          <ng-container matColumnDef="dias_mora">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Días mora</th>
+            <td mat-cell *matCellDef="let row" class="center">
+              <span class="mora-badge" [ngClass]="getMoraColor(row.dias_mora)">
+                {{ row.dias_mora }}d
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Última compra -->
+          <ng-container matColumnDef="ultima_compra">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Última compra</th>
+            <td mat-cell *matCellDef="let row">
+              {{ row.ultima_compra | date:'dd/MM/yyyy' }}
+            </td>
+          </ng-container>
+
+          <!-- Acciones -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let row" class="acciones-cell">
+              <button
+                mat-icon-button
+                color="primary"
+                (click)="abrirModalPago(row)"
+                matTooltip="Registrar pago">
+                <mat-icon>payment</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                color="accent"
+                (click)="verHistorial(row)"
+                [disabled]="!row.cliente_id"
+                matTooltip="Ver historial">
+                <mat-icon>history</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns" class="fila-cuenta"></tr>
+
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
+              <mat-icon>account_balance</mat-icon>
+              <p>No hay cuentas por cobrar</p>
+            </td>
+          </tr>
+
+        </table>
+      </div>
+
+      <mat-paginator [pageSizeOptions]="[10,25,50]" showFirstLastButtons></mat-paginator>
+
+    </ng-container>
+
+  </mat-card>
+
+</div>
+
+
+<!-- ===================================================== -->
+<!-- ================== MODAL PAGO ======================= -->
+<!-- ===================================================== -->
+<ng-template #modalPago>
+  <div class="modal-pago-container">
+
+    <div class="modal-header">
+      <div class="modal-header-info">
+        <mat-icon class="modal-icon">payment</mat-icon>
+        <div>
+          <h2 class="modal-titulo">Registrar pago</h2>
+          <p class="modal-subtitulo" *ngIf="cuentaSeleccionada">
+            {{ cuentaSeleccionada.nombre }}
+          </p>
+        </div>
+      </div>
+      <button mat-icon-button class="btn-cerrar" (click)="cerrarModalPago()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <div class="modal-body" *ngIf="cuentaSeleccionada">
+
+      <!-- Resumen de deuda -->
+      <div class="resumen-deuda">
+        <div class="resumen-item">
+          <span class="resumen-label">Saldo pendiente:</span>
+          <span class="resumen-valor saldo">
+            {{ cuentaSeleccionada.saldo_pendiente | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </span>
+        </div>
+        <div class="resumen-item">
+          <span class="resumen-label">Núm. facturas:</span>
+          <span class="resumen-valor">{{ cuentaSeleccionada.num_facturas }}</span>
+        </div>
+        <div class="resumen-item">
+          <span class="resumen-label">Días de mora:</span>
+          <span class="resumen-valor mora">{{ cuentaSeleccionada.dias_mora }}d</span>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Formulario -->
+      <form [formGroup]="formPago" (ngSubmit)="registrarPago()">
+
+        <div class="form-grid">
+
+          <!-- Monto -->
+          <mat-form-field appearance="outline" class="span-2">
+            <mat-label>Monto del pago</mat-label>
+            <input matInput type="number" step="0.01" formControlName="monto">
+            <span matTextPrefix>$&nbsp;</span>
+            <mat-hint>Máximo: {{ cuentaSeleccionada.saldo_pendiente | currency:'COP':'symbol-narrow':'1.0-0' }}</mat-hint>
+            <mat-error *ngIf="formPago.get('monto')?.hasError('required')">Campo obligatorio</mat-error>
+            <mat-error *ngIf="formPago.get('monto')?.hasError('min')">Debe ser mayor a 0</mat-error>
+          </mat-form-field>
+
+          <!-- Método de pago -->
+          <mat-form-field appearance="outline" class="span-2">
+            <mat-label>Método de pago</mat-label>
+            <mat-select formControlName="metodo_pago">
+              <mat-option *ngFor="let metodo of metodosPago" [value]="metodo.value">
+                {{ metodo.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formPago.get('metodo_pago')?.hasError('required')">Campo obligatorio</mat-error>
+          </mat-form-field>
+
+          <!-- Referencia -->
+          <mat-form-field appearance="outline" class="span-2">
+            <mat-label>Referencia (opcional)</mat-label>
+            <input matInput formControlName="referencia" placeholder="Núm. transacción, etc.">
+            <mat-icon matSuffix>tag</mat-icon>
+          </mat-form-field>
+
+          <!-- Notas -->
+          <mat-form-field appearance="outline" class="span-2">
+            <mat-label>Notas (opcional)</mat-label>
+            <textarea matInput formControlName="notas" rows="2"></textarea>
+          </mat-form-field>
+
+        </div>
+
+        <!-- Botones -->
+        <mat-divider></mat-divider>
+
+        <div class="modal-footer">
+          <button mat-stroked-button type="button" (click)="cerrarModalPago()" [disabled]="cargandoModal">
+            Cancelar
+          </button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="cargandoModal">
+            <mat-spinner *ngIf="cargandoModal" diameter="18"></mat-spinner>
+            <mat-icon *ngIf="!cargandoModal">check_circle</mat-icon>
+            <span>{{ cargandoModal ? 'Registrando...' : 'Registrar pago' }}</span>
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+</ng-template>
+
+
+<!-- ===================================================== -->
+<!-- ================ MODAL HISTORIAL ==================== -->
+<!-- ===================================================== -->
+<ng-template #modalHistorial>
+  <div class="modal-historial-container">
+
+    <div class="modal-header">
+      <div class="modal-header-info">
+        <mat-icon class="modal-icon">history</mat-icon>
+        <div>
+          <h2 class="modal-titulo">Historial del cliente</h2>
+          <p class="modal-subtitulo" *ngIf="cuentaSeleccionada">
+            {{ cuentaSeleccionada.nombre }}
+          </p>
+        </div>
+      </div>
+      <button mat-icon-button class="btn-cerrar" (click)="cerrarModalHistorial()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <div class="modal-body">
+
+      <!-- Loading -->
+      <div *ngIf="cargandoHistorial" class="loading-historial">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando historial...</p>
+      </div>
+
+      <!-- Historial -->
+      <div *ngIf="!cargandoHistorial && historialCliente.length > 0" class="historial-list">
+
+        <div *ngFor="let item of historialCliente" class="historial-item">
+
+          <div class="item-header">
+            <div class="item-info">
+              <h4>Factura #{{ item.numero_factura }}</h4>
+              <span class="item-fecha">{{ item.fecha_venta | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="item-montos">
+              <span class="monto-venta">{{ item.monto_venta | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+              <span class="estado-badge" [ngClass]="'estado-' + item.estado_venta">
+                {{ item.estado_venta }}
+              </span>
+            </div>
+          </div>
+
+          <div class="item-body">
+
+            <!-- Productos -->
+            <div class="productos-vendidos">
+              <strong>Productos:</strong>
+              <ul>
+                <li *ngFor="let prod of item.productos">
+                  {{ prod.producto }} ({{ prod.marca }}) - {{ prod.talla }}/{{ prod.color }}
+                  × {{ prod.cantidad }} = {{ prod.precio | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </li>
+              </ul>
+            </div>
+
+            <!-- Pagos -->
+            <div class="pagos-realizados" *ngIf="item.pagos.length > 0">
+              <strong>Pagos:</strong>
+              <ul>
+                <li *ngFor="let pago of item.pagos">
+                  {{ pago.fecha | date:'dd/MM/yyyy' }} -
+                  {{ pago.monto | currency:'COP':'symbol-narrow':'1.0-0' }} -
+                  {{ pago.metodo }}
+                  <span *ngIf="pago.referencia">(Ref: {{ pago.referencia }})</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Saldo -->
+            <div class="item-saldo">
+              <span>Pagado: {{ item.total_pagado | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+              <span class="saldo-pendiente" *ngIf="item.saldo_pendiente > 0">
+                Saldo: {{ item.saldo_pendiente | currency:'COP':'symbol-narrow':'1.0-0' }}
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Sin historial -->
+      <div *ngIf="!cargandoHistorial && historialCliente.length === 0" class="sin-historial">
+        <mat-icon>inbox</mat-icon>
+        <p>No hay historial para este cliente</p>
+      </div>
+
+    </div>
+
+  </div>
+</ng-template>
