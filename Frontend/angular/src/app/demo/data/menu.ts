@@ -108,11 +108,11 @@ export const menus: Navigation[] = [
         url: '/component/addventas',
         icon: '#custom-cart'
       },{
-        id: 'ventas-diarias',
-        title: 'Ventas Diarias',
+        id: 'ventas',
+        title: 'Ventas',
         type: 'item',
         classes: 'nav-item',
-        url: '/component/ventas-diarias',
+        url: '/component/ventas',
         icon: '#custom-chart-bar'
       }
     ]
@@ -134,7 +134,7 @@ export const menus: Navigation[] = [
       }, 
       {
         id: 'agregar-deudores',
-        title: 'Agregar Deudores',
+        title: 'Historial de ventas',
         type: 'item',
         classes: 'nav-item',
         url: '/component/adddeudores',
