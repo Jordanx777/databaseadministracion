@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { ApiService } from './api.service';
 
 
 // models/cuenta.model.ts
@@ -54,32 +55,31 @@ export interface HistorialCliente {
   providedIn: 'root'
 })
 export class CuentaService {
-  private apiUrl = `${environment.apiUrl}/cuentas`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private apiService: ApiService) {}
 
   // 1. Ver todas las deudas activas
-  listarCuentasPorCobrar(): Observable<Cuenta[]> {
-    return this.http.get<Cuenta[]>(`${this.apiUrl}/por-cobrar`);
+  listarCuentasPorCobrar() {
+    return this.apiService.get<Cuenta[]>('cuentas/por-cobrar');
   }
 
   // 2. Ver deuda de un cliente específico (registrado)
-  obtenerDeudaClienteRegistrado(clienteId: number): Observable<Cuenta> {
-    return this.http.get<Cuenta>(`${this.apiUrl}/cliente/${clienteId}`);
+  obtenerDeudaClienteRegistrado(clienteId: number){
+    return this.apiService.get<Cuenta>(`cuentas/cliente/${clienteId}`);
   }
 
   // 3. Buscar deuda de cliente ocasional por nombre
-  buscarDeudaClienteOcasional(nombre: string): Observable<Cuenta[]> {
-    return this.http.get<Cuenta[]>(`${this.apiUrl}/buscar?nombre=${nombre}`);
+  buscarDeudaClienteOcasional(nombre: string) {
+    return this.apiService.get<Cuenta[]>(`cuentas/buscar?nombre=${encodeURIComponent(nombre)}`);
   }
 
   // 4. Ver historial completo de un cliente
-  obtenerHistorialCliente(clienteId: number): Observable<HistorialCliente[]> {
-    return this.http.get<HistorialCliente[]>(`${this.apiUrl}/historial/${clienteId}`);
+  obtenerHistorialCliente(clienteId: number) {
+    return this.apiService.get<HistorialCliente[]>(`cuentas/historial/${clienteId}`);
   }
 
   // 6. Ver cuánto debe un cliente (todas sus ventas)
   obtenerResumenDeuda(clienteId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/resumen/${clienteId}`);
+    return this.apiService.get<any>(`cuentas/resumen/${clienteId}`);
   }
 }
