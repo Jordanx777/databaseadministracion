@@ -105,8 +105,17 @@ class VentasController {
  * Obtener venta completa por ID
  * GET /api/ventas/completas/:id
  */
-public function obtenerVentaCompletaPorId($id) {
+public function obtenerVentaCompletaPorId(array $params) {
     try {
+        $id = $params['id'] ?? null;
+        if (!$id) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'ID de venta es requerido'
+            ]);
+            return;
+        }
         $venta = $this->ventaModel->obtenerVentaCompletaPorId($id);
         
         if (!$venta) {
