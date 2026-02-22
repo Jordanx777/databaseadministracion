@@ -23,7 +23,9 @@ import { MatChipsModule } from '@angular/material/chips';
 /* Servicios */
 import { ProductosService } from 'src/app/@theme/services/Productos.service';
 import { ClientesService } from 'src/app/@theme/services/Cliente.service';
-import { VentasService } from 'src/app/@theme/services/Ventas.services';
+// ===== CAMBIAR ESTE IMPORT =====
+import { VentasService, VentaCrear } from 'src/app/@theme/services/Ventas.services';
+
 import { AuthService } from 'src/app/@theme/services/auth.service';
 
 import { Observable } from 'rxjs';
@@ -394,43 +396,45 @@ export class AgregarVentasComponent implements OnInit {
       return;
     }
 
-    const venta = {
-      usuario_id: currentUser.id_usuario, // 👈 NUEVO CAMPO
-      cliente_id: tipoCliente === 'registrado' ? (clienteId?.id || clienteId) : null,
-      cliente_nombre: tipoCliente === 'ocasional' ? clienteNombre : null,
-      cliente_telefono: this.formVenta.get('cliente_telefono')?.value || null,
-      cliente_referencia: this.formVenta.get('cliente_referencia')?.value || null,
-      subtotal: this.subtotal,
-      descuento: this.descuento,
-      total: this.total,
-      tipo_pago: tipoPago,
-      notas: this.formVenta.get('notas')?.value || null,
-      detalles: this.carrito.map(item => ({
-        producto_id: item.producto_id,
-        variante_id: item.variante_id,
-        cantidad: item.cantidad,
-        precio_unitario: item.precio_unitario,
-        subtotal: item.subtotal,
-        talla_vendida: item.talla,
-        color_vendido: item.color,
-        genero_vendido: item.genero
-      })),
-      pagos: tipoPago !== 'credito' ? this.pagos.value : []
-    };
-    console.log('Venta a registrar:', venta);
+    // ✅ TIPAR CORRECTAMENTE COMO VentaCrear
+  const venta: VentaCrear = {
+    usuario_id: currentUser.id_usuario,
+    cliente_id: tipoCliente === 'registrado' ? (clienteId?.id || clienteId) : null,
+    cliente_nombre: tipoCliente === 'ocasional' ? clienteNombre : null,
+    cliente_telefono: this.formVenta.get('cliente_telefono')?.value || null,
+    cliente_referencia: this.formVenta.get('cliente_referencia')?.value || null,
+    subtotal: this.subtotal,
+    descuento: this.descuento,
+    total: this.total,
+    tipo_pago: tipoPago,
+    notas: this.formVenta.get('notas')?.value || null,
+    detalles: this.carrito.map(item => ({
+      producto_id: item.producto_id,
+      variante_id: item.variante_id,
+      cantidad: item.cantidad,
+      precio_unitario: item.precio_unitario,
+      subtotal: item.subtotal,
+      talla_vendida: item.talla,
+      color_vendido: item.color,
+      genero_vendido: item.genero
+    })),
+    pagos: tipoPago !== 'credito' ? this.pagos.value : []
+  };
+
+  console.log('Venta a registrar:', venta);
 
     this.ventasService.crearVenta(venta).subscribe({
-      next: (response) => {
-        this.mostrarMensaje('Venta registrada exitosamente', 'success');
-        // this.router.navigate(['component/ventas-diarias']);
-        this.cargando = false;
-      },
-      error: (error) => {
-        console.error('Error:', error);
-        this.mostrarMensaje('Error al registrar la venta', 'error');
-        this.cargando = false;
-      }
-    });
+    next: (response) => {
+      this.mostrarMensaje('Venta registrada exitosamente', 'success');
+      this.router.navigate(['component/ventas']); // ✅ Descomenta esto
+      this.cargando = false;
+    },
+    error: (error) => {
+      console.error('Error:', error);
+      this.mostrarMensaje('Error al registrar la venta', 'error');
+      this.cargando = false;
+    }
+  });
   }
 
   cancelar(): void {
