@@ -4,26 +4,23 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ApiService } from './api.service';
 
-export interface Venta {
-  id?: number;
-  numero_factura?: string;
+// ===== INTERFAZ PARA CREAR VENTAS ===== 
+export interface VentaCrear {
+  usuario_id: number;
   cliente_id?: number | null;
   cliente_nombre?: string | null;
   cliente_telefono?: string | null;
   cliente_referencia?: string | null;
-  usuario_id?: number;
-  fecha_venta?: Date;
   subtotal: number;
   descuento: number;
   total: number;
   tipo_pago: 'contado' | 'credito' | 'mixto';
-  estado?: 'pendiente' | 'pagada' | 'cancelada';
-  notas?: string;
-  detalles?: DetalleVenta[];
-  pagos?: PagoInicial[];
+  notas?: string | null;
+  detalles: DetalleVentaCrear[];
+  pagos?: PagoInicialCrear[];
 }
 
-export interface DetalleVenta {
+export interface DetalleVentaCrear {
   producto_id: number;
   variante_id: number;
   cantidad: number;
@@ -34,11 +31,46 @@ export interface DetalleVenta {
   genero_vendido?: string;
 }
 
-export interface PagoInicial {
+export interface PagoInicialCrear {
   monto: number;
   metodo_pago: 'efectivo' | 'nequi' | 'transferencia' | 'tarjeta' | 'daviplata';
   referencia?: string;
   notas?: string;
+}
+
+// ===== INTERFAZ PARA RECIBIR VENTAS ===== 
+export interface VentaCompleta {
+  venta_id: number;
+  numero_factura: string;
+  fecha_venta: Date;
+  venta_total: number;
+  venta_estado: 'pendiente' | 'pagada' | 'cancelada';
+  tipo_pago: 'contado' | 'credito' | 'mixto';
+  cliente_nombre: string;
+  cliente_apodo: string | null;
+  cliente_id: number | null;
+  tipo_cliente: 'registrado' | 'ocasional';
+  total_pagado: number;
+  saldo_pendiente: number;
+  productos: Array<{
+    detalle_id: number;
+    producto_id: number;
+    producto_nombre: string;
+    marca_nombre: string;
+    talla: string;
+    color: string;
+    genero: string;
+    cantidad: number;
+    precio_unitario: number;
+    subtotal: number;
+  }>;
+  pagos: Array<{
+    pago_id: number;
+    monto: number;
+    fecha: Date;
+    metodo: string;
+    referencia: string;
+  }>;
 }
 
 @Injectable({
@@ -49,9 +81,10 @@ export class VentasService {
   constructor(private apiService: ApiService) {}
 
   // Crear venta
-  crearVenta(venta: Venta): Observable<any> {
+  // ✅ AHORA (CORRECTO):
+crearVenta(venta: VentaCrear): Observable<any> {
   return this.apiService.post('ventas', venta);  
-  }
+}
 
   /**
    * Obtener todas las ventas con filtros opcionales
@@ -70,10 +103,27 @@ export class VentasService {
     return this.apiService.get(`ventas?${params.toString()}`);
   }
 
-  // Listar ventas
-//   listarVentas(params?: any): Observable<any> {
-//     return this.apiService.get<any>(this.apiUrl, { params });
-//   }
+  /**
+   * Obtener venta completa por ID
+   */
+  obtenerVentaCompletaPorId(id: number): Observable<{success: boolean, data: VentaCompleta}> {
+    return this.apiService.get<any>(`ventas/completas/${id}`);
+  }
+
+  /**
+   * Obtener ventas completas (con detalles y pagos)
+   */
+  obtenerVentasCompletas(filtros?: any): Observable<{success: boolean, data: VentaCompleta[], total: number}> {
+      let params = new URLSearchParams();
+    if (filtros) {
+      Object.keys(filtros).forEach(key => {
+        if (filtros[key]) {
+          params.append(key, filtros[key]);
+        }
+      });
+    }
+    return this.apiService.get<any>(`ventas/completas?${params.toString()}`);
+  }
 
 obtenerPorId(id: number): Observable<any> {
     return this.apiService.get<any>(`ventas/${id}`);
