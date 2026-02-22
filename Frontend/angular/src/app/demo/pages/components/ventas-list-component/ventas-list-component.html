@@ -1,0 +1,274 @@
+<!-- src/app/modules/ventas/components/ventas-list/ventas-list.component.html -->
+
+<div class="ventas-container">
+
+  <mat-card class="card-ventas theme-card">
+
+    <!-- ===== LOADING ===== -->
+    <div *ngIf="cargando" class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Cargando ventas...</p>
+    </div>
+
+    <!-- ===== CONTENIDO ===== -->
+    <ng-container *ngIf="!cargando">
+
+      <!-- ===== HEADER ===== -->
+      <div class="tabla-header">
+        <div class="header-info">
+          <h2 class="tabla-titulo">
+            <mat-icon>receipt_long</mat-icon>
+            Ventas registradas
+          </h2>
+          <span class="tabla-subtitulo">
+            {{ dataSource.data.length }} ventas registradas
+          </span>
+        </div>
+
+        <div class="header-acciones">
+          <button mat-flat-button color="primary"  (click)="agregarVenta()">
+            <mat-icon>add_circle</mat-icon>
+            Nueva venta
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== ESTADÍSTICAS ===== -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <mat-icon class="stat-icon">attach_money</mat-icon>
+          <div class="stat-content">
+            <span class="stat-label">Total vendido</span>
+            <span class="stat-value">{{ totalVentas | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+        </div>
+
+        <div class="stat-card alert">
+          <mat-icon class="stat-icon">account_balance_wallet</mat-icon>
+          <div class="stat-content">
+            <span class="stat-label">Por cobrar</span>
+            <span class="stat-value">{{ totalPorCobrar | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== FILTROS ===== -->
+      <div class="filtros-section">
+        
+        <mat-form-field appearance="outline" class="filtro-buscar">
+          <mat-label>Buscar</mat-label>
+          <input matInput placeholder="Factura o cliente..." (keyup)="applyFilter($event)">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filtro-select">
+          <mat-label>Estado</mat-label>
+          <mat-select [(ngModel)]="filtroEstado" (selectionChange)="aplicarFiltros()">
+            <mat-option *ngFor="let estado of estados" [value]="estado.value">
+              {{ estado.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filtro-select">
+          <mat-label>Tipo de pago</mat-label>
+          <mat-select [(ngModel)]="filtroTipoPago" (selectionChange)="aplicarFiltros()">
+            <mat-option *ngFor="let tipo of tiposPago" [value]="tipo.value">
+              {{ tipo.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-icon-button (click)="cargarVentas()" matTooltip="Recargar">
+          <mat-icon>refresh</mat-icon>
+        </button>
+
+      </div>
+
+      <!-- ===== TABLA ===== -->
+      <div class="tabla-wrapper">
+        <table mat-table [dataSource]="dataSource" matSort class="tabla-ventas">
+
+          <!-- Número de factura -->
+          <ng-container matColumnDef="numero_factura">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Factura</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="factura-cell">
+                <mat-icon class="factura-icon">receipt</mat-icon>
+                <span class="factura-numero">{{ row.numero_factura }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Fecha -->
+          <ng-container matColumnDef="fecha_venta">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
+            <td mat-cell *matCellDef="let row">
+              {{ row.fecha_venta | date:'dd/MM/yyyy HH:mm' }}
+            </td>
+          </ng-container>
+
+          <!-- Cliente -->
+          <ng-container matColumnDef="cliente">
+            <th mat-header-cell *matHeaderCellDef>Cliente</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="cliente-cell">
+                <span class="cliente-nombre">{{ row.cliente_nombre }}</span>
+                <span class="cliente-meta" *ngIf="row.cliente_apodo">{{ row.cliente_apodo }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Tipo cliente -->
+          <ng-container matColumnDef="tipo_cliente">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
+            <td mat-cell *matCellDef="let row">
+              <mat-chip 
+                [class.chip-registrado]="row.tipo_cliente === 'registrado'"
+                [class.chip-ocasional]="row.tipo_cliente === 'ocasional'"
+                highlighted>
+                {{ row.tipo_cliente === 'registrado' ? 'Registrado' : 'Ocasional' }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Total venta -->
+          <ng-container matColumnDef="venta_total">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Total</th>
+            <td mat-cell *matCellDef="let row" class="precio">
+              <strong>{{ row.venta_total | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+            </td>
+          </ng-container>
+
+          <!-- Total pagado -->
+          <ng-container matColumnDef="total_pagado">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Pagado</th>
+            <td mat-cell *matCellDef="let row" class="precio precio-pagado">
+              {{ row.total_pagado | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </td>
+          </ng-container>
+
+          <!-- Saldo pendiente -->
+          <ng-container matColumnDef="saldo_pendiente">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Saldo</th>
+            <td mat-cell *matCellDef="let row" class="precio">
+              <span 
+                [class.saldo-cero]="row.saldo_pendiente === 0"
+                [class.saldo-pendiente]="row.saldo_pendiente > 0">
+                {{ row.saldo_pendiente | currency:'COP':'symbol-narrow':'1.0-0' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Tipo de pago -->
+          <ng-container matColumnDef="tipo_pago">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Pago</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="tipo-pago-badge" [ngClass]="getTipoPagoColor(row.tipo_pago)">
+                {{ row.tipo_pago }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Estado -->
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+            <td mat-cell *matCellDef="let row">
+              <mat-chip 
+                [class.chip-pagada]="row.venta_estado === 'pagada'"
+                [class.chip-pendiente]="row.venta_estado === 'pendiente'"
+                highlighted>
+                {{ row.venta_estado === 'pagada' ? 'Pagada' : 'Pendiente' }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Acciones -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let row" class="acciones-cell">
+              
+              <!-- Ver detalle -->
+              <button 
+                mat-icon-button 
+                color="primary"
+                (click)="verDetalle(row)"
+                matTooltip="Ver detalle">
+                <mat-icon>visibility</mat-icon>
+              </button>
+
+              <!-- Registrar pago (solo si tiene saldo pendiente) -->
+              <button 
+                mat-icon-button 
+                color="accent"
+                *ngIf="row.saldo_pendiente > 0"
+                (click)="registrarPago(row)"
+                matTooltip="Registrar pago">
+                <mat-icon>payment</mat-icon>
+              </button>
+
+              <!-- Ver cuenta del cliente (solo si es registrado) -->
+              <button 
+                mat-icon-button
+                *ngIf="row.cliente_id"
+                (click)="verCuentaCliente(row)"
+                matTooltip="Ver cuenta del cliente">
+                <mat-icon>person</mat-icon>
+              </button>
+
+              <!-- Menú de más opciones -->
+              <button mat-icon-button [matMenuTriggerFor]="menu" matTooltip="Más opciones">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="verDetalle(row)">
+                  <mat-icon>receipt_long</mat-icon>
+                  <span>Ver factura</span>
+                </button>
+                <button 
+                  mat-menu-item 
+                  *ngIf="row.saldo_pendiente > 0"
+                  (click)="registrarPago(row)">
+                  <mat-icon>attach_money</mat-icon>
+                  <span>Registrar pago</span>
+                </button>
+              </mat-menu>
+
+            </td>
+          </ng-container>
+
+          <!-- Headers y rows -->
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr 
+            mat-row 
+            *matRowDef="let row; columns: displayedColumns" 
+            class="fila-venta"
+            [class.fila-pendiente]="row.venta_estado === 'pendiente'"></tr>
+
+          <!-- Sin datos -->
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
+              <mat-icon>inbox</mat-icon>
+              <p>No hay ventas registradas</p>
+              <button mat-flat-button color="primary" routerLink="/component/agregar-ventas">
+                <mat-icon>add_circle</mat-icon>
+                Registrar primera venta
+              </button>
+            </td>
+          </tr>
+
+        </table>
+      </div>
+
+      <!-- Paginador -->
+      <mat-paginator 
+        [pageSizeOptions]="[10, 25, 50, 100]" 
+        showFirstLastButtons
+        aria-label="Seleccionar página de ventas">
+      </mat-paginator>
+
+    </ng-container>
+
+  </mat-card>
+
+</div>
