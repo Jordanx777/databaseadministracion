@@ -81,6 +81,12 @@ const routes: Routes = [
             .then(m => m.CuentasCobrarComponent),
       },
       {
+        path: 'cuentas-detalles/:id',
+        loadComponent: () =>
+          import('./cuenta-detail/cuenta-detail.component')
+            .then(m => m.CuentaDetailComponent),
+      },
+      {
         path: 'Clientes',
         loadComponent: ()=>
           import('./clientes-component/clientes.component')
@@ -95,10 +101,10 @@ const routes: Routes = [
       },
 
       {
-        path: 'ventas-diarias',
+        path: 'ventas',
         loadComponent: () =>
-          import('./ventas-diarias-component/ventas-diarias-component')
-            .then(m => m.VentasDiariasComponent)
+          import('./ventas-list-component/ventas-list-component')
+            .then(m => m.VentasListComponent)
       },
 
       {
