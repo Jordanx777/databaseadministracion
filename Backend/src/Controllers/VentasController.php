@@ -10,6 +10,39 @@ class VentasController {
     public function __construct() {
         $this->ventaModel = new VentasModel();
     }
+
+    public function listarPorVenta($params)
+    {
+        try {
+            $ventaId = $params['ventaId'] ?? null;
+
+            if (!$ventaId) {
+                http_response_code(400);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'ID de venta no proporcionado'
+                ]);
+                return;
+            }
+
+            $pagos = $this->ventaModel->obtenerPorVenta($ventaId);
+
+            http_response_code(200);
+            echo json_encode([
+                'success' => true,
+                'data' => $pagos,
+                'total' => count($pagos)
+            ]);
+
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error al obtener pagos: ' . $e->getMessage()
+            ]);
+        }
+    }
+
     
     /**
      * Crear una nueva venta
@@ -19,7 +52,6 @@ class VentasController {
         try {
             // Obtener datos del body
             $data = json_decode(file_get_contents('php://input'), true);
-            error_log("Datos recibidos para crear venta: " . json_encode($data));
             
             // Validaciones básicas
             if (empty($data['total']) || $data['total'] <= 0) {
@@ -146,8 +178,17 @@ public function obtenerVentaCompletaPorId(array $params) {
      * Cancelar una venta
      * PUT /api/ventas/:id/cancelar
      */
-    public function cancelar($id) {
+    public function cancelar(array $params) {
         try {
+            $id = $params['id'] ?? null;
+            if (!$id) {
+                http_response_code(400);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'ID de venta es requerido'
+                ]);
+                return;
+            }
             $resultado = $this->ventaModel->cancelar($id);
             
             http_response_code(200);
