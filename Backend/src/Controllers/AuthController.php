@@ -12,11 +12,9 @@ class AuthController {
         header('Content-Type: application/json; charset=UTF-8');
         
         try {
-            error_log("=== INICIO REGISTRO ===");
             
             // Obtener datos del JSON
             $rawInput = file_get_contents('php://input');
-            error_log("Raw input: " . $rawInput);
             
             $input = json_decode($rawInput, true);
             
@@ -29,7 +27,6 @@ class AuthController {
                 return;
             }
             
-            error_log("Input decodificado: " . json_encode($input));
             
             // Validar datos requeridos
             $requiredFields = ['nombre', 'apellido', 'email', 'password', 'confirmPassword', 'telefono', 'id_rol'];
@@ -75,11 +72,7 @@ class AuthController {
                 return;
             }
             
-            error_log("Validaciones pasadas, creando modelo...");
-            
             $usuarioModel = new UsuarioModel();
-            
-            error_log("Modelo creado, verificando email...");
             
             // Verificar si el email ya existe
             if ($usuarioModel->existsByEmail($input['email'])) {
@@ -90,8 +83,6 @@ class AuthController {
                 ]);
                 return;
             }
-            
-            error_log("Email disponible, hasheando contraseña...");
             
             // Hash de la contraseña
             $passwordHash = password_hash($input['password'], PASSWORD_BCRYPT);
@@ -109,13 +100,8 @@ class AuthController {
                 
             ];
             
-            error_log("Datos preparados: " . json_encode($userData));
-            error_log("Creando usuario en BD...");
-            
             // Crear usuario
             $userId = $usuarioModel->create($userData);
-            
-            error_log("Usuario creado con ID: $userId");
             
             if ($userId) {
                 // Obtener usuario completo (sin contraseña)
@@ -126,8 +112,6 @@ class AuthController {
                 $_SESSION['user_id'] = $userId;
                 $_SESSION['user_email'] = $user['correo'];
                 $_SESSION['user_role'] = $user['id_rol'];
-                
-                error_log("Sesión iniciada, retornando respuesta...");
                 
                 http_response_code(201);
                 echo json_encode([
@@ -142,7 +126,6 @@ class AuthController {
             }
             
         } catch (\PDOException $e) {
-            error_log("❌ PDO Exception: " . $e->getMessage());
             http_response_code(500);
             echo json_encode([
                 'status' => 'error',
@@ -150,8 +133,6 @@ class AuthController {
                 'error' => $e->getMessage()
             ]);
         } catch (\Exception $e) {
-            error_log("❌ Exception: " . $e->getMessage());
-            error_log("Stack trace: " . $e->getTraceAsString());
             http_response_code(500);
             echo json_encode([
                 'status' => 'error',
@@ -239,7 +220,6 @@ class AuthController {
     
     // POST /api/auth/logout
     public function logout(): void {
-        error_log("Cerrando sesión...");
         session_start();
         session_destroy();
         
