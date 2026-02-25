@@ -30,6 +30,12 @@ const routes: Routes = [
             .then(m => m.AgregarProductoscomponent),
       },
       {
+        path: 'registrar-pago',
+        loadComponent: () =>
+          import('../forms/registrar-pago-component/registrar-pago-component')
+            .then(m => m.RegistrarPagoComponent),
+      },
+      {
         // ✅ Ruta de EDICIÓN — mismo componente, recibe el id
         path: 'addproducto/:id',
         loadComponent: () =>
@@ -73,7 +79,12 @@ const routes: Routes = [
           import('./catalogo-component/catalogo-component')
             .then(m => m.CatalogoComponent)
       },
-
+      {
+        path: 'cuentas/:id',
+        loadComponent: () =>
+          import('./cuentas-cliente/cuentas-cliente-component')
+            .then(m => m.CuentasClienteComponent),
+      },
       {
         path: 'cuentas-cobrar',
         loadComponent: () =>
@@ -86,6 +97,7 @@ const routes: Routes = [
           import('./cuenta-detail/cuenta-detail.component')
             .then(m => m.CuentaDetailComponent),
       },
+      
       {
         path: 'Clientes',
         loadComponent: ()=>
