@@ -28,7 +28,6 @@ class ProveedoresController
     // {
     //     try {
     //         $id = isset($params['id']) ? (int)$params['id'] : null;
-    //         error_log("Obteniendo proveedor por ID: $id");
     //         $proveedor = $this->proveedoresModel->getProveedorById($id);
     //         if ($proveedor) {
     //             ResponseHelper::success($proveedor, 'Proveedor obtenido exitosamente');
@@ -76,8 +75,7 @@ class ProveedoresController
         try {
             $id = isset($params['id']) ? (int)$params['id'] : null;
             // Validar que se recibieron datos
-            $data = json_decode(file_get_contents('php://input'), true);
-            error_log("Datos recibidos para actualizar proveedor ID $id: " . print_r($data, true)); // Log para depuración
+            $data = json_decode(file_get_contents('php://input'), true); // Log para depuración
             if (empty($data)) {
                 ResponseHelper::error('No se recibieron datos para actualizar el proveedor', 400);
                 return;
@@ -104,8 +102,6 @@ class ProveedoresController
                 ResponseHelper::error('ID del proveedor no proporcionado', 400);
                 return;
             }
-
-            error_log("Intentando eliminar proveedor ID $id");
 
             $result = $this->proveedoresModel->deleteProveedor($id);
 
