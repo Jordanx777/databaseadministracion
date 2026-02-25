@@ -18,6 +18,22 @@ class VentasModel
         $this->conn = $database->connect();
     }
 
+    public function obtenerPorVenta($ventaId)
+    {
+        $sql = "SELECT 
+                    p.*,
+                    u.nombre_completo as registrado_por_nombre
+                FROM pagos p
+                LEFT JOIN usuario u ON p.registrado_por = u.id_usuario
+                WHERE p.venta_id = ?
+                ORDER BY p.fecha_pago DESC";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([$ventaId]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     /**
      * Crear una nueva venta con detalles y pagos
      */
@@ -31,7 +47,6 @@ class VentasModel
 
             // 2. Obtener usuario_id del token (debes implementar esto según tu auth)
             $usuario_id = $data['usuario_id'] ?? 1; // Por ahora 1 por defecto
-            error_log("Usuario ID para la venta: " . $usuario_id);
 
             // 3. Validar que si es crédito, debe tener cliente_id
             if ($data['tipo_pago'] === 'credito' && empty($data['cliente_id'])) {
