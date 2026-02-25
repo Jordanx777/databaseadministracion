@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
 /* Angular Material */
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -22,7 +23,6 @@ import { MatBadgeModule } from '@angular/material/badge';
 
 /* Servicios */
 import { CuentaService, Cuenta, HistorialCliente } from 'src/app/@theme/services/Cuentas.service';
-import { PagoService, Pago } from 'src/app/@theme/services/Pagos.services';
 
 @Component({
   selector: 'app-cuentas-cobrar',
@@ -70,25 +70,14 @@ export class CuentasCobrarComponent implements OnInit, AfterViewInit {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-  @ViewChild('modalPago') modalPago!: TemplateRef<any>;
   @ViewChild('modalHistorial') modalHistorial!: TemplateRef<any>;
 
   /* ===== MODALES ===== */
-  dialogRefPago!: MatDialogRef<any>;
   dialogRefHistorial!: MatDialogRef<any>;
 
-  /* ===== FORMULARIO PAGO ===== */
-  formPago!: FormGroup;
+  /* ===== DATOS ===== */
   cuentaSeleccionada: Cuenta | null = null;
   historialCliente: HistorialCliente[] = [];
-
-  metodosPago = [
-    { value: 'efectivo', label: 'Efectivo' },
-    { value: 'nequi', label: 'Nequi' },
-    { value: 'daviplata', label: 'Daviplata' },
-    { value: 'transferencia', label: 'Transferencia bancaria' },
-    { value: 'tarjeta', label: 'Tarjeta' },
-  ];
 
   /* ===== LOADING ===== */
   cargando = true;
@@ -100,13 +89,12 @@ export class CuentasCobrarComponent implements OnInit, AfterViewInit {
 
   constructor(
     private cuentaService: CuentaService,
-    private pagoService: PagoService,
+    private router: Router,
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef
   ) {
-    this.crearFormularioPago();
     this.configurarFiltro();
   }
 
@@ -117,18 +105,6 @@ export class CuentasCobrarComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-  }
-
-  // ─── FORMULARIO ────────────────────────────────────────────────────────────
-
-  crearFormularioPago(): void {
-    this.formPago = this.fb.group({
-      venta_id: ['', Validators.required],
-      monto: [0, [Validators.required, Validators.min(0.01)]],
-      metodo_pago: ['efectivo', Validators.required],
-      referencia: [''],
-      notas: ['']
-    });
   }
 
   // ─── CARGAR DATOS ──────────────────────────────────────────────────────────
@@ -158,6 +134,12 @@ export class CuentasCobrarComponent implements OnInit, AfterViewInit {
     return [];
   }
 
+  private extraerHistorial(response: any): HistorialCliente[] {
+    if (response?.data) return Array.isArray(response.data) ? response.data : [];
+    if (Array.isArray(response)) return response;
+    return [];
+  }
+
   calcularTotales(cuentas: Cuenta[]): void {
     this.totalDeuda = cuentas.reduce((sum, c) => sum + Number(c.saldo_pendiente), 0);
   }
@@ -182,74 +164,74 @@ export class CuentasCobrarComponent implements OnInit, AfterViewInit {
     if (this.paginator) this.paginator.firstPage();
   }
 
-  // ─── MODAL REGISTRAR PAGO ──────────────────────────────────────────────────
+  // ─── REGISTRAR PAGO ────────────────────────────────────────────────────────
 
-  abrirModalPago(cuenta: Cuenta): void {
-    this.cuentaSeleccionada = cuenta;
-
-    // Pre-llenar el monto con el saldo pendiente
-    this.formPago.patchValue({
-      monto: cuenta.saldo_pendiente,
-      metodo_pago: 'efectivo',
-      referencia: '',
-      notas: ''
-    });
-
-    this.dialogRefPago = this.dialog.open(this.modalPago, {
-      width: '600px',
-      maxWidth: '95vw',
-      disableClose: false
-    });
-  }
-
-  cerrarModalPago(): void {
-    this.dialogRefPago?.close();
-    this.formPago.reset();
-    this.cuentaSeleccionada = null;
-  }
-
-  registrarPago(): void {
-    if (this.formPago.invalid || !this.cuentaSeleccionada) {
-      this.formPago.markAllAsTouched();
-      this.mostrarMensaje('Complete todos los campos requeridos', 'warning');
+  /**
+   * Registrar pago (inteligente)
+   * - Si tiene 1 factura → Ir directo al formulario de pago
+   * - Si tiene múltiples → Mostrar historial para elegir
+   */
+  registrarPago(cuenta: Cuenta): void {
+    if (!cuenta.cliente_id) {
+      this.mostrarMensaje('No se puede registrar pago para clientes ocasionales sin ID', 'warning');
       return;
     }
 
-    const monto = Number(this.formPago.value.monto);
-    if (monto > this.cuentaSeleccionada.saldo_pendiente) {
-      this.mostrarMensaje(
-        `El monto no puede ser mayor al saldo pendiente ($${this.cuentaSeleccionada.saldo_pendiente.toFixed(2)})`,
-        'warning'
-      );
-      return;
+    // Decisión inteligente basada en número de facturas
+    if (cuenta.num_facturas === 1) {
+      // Ir directo al pago
+      this.registrarPagoDirecto(cuenta);
+    } else {
+      // Mostrar historial para elegir
+      this.verHistorialParaPago(cuenta);
     }
+  }
 
+  /**
+   * Registrar pago directo (cuando solo hay 1 factura)
+   */
+  private registrarPagoDirecto(cuenta: Cuenta): void {
     this.cargandoModal = true;
 
-    // NOTA: Aquí falta saber el venta_id específico
-    // Habría que agregarlo en la interfaz Cuenta o hacer un endpoint que devuelva
-    // la venta_id más antigua con saldo pendiente de este cliente
-    const pago: Pago = {
-      venta_id: 0, // ❗ ESTO DEBE VENIR DEL BACKEND
-      monto: monto,
-      metodo_pago: this.formPago.value.metodo_pago,
-      referencia: this.formPago.value.referencia || undefined,
-      notas: this.formPago.value.notas || undefined,
-    };
+    this.cuentaService.obtenerHistorialCliente(cuenta.cliente_id!).subscribe({
+      next: (response: any) => {
+        const historial = this.extraerHistorial(response);
+        const ventaPendiente = historial.find(v => v.saldo_pendiente > 0);
+        
+        if (!ventaPendiente) {
+          this.mostrarMensaje('No hay ventas pendientes para este cliente', 'warning');
+          this.cargandoModal = false;
+          return;
+        }
 
-    this.pagoService.registrarPago(pago).subscribe({
-      next: (response) => {
-        this.mostrarMensaje('Pago registrado exitosamente', 'success');
-        this.cerrarModalPago();
-        this.cargarCuentas();
+        // Redirigir al formulario de pago
+        this.router.navigate(['/component/registrar-pago'], {
+          queryParams: {
+            venta_id: ventaPendiente.venta_id,
+            cliente_nombre: ventaPendiente.cliente_nombre,
+            saldo: ventaPendiente.saldo_pendiente
+          }
+        });
+        
         this.cargandoModal = false;
       },
       error: (error) => {
-        console.error('Error al registrar pago:', error);
-        this.mostrarMensaje('Error al registrar el pago', 'error');
+        console.error('Error:', error);
+        this.mostrarMensaje('Error al obtener la venta del cliente', 'error');
         this.cargandoModal = false;
       }
     });
+  }
+
+  /**
+   * Ver historial cuando hay múltiples facturas
+   */
+  private verHistorialParaPago(cuenta: Cuenta): void {
+    this.mostrarMensaje(
+      `${cuenta.nombre} tiene ${cuenta.num_facturas} facturas pendientes. Seleccione a cuál abonar.`,
+      'warning'
+    );
+    this.verHistorial(cuenta);
   }
 
   // ─── MODAL HISTORIAL ───────────────────────────────────────────────────────
@@ -272,8 +254,7 @@ export class CuentasCobrarComponent implements OnInit, AfterViewInit {
 
     this.cuentaService.obtenerHistorialCliente(cuenta.cliente_id).subscribe({
       next: (response: any) => {
-        // this.historialCliente = this.extraerDatos(response);
-        this.historialCliente = Array.isArray(response?.data) ? response.data : [];
+        this.historialCliente = this.extraerHistorial(response);
         this.cargandoHistorial = false;
         this.cdr.detectChanges();
       },
@@ -282,6 +263,26 @@ export class CuentasCobrarComponent implements OnInit, AfterViewInit {
         this.mostrarMensaje('Error al cargar el historial del cliente', 'error');
         this.cargandoHistorial = false;
         this.cdr.detectChanges();
+      }
+    });
+  }
+
+  /**
+   * Registrar pago desde una venta específica del historial
+   */
+  registrarPagoDesdeHistorial(venta: HistorialCliente): void {
+    if (venta.saldo_pendiente <= 0) {
+      this.mostrarMensaje('Esta venta ya está completamente pagada', 'warning');
+      return;
+    }
+
+    this.cerrarModalHistorial();
+    
+    this.router.navigate(['/component/registrar-pago'], {
+      queryParams: {
+        venta_id: venta.venta_id,
+        cliente_nombre: venta.cliente_nombre,
+        saldo: venta.saldo_pendiente
       }
     });
   }
@@ -306,7 +307,7 @@ export class CuentasCobrarComponent implements OnInit, AfterViewInit {
 
   mostrarMensaje(mensaje: string, tipo: 'success' | 'error' | 'warning'): void {
     this.snackBar.open(mensaje, 'Cerrar', {
-      duration: 3000,
+      duration: 4000,
       horizontalPosition: 'end',
       verticalPosition: 'top',
       panelClass: [`snackbar-${tipo}`]

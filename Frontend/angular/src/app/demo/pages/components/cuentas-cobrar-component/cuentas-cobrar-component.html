@@ -2,16 +2,16 @@
 
   <mat-card class="card-cuentas">
 
-    <!-- LOADING -->
+    <!-- ===== LOADING ===== -->
     <div *ngIf="cargando" class="loading-container">
       <mat-spinner diameter="50"></mat-spinner>
       <p>Cargando cuentas por cobrar...</p>
     </div>
 
-    <!-- CONTENIDO -->
+    <!-- ===== CONTENIDO ===== -->
     <ng-container *ngIf="!cargando">
 
-      <!-- HEADER -->
+      <!-- ===== HEADER ===== -->
       <div class="tabla-header">
         <div class="header-info">
           <h2 class="tabla-titulo">Cuentas por cobrar</h2>
@@ -33,7 +33,7 @@
         </div>
       </div>
 
-      <!-- TABLA -->
+      <!-- ===== TABLA ===== -->
       <div class="tabla-wrapper">
         <table mat-table [dataSource]="dataSource" matSort class="tabla-cuentas">
 
@@ -122,9 +122,11 @@
               <button
                 mat-icon-button
                 color="primary"
-                (click)="abrirModalPago(row)"
+                (click)="registrarPago(row)"
+                [disabled]="cargandoModal"
                 matTooltip="Registrar pago">
-                <mat-icon>payment</mat-icon>
+                <mat-spinner *ngIf="cargandoModal && cuentaSeleccionada?.cliente_id === row.cliente_id" diameter="20"></mat-spinner>
+                <mat-icon *ngIf="!cargandoModal || cuentaSeleccionada?.cliente_id !== row.cliente_id">payment</mat-icon>
               </button>
               <button
                 mat-icon-button
@@ -157,114 +159,6 @@
   </mat-card>
 
 </div>
-
-
-<!-- ===================================================== -->
-<!-- ================== MODAL PAGO ======================= -->
-<!-- ===================================================== -->
-<ng-template #modalPago>
-  <div class="modal-pago-container">
-
-    <div class="modal-header">
-      <div class="modal-header-info">
-        <mat-icon class="modal-icon">payment</mat-icon>
-        <div>
-          <h2 class="modal-titulo">Registrar pago</h2>
-          <p class="modal-subtitulo" *ngIf="cuentaSeleccionada">
-            {{ cuentaSeleccionada.nombre }}
-          </p>
-        </div>
-      </div>
-      <button mat-icon-button class="btn-cerrar" (click)="cerrarModalPago()">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-
-    <mat-divider></mat-divider>
-
-    <div class="modal-body" *ngIf="cuentaSeleccionada">
-
-      <!-- Resumen de deuda -->
-      <div class="resumen-deuda">
-        <div class="resumen-item">
-          <span class="resumen-label">Saldo pendiente:</span>
-          <span class="resumen-valor saldo">
-            {{ cuentaSeleccionada.saldo_pendiente | currency:'COP':'symbol-narrow':'1.0-0' }}
-          </span>
-        </div>
-        <div class="resumen-item">
-          <span class="resumen-label">Núm. facturas:</span>
-          <span class="resumen-valor">{{ cuentaSeleccionada.num_facturas }}</span>
-        </div>
-        <div class="resumen-item">
-          <span class="resumen-label">Días de mora:</span>
-          <span class="resumen-valor mora">{{ cuentaSeleccionada.dias_mora }}d</span>
-        </div>
-      </div>
-
-      <mat-divider></mat-divider>
-
-      <!-- Formulario -->
-      <form [formGroup]="formPago" (ngSubmit)="registrarPago()">
-
-        <div class="form-grid">
-
-          <!-- Monto -->
-          <mat-form-field appearance="outline" class="span-2">
-            <mat-label>Monto del pago</mat-label>
-            <input matInput type="number" step="0.01" formControlName="monto">
-            <span matTextPrefix>$&nbsp;</span>
-            <mat-hint>Máximo: {{ cuentaSeleccionada.saldo_pendiente | currency:'COP':'symbol-narrow':'1.0-0' }}</mat-hint>
-            <mat-error *ngIf="formPago.get('monto')?.hasError('required')">Campo obligatorio</mat-error>
-            <mat-error *ngIf="formPago.get('monto')?.hasError('min')">Debe ser mayor a 0</mat-error>
-          </mat-form-field>
-
-          <!-- Método de pago -->
-          <mat-form-field appearance="outline" class="span-2">
-            <mat-label>Método de pago</mat-label>
-            <mat-select formControlName="metodo_pago">
-              <mat-option *ngFor="let metodo of metodosPago" [value]="metodo.value">
-                {{ metodo.label }}
-              </mat-option>
-            </mat-select>
-            <mat-error *ngIf="formPago.get('metodo_pago')?.hasError('required')">Campo obligatorio</mat-error>
-          </mat-form-field>
-
-          <!-- Referencia -->
-          <mat-form-field appearance="outline" class="span-2">
-            <mat-label>Referencia (opcional)</mat-label>
-            <input matInput formControlName="referencia" placeholder="Núm. transacción, etc.">
-            <mat-icon matSuffix>tag</mat-icon>
-          </mat-form-field>
-
-          <!-- Notas -->
-          <mat-form-field appearance="outline" class="span-2">
-            <mat-label>Notas (opcional)</mat-label>
-            <textarea matInput formControlName="notas" rows="2"></textarea>
-          </mat-form-field>
-
-        </div>
-
-        <!-- Botones -->
-        <mat-divider></mat-divider>
-
-        <div class="modal-footer">
-          <button mat-stroked-button type="button" (click)="cerrarModalPago()" [disabled]="cargandoModal">
-            Cancelar
-          </button>
-          <button mat-raised-button color="primary" type="submit" [disabled]="cargandoModal">
-            <mat-spinner *ngIf="cargandoModal" diameter="18"></mat-spinner>
-            <mat-icon *ngIf="!cargandoModal">check_circle</mat-icon>
-            <span>{{ cargandoModal ? 'Registrando...' : 'Registrar pago' }}</span>
-          </button>
-        </div>
-
-      </form>
-
-    </div>
-
-  </div>
-</ng-template>
 
 
 <!-- ===================================================== -->
@@ -330,8 +224,8 @@
             </div>
 
             <!-- Pagos -->
-            <div class="pagos-realizados" *ngIf="item.pagos.length > 0">
-              <strong>Pagos:</strong>
+            <div class="pagos-realizados" *ngIf="item.pagos && item.pagos.length > 0">
+              <strong>Pagos realizados:</strong>
               <ul>
                 <li *ngFor="let pago of item.pagos">
                   {{ pago.fecha | date:'dd/MM/yyyy' }} -
@@ -348,6 +242,17 @@
               <span class="saldo-pendiente" *ngIf="item.saldo_pendiente > 0">
                 Saldo: {{ item.saldo_pendiente | currency:'COP':'symbol-narrow':'1.0-0' }}
               </span>
+            </div>
+
+            <!-- ✅ BOTÓN PARA PAGAR ESTA FACTURA -->
+            <div class="item-acciones" *ngIf="item.saldo_pendiente > 0">
+              <button 
+                mat-flat-button 
+                color="accent"
+                (click)="registrarPagoDesdeHistorial(item)">
+                <mat-icon>payment</mat-icon>
+                Pagar esta factura
+              </button>
             </div>
 
           </div>

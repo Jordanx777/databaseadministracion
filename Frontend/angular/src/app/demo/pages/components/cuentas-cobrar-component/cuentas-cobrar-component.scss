@@ -255,6 +255,21 @@
   }
 }
 
+// Agregar al final de cuentas-cobrar-component.scss
+
+// ===== ITEM ACCIONES =====
+.item-acciones {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: flex-end;
+
+  button {
+    min-width: 180px;
+  }
+}
+
 /* ── Historial ───────────────────────────────────────────────────────── */
 .loading-historial,
 .sin-historial {
