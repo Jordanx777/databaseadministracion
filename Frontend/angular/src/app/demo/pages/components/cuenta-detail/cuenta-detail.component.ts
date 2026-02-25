@@ -97,7 +97,7 @@ export class CuentaDetailComponent implements OnInit {
   registrarPago(): void {
     if (!this.venta) return;
     
-    this.router.navigate(['/component/pagos/registrar'], {
+    this.router.navigate(['/component/registrar-pago'], {
       queryParams: {
         venta_id: this.venta.venta_id,
         cliente_nombre: this.venta.cliente_nombre,
@@ -122,7 +122,7 @@ export class CuentaDetailComponent implements OnInit {
       this.ventasService.cancelar(this.venta.venta_id).subscribe({
         next: (response) => {
           this.mostrarMensaje('Venta cancelada exitosamente', 'success');
-          this.router.navigate(['/component/ventas-diarias']);
+          this.router.navigate(['/component/ventas']);
         },
         error: (error) => {
           console.error('Error:', error);
