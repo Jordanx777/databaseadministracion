@@ -209,7 +209,6 @@ class ProductosController
                 ResponseHelper::error('No se pudo actualizar el producto');
             }
         } catch (\Exception $e) {
-            error_log("Error en actualizarProducto: " . $e->getMessage());
             ResponseHelper::error($e->getMessage(), 500);
         }
     }
