@@ -1,0 +1,173 @@
+
+<div class="cliente-cuenta-container">
+
+  <!-- ===== LOADING ===== -->
+  <div *ngIf="cargando" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando cuenta del cliente...</p>
+  </div>
+
+  <!-- ===== CONTENIDO ===== -->
+  <ng-container *ngIf="!cargando">
+
+    <!-- ===== HEADER ===== -->
+    <div class="page-header">
+      <button mat-icon-button (click)="volver()" class="btn-volver">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="header-info">
+        <h1>
+          <mat-icon>account_circle</mat-icon>
+          {{ resumenCuenta?.nombre || 'Cliente' }}
+        </h1>
+        <p class="subtitulo" *ngIf="resumenCuenta?.apodo">{{ resumenCuenta.apodo }}</p>
+      </div>
+    </div>
+
+    <!-- ===== RESUMEN CARDS ===== -->
+    <div class="resumen-grid">
+      
+      <mat-card class="resumen-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="icon-ventas">receipt_long</mat-icon>
+          <mat-card-title>Total Compras</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="valor">{{ totalVentas | currency:'COP':'symbol-narrow':'1.0-0' }}</div>
+          <div class="meta">{{ numFacturas }} facturas</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="resumen-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="icon-pagado">check_circle</mat-icon>
+          <mat-card-title>Total Pagado</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="valor pagado">{{ totalPagado | currency:'COP':'symbol-narrow':'1.0-0' }}</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="resumen-card destacado">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="icon-saldo">account_balance_wallet</mat-icon>
+          <mat-card-title>Saldo Pendiente</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="valor pendiente">{{ saldoPendiente | currency:'COP':'symbol-narrow':'1.0-0' }}</div>
+          <div class="meta" *ngIf="resumenCuenta">{{ resumenCuenta.dias_mora }} días de mora</div>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+
+    <!-- ===== HISTORIAL DE VENTAS ===== -->
+    <mat-card class="historial-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="icon-historial">history</mat-icon>
+        <mat-card-title>Historial de Ventas</mat-card-title>
+        <mat-card-subtitle>{{ historial.length }} ventas registradas</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+
+        <!-- Sin historial -->
+        <div *ngIf="historial.length === 0" class="sin-historial">
+          <mat-icon>inbox</mat-icon>
+          <p>No hay ventas registradas para este cliente</p>
+        </div>
+
+        <!-- Lista de ventas -->
+        <div *ngIf="historial.length > 0" class="ventas-list">
+
+          <div *ngFor="let venta of historial" class="venta-item">
+            
+            <div class="venta-header">
+              <div class="venta-info">
+                <h4>{{ venta.numero_factura }}</h4>
+                <span class="fecha">{{ venta.fecha_venta | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <div class="venta-montos">
+                <span class="monto-total">{{ venta.monto_venta | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+                <mat-chip 
+                  [class.chip-pagada]="venta.estado_venta === 'pagada'"
+                  [class.chip-pendiente]="venta.estado_venta === 'pendiente'"
+                  highlighted>
+                  {{ venta.estado_venta }}
+                </mat-chip>
+              </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="venta-body">
+              
+              <!-- Productos -->
+              <div class="productos-seccion">
+                <strong>Productos vendidos:</strong>
+                <ul>
+                  <li *ngFor="let prod of venta.productos">
+                    {{ prod.cantidad }}x {{ prod.producto }} 
+                    ({{ prod.marca }}, {{ prod.talla }}/{{ prod.color }})
+                    - {{ prod.precio | currency:'COP':'symbol-narrow':'1.0-0' }}
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Pagos -->
+              <div class="pagos-seccion" *ngIf="venta.pagos && venta.pagos.length > 0">
+                <strong>Pagos realizados:</strong>
+                <ul>
+                  <li *ngFor="let pago of venta.pagos">
+                    {{ pago.fecha | date:'dd/MM/yyyy' }} - 
+                    {{ pago.monto | currency:'COP':'symbol-narrow':'1.0-0' }} 
+                    ({{ pago.metodo }})
+                    <span *ngIf="pago.referencia"> - Ref: {{ pago.referencia }}</span>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Resumen de pago -->
+              <div class="pago-resumen">
+                <div class="resumen-item">
+                  <span>Total:</span>
+                  <span>{{ venta.monto_venta | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+                </div>
+                <div class="resumen-item">
+                  <span>Pagado:</span>
+                  <span class="pagado">{{ venta.total_pagado | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+                </div>
+                <div class="resumen-item destacado" *ngIf="venta.saldo_pendiente > 0">
+                  <span>Saldo:</span>
+                  <span class="pendiente">{{ venta.saldo_pendiente | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="venta-acciones">
+              <button 
+                mat-stroked-button 
+                (click)="verDetalleVenta(venta.venta_id)">
+                <mat-icon>visibility</mat-icon>
+                Ver detalle
+              </button>
+              <button 
+                mat-flat-button 
+                color="accent"
+                *ngIf="venta.saldo_pendiente > 0"
+                (click)="registrarPago(venta.venta_id)">
+                <mat-icon>payment</mat-icon>
+                Registrar pago
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+
+  </ng-container>
+
+</div>
