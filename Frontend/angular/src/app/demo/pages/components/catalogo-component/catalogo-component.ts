@@ -42,7 +42,6 @@ export class CatalogoComponent {
   ];
 
   agregarAlCarrito(producto: any): void {
-    console.log('Producto agregado:', producto);
     // aquí luego conectas carrito real
   }
 }
