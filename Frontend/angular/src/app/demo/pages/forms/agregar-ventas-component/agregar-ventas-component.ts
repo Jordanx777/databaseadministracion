@@ -421,7 +421,6 @@ export class AgregarVentasComponent implements OnInit {
     pagos: tipoPago !== 'credito' ? this.pagos.value : []
   };
 
-  console.log('Venta a registrar:', venta);
 
     this.ventasService.crearVenta(venta).subscribe({
     next: (response) => {
@@ -438,7 +437,7 @@ export class AgregarVentasComponent implements OnInit {
   }
 
   cancelar(): void {
-    this.router.navigate(['component/ventas-diarias']);
+    this.router.navigate(['component/ventas']);
   }
 
   mostrarMensaje(mensaje: string, tipo: 'success' | 'error' | 'warning'): void {
