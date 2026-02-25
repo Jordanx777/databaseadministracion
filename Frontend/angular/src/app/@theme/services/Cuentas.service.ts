@@ -77,6 +77,11 @@ export class CuentaService {
   obtenerHistorialCliente(clienteId: number) {
     return this.apiService.get<HistorialCliente[]>(`cuentas/historial/${clienteId}`);
   }
+  
+  // 5. Ver historial activo de un cliente
+  obtenerHistorialClienteActivos(clienteId: number) {
+    return this.apiService.get<HistorialCliente[]>(`cuentas/historial/activos/${clienteId}`);
+  }
 
   // 6. Ver cuánto debe un cliente (todas sus ventas)
   obtenerResumenDeuda(clienteId: number): Observable<any> {
