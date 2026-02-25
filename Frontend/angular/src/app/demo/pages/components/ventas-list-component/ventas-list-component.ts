@@ -169,7 +169,7 @@ export class VentasListComponent implements OnInit, AfterViewInit {
 
   registrarPago(venta: VentaCompleta): void {
     // Redirigir a formulario de pago
-    this.router.navigate(['/component/pagos/registrar'], {
+    this.router.navigate(['/component/registrar-pago'], {
       queryParams: {
         venta_id: venta.venta_id,
         cliente_nombre: venta.cliente_nombre,
@@ -177,7 +177,6 @@ export class VentasListComponent implements OnInit, AfterViewInit {
       }
     });
   }
-
   verCuentaCliente(venta: VentaCompleta): void {
     if (venta.cliente_id) {
       this.router.navigate(['/component/cuentas', venta.cliente_id]);
