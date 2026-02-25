@@ -86,11 +86,5 @@ export class AgregarClientesSaldoComponent implements OnInit {
     }
 
     const clienteSaldo = this.formClienteSaldo.getRawValue();
-
-    console.log('Cliente con saldo:', clienteSaldo);
-
-    // 🔜 Próximo paso:
-    // - Enviar al backend
-    // - O agregar directamente a la tabla de pagos pendientes
   }
 }
