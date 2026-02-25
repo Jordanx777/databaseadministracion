@@ -3,6 +3,7 @@ namespace App\Controllers;
 use App\Models\CuentasModel;
 use App\Models\VentasModel;
 use App\Models\ClientesModel;
+use Exception;
 
 class CuentasController {
     private $cuentasModel;
@@ -28,7 +29,8 @@ class CuentasController {
     }
 
     // 3. Obtener deuda de un cliente registrado
-    public function obtenerDeudaClienteRegistrado($clienteId) {
+    public function obtenerDeudaClienteRegistrado(array $params) {
+        $clienteId = $params['clienteId'] ?? null;
         $deuda = $this->cuentasModel->getDeudaClienteRegistrado($clienteId);
         echo json_encode($deuda);
     }
@@ -40,13 +42,71 @@ class CuentasController {
         echo json_encode($deudas);
     }
 
-    // 5. Obtener historial completo de un cliente
-    public function obtenerHistorialCliente($clienteId) {
-        $historial = $this->cuentasModel->getHistorialCliente($clienteId);
-        echo json_encode($historial);
+     // 5. Obtener historial completo activo de un cliente
+    public function obtenerHistorialClienteActivos(array $params) {
+    $clienteId = $params['clienteId'] ?? null;
+    
+    if (!$clienteId) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'ID de cliente no proporcionado'
+        ]);
+        return;
     }
+    
+    try {
+        $historial = $this->cuentasModel->getHistorialClienteActivas($clienteId);
+        
+        http_response_code(200);
+        echo json_encode([
+            'success' => true,
+            'data' => $historial,
+            'total' => count($historial)
+        ]);
+        
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Error al obtener historial: ' . $e->getMessage()
+        ]);
+    }
+}
 
-    // 6. Obtener resumen de deuda de un cliente (total adeudado, total pagado, etc.)
+    // 6. Obtener historial completo de un cliente
+    public function obtenerHistorialCliente(array $params) {
+    $clienteId = $params['clienteId'] ?? null;
+    
+    if (!$clienteId) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'ID de cliente no proporcionado'
+        ]);
+        return;
+    }
+    
+    try {
+        $historial = $this->cuentasModel->getHistorialCliente($clienteId);
+        
+        http_response_code(200);
+        echo json_encode([
+            'success' => true,
+            'data' => $historial,
+            'total' => count($historial)
+        ]);
+        
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Error al obtener historial: ' . $e->getMessage()
+        ]);
+    }
+}
+
+    // 7. Obtener resumen de deuda de un cliente (total adeudado, total pagado, etc.)
     public function obtenerResumenDeuda($clienteId) {
         $resumen = $this->cuentasModel->getResumenDeuda($clienteId);
         echo json_encode($resumen);
