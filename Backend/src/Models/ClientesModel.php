@@ -23,7 +23,6 @@ class ClientesModel
             $stmt = $this->db->query("SELECT * FROM clientes");
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log("Error al obtener clientes: " . $e->getMessage());
             return [];
         }
     }
@@ -41,7 +40,7 @@ class ClientesModel
             $stmt->execute([':query' => '%' . $query . '%']);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\Exception $e) {
-            error_log("Error en searchByName: " . $e->getMessage());
+            error_log("Error al buscar clientes por nombre: " . $e->getMessage());
             return [];
         }
     }
