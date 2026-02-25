@@ -144,7 +144,7 @@ obtenerPorId(id: number): Observable<any> {
   //   return this.apiService.delete<any>(`${this.apiUrl}/${id}`);
   // }
   cancelar(id: number): Observable<any> {
-    return this.apiService.put<any>(`ventas/${id}/cancelar`, {});
+    return this.apiService.put<any>(`ventas/cancelar/${id}`, {});
   }
 
   // Ventas del día
