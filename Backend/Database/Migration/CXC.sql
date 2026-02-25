@@ -1,49 +1,103 @@
--- ============================================
--- VISTA: CUENTAS_POR_COBRAR (Actualizada)
--- ============================================
+-- Eliminar la vista anterior
+DROP VIEW IF EXISTS cuentas_por_cobrar CASCADE;
+
+-- Crear la vista corregida
 CREATE VIEW cuentas_por_cobrar AS
 SELECT 
-    -- Identificación del cliente
+    -- Información del cliente
     v.cliente_id,
     COALESCE(c.nombre, v.cliente_nombre) as nombre,
     c.apodo,
-    COALESCE(c.referencia, v.cliente_referencia) as referencia,
+    v.cliente_referencia as referencia,
     COALESCE(c.telefono, v.cliente_telefono) as telefono,
-    
-    -- Tipo de cliente
     CASE 
         WHEN v.cliente_id IS NOT NULL THEN 'registrado'
         ELSE 'ocasional'
     END as tipo_cliente,
     
-    -- Cálculos financieros
-    COALESCE(SUM(v.total), 0) as total_ventas,
-    COALESCE(SUM(p.monto), 0) as total_pagado,
-    COALESCE(SUM(v.total), 0) - COALESCE(SUM(p.monto), 0) as saldo_pendiente,
+    -- ✅ CORRECCIÓN: Sumar v.total SIN JOIN con pagos
+    SUM(v.total) as total_ventas,
     
-    -- Estadísticas
+    -- ✅ CORRECCIÓN: Calcular total pagado con subconsulta
+    COALESCE(
+        (
+            SELECT SUM(p.monto)
+            FROM pagos p
+            WHERE p.venta_id IN (
+                SELECT v2.id 
+                FROM ventas v2 
+                WHERE (v2.cliente_id = v.cliente_id OR v2.cliente_nombre = v.cliente_nombre)
+                  AND v2.tipo_pago IN ('credito', 'mixto')
+                  AND v2.estado != 'cancelada'
+            )
+        ), 
+        0
+    ) as total_pagado,
+    
+    -- Saldo pendiente
+    SUM(v.total) - COALESCE(
+        (
+            SELECT SUM(p.monto)
+            FROM pagos p
+            WHERE p.venta_id IN (
+                SELECT v2.id 
+                FROM ventas v2 
+                WHERE (v2.cliente_id = v.cliente_id OR v2.cliente_nombre = v.cliente_nombre)
+                  AND v2.tipo_pago IN ('credito', 'mixto')
+                  AND v2.estado != 'cancelada'
+            )
+        ), 
+        0
+    ) as saldo_pendiente,
+    
+    -- Número de facturas
     COUNT(DISTINCT v.id) as num_facturas,
+    
+    -- Fecha de última compra
     MAX(v.fecha_venta) as ultima_compra,
-    MAX(p.fecha_pago) as ultimo_pago,
     
-    -- Días de mora (desde la venta más antigua sin pagar)
-    EXTRACT(DAY FROM (CURRENT_TIMESTAMP - MIN(v.fecha_venta))) as dias_mora
+    -- Fecha de último pago
+    (
+        SELECT MAX(p.fecha_pago)
+        FROM pagos p
+        WHERE p.venta_id IN (
+            SELECT v2.id 
+            FROM ventas v2 
+            WHERE (v2.cliente_id = v.cliente_id OR v2.cliente_nombre = v.cliente_nombre)
+              AND v2.tipo_pago IN ('credito', 'mixto')
+              AND v2.estado != 'cancelada'
+        )
+    ) as ultimo_pago,
     
+    -- Días de mora (desde la última compra)
+    EXTRACT(DAY FROM (NOW() - MAX(v.fecha_venta)))::INTEGER as dias_mora
+
 FROM ventas v
 LEFT JOIN clientes c ON v.cliente_id = c.id
-LEFT JOIN pagos p ON v.id = p.venta_id
-WHERE v.tipo_pago IN ('credito', 'mixto') 
+WHERE v.tipo_pago IN ('credito', 'mixto')
   AND v.estado != 'cancelada'
 GROUP BY 
-    v.cliente_id, 
-    c.nombre, 
-    v.cliente_nombre,
-    c.apodo, 
-    c.referencia, 
-    v.cliente_referencia,
+    v.cliente_id,
+    c.nombre,
+    c.apodo,
     c.telefono,
-    v.cliente_telefono
-HAVING COALESCE(SUM(v.total), 0) - COALESCE(SUM(p.monto), 0) > 0
-ORDER BY saldo_pendiente DESC;
-
-COMMENT ON VIEW cuentas_por_cobrar IS 'Vista de clientes con saldo pendiente (registrados y ocasionales)';
+    v.cliente_nombre,
+    v.cliente_telefono,
+    v.cliente_referencia
+HAVING 
+    -- Solo mostrar clientes con saldo pendiente
+    SUM(v.total) - COALESCE(
+        (
+            SELECT SUM(p.monto)
+            FROM pagos p
+            WHERE p.venta_id IN (
+                SELECT v2.id 
+                FROM ventas v2 
+                WHERE (v2.cliente_id = v.cliente_id OR v2.cliente_nombre = v.cliente_nombre)
+                  AND v2.tipo_pago IN ('credito', 'mixto')
+                  AND v2.estado != 'cancelada'
+            )
+        ), 
+        0
+    ) > 0
+ORDER BY dias_mora DESC, saldo_pendiente DESC;
