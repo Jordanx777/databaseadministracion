@@ -1,5 +1,3 @@
-<!-- src/app/modules/ventas/components/venta-detail/venta-detail.component.html -->
-
 <div class="venta-detail-container">
 
   <!-- ===== LOADING ===== -->
@@ -23,12 +21,12 @@
         </h1>
         <p class="fecha">{{ venta.fecha_venta | date:'dd/MM/yyyy HH:mm' }}</p>
       </div>
-      <div class="header-acciones">
+      <!-- <div class="header-acciones">
         <button mat-stroked-button (click)="imprimirFactura()">
           <mat-icon>print</mat-icon>
           Imprimir
         </button>
-      </div>
+      </div> -->
     </div>
 
     <!-- ===== CARDS DE INFORMACIÓN ===== -->
@@ -42,11 +40,11 @@
         </mat-card-header>
         <mat-card-content>
           <div class="info-item">
-            <span class="label">Nombre:</span>
+            <span class="label">Nombre: </span>
             <span class="value">{{ venta.cliente_nombre }}</span>
           </div>
           <div class="info-item" *ngIf="venta.cliente_apodo">
-            <span class="label">Apodo:</span>
+            <span class="label">Apodo: </span>
             <span class="value">{{ venta.cliente_apodo }}</span>
           </div>
           <div class="info-item">
