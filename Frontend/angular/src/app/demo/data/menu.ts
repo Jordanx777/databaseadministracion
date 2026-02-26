@@ -17,9 +17,22 @@ export const menus: Navigation[] = [
       }
     ]
   },
-
-  
-  
+  {
+    id: 'Categorias y Subcategorias',
+    title: 'Categorias&Subcategorias',
+    type: 'group',
+    icon: 'icon-navigation',
+    children: [
+      {
+        id: 'categorias&subcategorias',
+        title: 'Categorias y Subcategorias',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/component/categorias',
+        icon: '#custom-tag'
+      },
+    ]
+  },
   {
     id: 'productos',
     title: 'Productos',
