@@ -8,6 +8,6 @@ CREATE TABLE proveedores (
     telefono VARCHAR(20),
     ciudad VARCHAR(50),
     estado BOOLEAN DEFAULT TRUE,
-    fecha_llegada DATE,
+    -- fecha_llegada DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
