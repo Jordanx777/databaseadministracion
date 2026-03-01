@@ -1,0 +1,313 @@
+<!-- src/app/modules/categorias/components/categorias-gestion/categorias-gestion.component.html -->
+
+<div class="categorias-container">
+
+  <mat-card class="categorias-card">
+
+    <!-- ===== LOADING ===== -->
+    <div *ngIf="cargando" class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Cargando categorías...</p>
+    </div>
+
+    <!-- ===== CONTENIDO ===== -->
+    <ng-container *ngIf="!cargando">
+
+      <!-- ===== HEADER ===== -->
+      <div class="card-header">
+        <div class="header-info">
+          <h2 class="titulo">
+            <mat-icon>category</mat-icon>
+            Gestión de Categorías y Subcategorías
+          </h2>
+          <p class="subtitulo">{{ categorias.length }} categorías registradas</p>
+        </div>
+        <div class="header-acciones">
+          <button mat-flat-button color="primary" (click)="abrirModalCategoria()">
+            <mat-icon>add</mat-icon>
+            Nueva Categoría
+          </button>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- ===== LISTA DE CATEGORÍAS ===== -->
+      <div class="categorias-list">
+
+        <!-- Sin categorías -->
+        <div *ngIf="categorias.length === 0" class="empty-state">
+          <mat-icon>folder_open</mat-icon>
+          <p>No hay categorías registradas</p>
+          <button mat-flat-button color="primary" (click)="abrirModalCategoria()">
+            <mat-icon>add</mat-icon>
+            Crear primera categoría
+          </button>
+        </div>
+
+        <!-- Accordion de Categorías -->
+        <mat-accordion *ngIf="categorias.length > 0">
+          
+          <mat-expansion-panel *ngFor="let categoria of categorias" class="categoria-panel">
+            
+            <!-- Header de Categoría -->
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon class="categoria-icon">folder</mat-icon>
+                <span class="categoria-nombre">{{ categoria.nombre }}</span>
+                <mat-chip class="subcategorias-count" highlighted>
+                  {{ categoria.subcategorias?.length || 0 }} subcategorías
+                </mat-chip>
+              </mat-panel-title>
+              
+              <mat-panel-description>
+                <span class="categoria-descripcion">{{ categoria.descripcion || 'Sin descripción' }}</span>
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <!-- Contenido de Categoría -->
+            <div class="categoria-content">
+
+              <!-- Acciones de Categoría -->
+              <div class="categoria-acciones">
+                <button 
+                  mat-stroked-button 
+                  color="primary"
+                  (click)="abrirModalCategoria(categoria)">
+                  <mat-icon>edit</mat-icon>
+                  Editar Categoría
+                </button>
+                <button 
+                  mat-stroked-button 
+                  color="warn"
+                  (click)="eliminarCategoria(categoria)">
+                  <mat-icon>delete</mat-icon>
+                  Eliminar Categoría
+                </button>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <!-- Subcategorías Header -->
+              <div class="subcategorias-header">
+                <h4>
+                  <mat-icon>subdirectory_arrow_right</mat-icon>
+                  Subcategorías
+                </h4>
+                <button 
+                  mat-mini-fab 
+                  color="accent"
+                  (click)="abrirModalSubcategoria(categoria)"
+                  matTooltip="Agregar subcategoría">
+                  <mat-icon>add</mat-icon>
+                </button>
+              </div>
+
+              <!-- Lista de Subcategorías -->
+              <div class="subcategorias-list">
+                
+                <!-- Sin subcategorías -->
+                <div *ngIf="!categoria.subcategorias || categoria.subcategorias.length === 0" 
+                     class="sin-subcategorias">
+                  <mat-icon>info</mat-icon>
+                  <p>No hay subcategorías en esta categoría</p>
+                  <button 
+                    mat-stroked-button 
+                    color="accent"
+                    (click)="abrirModalSubcategoria(categoria)">
+                    <mat-icon>add</mat-icon>
+                    Agregar primera subcategoría
+                  </button>
+                </div>
+
+                <!-- Con subcategorías -->
+                <div *ngIf="categoria.subcategorias && categoria.subcategorias.length > 0" 
+                     class="subcategorias-grid">
+                  
+                  <div *ngFor="let subcategoria of categoria.subcategorias" 
+                       class="subcategoria-item">
+                    
+                    <div class="subcategoria-info">
+                      <mat-icon class="sub-icon">label</mat-icon>
+                      <div class="sub-texto">
+                        <span class="sub-nombre">{{ subcategoria.nombre }}</span>
+                        <span class="sub-descripcion">{{ subcategoria.descripcion || 'Sin descripción' }}</span>
+                      </div>
+                    </div>
+
+                    <div class="subcategoria-acciones">
+                      <button 
+                        mat-icon-button 
+                        color="primary"
+                        (click)="abrirModalSubcategoria(categoria, subcategoria)"
+                        matTooltip="Editar">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button 
+                        mat-icon-button 
+                        color="warn"
+                        (click)="eliminarSubcategoria(subcategoria)"
+                        matTooltip="Eliminar">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </mat-expansion-panel>
+
+        </mat-accordion>
+
+      </div>
+
+    </ng-container>
+
+  </mat-card>
+
+</div>
+
+
+<!-- ===================================================== -->
+<!-- ================= MODAL CATEGORÍA =================== -->
+<!-- ===================================================== -->
+<ng-template #modalCategoria>
+  <div class="modal-container">
+
+    <div class="modal-header">
+      <h2 mat-dialog-title>
+        <mat-icon>{{ modoEdicion ? 'edit' : 'add' }}</mat-icon>
+        {{ modoEdicion ? 'Editar' : 'Nueva' }} Categoría
+      </h2>
+      <button mat-icon-button mat-dialog-close>
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <mat-dialog-content>
+      <form [formGroup]="formCategoria">
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nombre de la categoría</mat-label>
+          <input matInput formControlName="nombre" placeholder="Ej: Ropa Deportiva">
+          <mat-icon matSuffix>category</mat-icon>
+          <mat-error *ngIf="formCategoria.get('nombre')?.hasError('required')">
+            El nombre es obligatorio
+          </mat-error>
+          <mat-error *ngIf="formCategoria.get('nombre')?.hasError('minlength')">
+            Mínimo 3 caracteres
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Descripción (opcional)</mat-label>
+          <textarea 
+            matInput 
+            formControlName="descripcion" 
+            rows="3"
+            placeholder="Describe esta categoría..."></textarea>
+          <mat-icon matSuffix>description</mat-icon>
+        </mat-form-field>
+
+      </form>
+    </mat-dialog-content>
+
+    <mat-divider></mat-divider>
+
+    <mat-dialog-actions align="end">
+      <button mat-stroked-button mat-dialog-close [disabled]="guardando">
+        Cancelar
+      </button>
+      <button 
+        mat-flat-button 
+        color="primary"
+        (click)="guardarCategoria()"
+        [disabled]="guardando || formCategoria.invalid">
+        <mat-spinner *ngIf="guardando" diameter="20"></mat-spinner>
+        <mat-icon *ngIf="!guardando">{{ modoEdicion ? 'save' : 'add' }}</mat-icon>
+        <span>{{ guardando ? 'Guardando...' : (modoEdicion ? 'Actualizar' : 'Crear') }}</span>
+      </button>
+    </mat-dialog-actions>
+
+  </div>
+</ng-template>
+
+
+<!-- ===================================================== -->
+<!-- =============== MODAL SUBCATEGORÍA ================== -->
+<!-- ===================================================== -->
+<ng-template #modalSubcategoria>
+  <div class="modal-container">
+
+    <div class="modal-header">
+      <h2 mat-dialog-title>
+        <mat-icon>{{ modoEdicion ? 'edit' : 'add' }}</mat-icon>
+        {{ modoEdicion ? 'Editar' : 'Nueva' }} Subcategoría
+      </h2>
+      <button mat-icon-button mat-dialog-close>
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <mat-dialog-content>
+      <form [formGroup]="formSubcategoria">
+
+        <!-- Categoría padre (solo informativo en modo edición) -->
+        <div class="categoria-info" *ngIf="categoriaSeleccionada">
+          <mat-icon>folder</mat-icon>
+          <span>Categoría: <strong>{{ categoriaSeleccionada.nombre }}</strong></span>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nombre de la subcategoría</mat-label>
+          <input matInput formControlName="nombre" placeholder="Ej: Camisetas deportivas">
+          <mat-icon matSuffix>label</mat-icon>
+          <mat-error *ngIf="formSubcategoria.get('nombre')?.hasError('required')">
+            El nombre es obligatorio
+          </mat-error>
+          <mat-error *ngIf="formSubcategoria.get('nombre')?.hasError('minlength')">
+            Mínimo 3 caracteres
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Descripción (opcional)</mat-label>
+          <textarea 
+            matInput 
+            formControlName="descripcion" 
+            rows="3"
+            placeholder="Describe esta subcategoría..."></textarea>
+          <mat-icon matSuffix>description</mat-icon>
+        </mat-form-field>
+
+      </form>
+    </mat-dialog-content>
+
+    <mat-divider></mat-divider>
+
+    <mat-dialog-actions align="end">
+      <button mat-stroked-button mat-dialog-close [disabled]="guardando">
+        Cancelar
+      </button>
+      <button 
+        mat-flat-button 
+        color="accent"
+        (click)="guardarSubcategoria()"
+        [disabled]="guardando || formSubcategoria.invalid">
+        <mat-spinner *ngIf="guardando" diameter="20"></mat-spinner>
+        <mat-icon *ngIf="!guardando">{{ modoEdicion ? 'save' : 'add' }}</mat-icon>
+        <span>{{ guardando ? 'Guardando...' : (modoEdicion ? 'Actualizar' : 'Crear') }}</span>
+      </button>
+    </mat-dialog-actions>
+
+  </div>
+</ng-template>
