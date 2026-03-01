@@ -377,6 +377,12 @@ export class AgregarVentasComponent implements OnInit {
       return;
     }
 
+    // el cliente ocacional tampoco puede hacer pagos mixtos
+    if(tipoCliente === 'ocasional' && tipoPago === 'mixto') {
+      this.mostrarMensaje('Los clientes ocasionales no pueden hacer pagos mixtos', 'warning');
+      return;
+    }
+
     const totalPagos = this.getTotalPagos();
     if (tipoPago === 'contado' && totalPagos !== this.total) {
       this.mostrarMensaje('El pago debe ser igual al total en ventas de contado', 'warning');
@@ -420,6 +426,22 @@ export class AgregarVentasComponent implements OnInit {
     })),
     pagos: tipoPago !== 'credito' ? this.pagos.value : []
   };
+
+  // validar cantidades antes de enviar
+  for (const detalle of venta.detalles) {
+    const producto = this.productos.find(p => p.id === detalle.producto_id);
+    const variante = producto?.variantes?.find((v: any) => v.id === detalle.variante_id);
+    if (!variante) {
+      this.mostrarMensaje(`Variante no encontrada para el producto ID ${detalle.producto_id}`, 'error');
+      this.cargando = false;
+      return;
+    }
+    if (detalle.cantidad > variante.stock) {
+      this.mostrarMensaje(`Stock insuficiente para ${producto.nombre} - ${variante.talla} ${variante.color} (disponible: ${variante.stock})`, 'error');
+      this.cargando = false;
+      return;
+    }
+  }
 
 
     this.ventasService.crearVenta(venta).subscribe({
