@@ -147,9 +147,8 @@ obtenerPorId(id: number): Observable<any> {
     return this.apiService.put<any>(`ventas/cancelar/${id}`, {});
   }
 
-  // Ventas del día
-//   ventasDelDia(fecha?: string): Observable<any> {
-//     const fechaParam = fecha ? { fecha } : {};
-//     return this.apiService.get<any>(`${this.apiUrl}/ventas-del-dia`, { params: fechaParam });
-//   }
+  // ver el historial en genera TODO
+  getHistorialCompleto(): Observable<any> {
+    return this.apiService.get<any>('cuentas/historial/completo');
+  }
 }
