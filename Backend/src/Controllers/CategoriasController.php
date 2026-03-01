@@ -10,6 +10,10 @@ class CategoriasController {
         $this->categoriasModel = new CategoriasModel();
     }
 
+    /**
+     * Obtener todas las categorías
+     * GET /api/categorias
+     */
     public function getAllCategorias() {
         try {
             $categorias = $this->categoriasModel->getAllCategorias();
@@ -19,9 +23,22 @@ class CategoriasController {
         }
     }
 
-    public function getCategoriaById($id) {
+    /**
+     * Obtener una categoría por ID
+     * GET /api/categorias/{id}
+     * ✅ CORREGIDO: Recibir parámetros correctamente
+     */
+    public function getCategoriaById(array $params) {
         try {
+            $id = $params['id'] ?? null;
+
+            if (!$id) {
+                ResponseHelper::error('ID no proporcionado', 400);
+                return;
+            }
+
             $categoria = $this->categoriasModel->getCategoriaById($id);
+            
             if ($categoria) {
                 ResponseHelper::success($categoria, 'Categoría obtenida exitosamente');
             } else {
@@ -32,9 +49,22 @@ class CategoriasController {
         }
     }
 
-    public function createCategoria($data) {
+    /**
+     * Crear una nueva categoría
+     * POST /api/categorias
+     * ✅ CORREGIDO: Leer JSON del body
+     */
+    public function createCategoria() {
         try {
+            $data = json_decode(file_get_contents('php://input'), true);
+
+            if (!isset($data['nombre'])) {
+                ResponseHelper::error('El nombre es obligatorio', 400);
+                return;
+            }
+
             $id = $this->categoriasModel->createCategoria($data);
+            
             if ($id) {
                 ResponseHelper::created(['id' => $id], 'Categoría creada exitosamente');
             } else {
@@ -45,9 +75,29 @@ class CategoriasController {
         }
     }
 
-    public function updateCategoria($id, $data) {
+    /**
+     * Actualizar una categoría
+     * PUT /api/categorias/{id}
+     * ✅ CORREGIDO: Recibir parámetros y leer JSON
+     */
+    public function updateCategoria(array $params) {
         try {
+            $id = $params['id'] ?? null;
+
+            if (!$id) {
+                ResponseHelper::error('ID no proporcionado', 400);
+                return;
+            }
+
+            $data = json_decode(file_get_contents('php://input'), true);
+
+            if (empty($data)) {
+                ResponseHelper::error('No se enviaron datos para actualizar', 400);
+                return;
+            }
+
             $result = $this->categoriasModel->updateCategoria($id, $data);
+            
             if ($result) {
                 ResponseHelper::success(['id' => $id], 'Categoría actualizada exitosamente');
             } else {
@@ -58,9 +108,22 @@ class CategoriasController {
         }
     }
 
-    public function deleteCategoria($id) {
+    /**
+     * Eliminar una categoría
+     * DELETE /api/categorias/{id}
+     * ✅ CORREGIDO: Recibir parámetros correctamente
+     */
+    public function deleteCategoria(array $params) {
         try {
+            $id = $params['id'] ?? null;
+
+            if (!$id) {
+                ResponseHelper::error('ID no proporcionado', 400);
+                return;
+            }
+
             $result = $this->categoriasModel->deleteCategoria($id);
+            
             if ($result) {
                 ResponseHelper::success(['id' => $id], 'Categoría eliminada exitosamente');
             } else {
