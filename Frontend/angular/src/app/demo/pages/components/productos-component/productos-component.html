@@ -86,7 +86,7 @@
                     *ngFor="let v of variantesVisibles(row)"
                     [color]="chipColor(v)"
                     highlighted
-                    [matTooltip]="'Talla: '+v.talla+' | Color: '+v.color+' | Género: '+v.genero+' | Stock: '+v.stock">
+                    [matTooltip]="'Talla: '+v.talla+' | Color: '+v.color+' | Stock: '+v.stock">
                     {{ chipLabel(v) }}
                   </mat-chip>
                 </mat-chip-set>
@@ -113,6 +113,12 @@
               </ng-template>
 
             </td>
+          </ng-container>
+
+          <!-- genero -->
+          <ng-container matColumnDef="genero">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Género</th>
+            <td mat-cell *matCellDef="let row">{{ row.genero || 'N/A' }}</td>
           </ng-container>
 
           <!-- ✅ STOCK TOTAL -->

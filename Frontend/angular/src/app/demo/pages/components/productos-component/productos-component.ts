@@ -60,6 +60,7 @@ export class ProductosComponent implements OnInit, AfterViewInit {
     'nombre',
     'categoria',
     'variantes',
+    'genero',
     'stock_total',
     'precio_compra',
     'precio_venta',
@@ -108,6 +109,7 @@ export class ProductosComponent implements OnInit, AfterViewInit {
 
     this.productosService.getProductos().subscribe({
       next: (response) => {
+        console.log("productos recibidos:", response);
         const productos = this.extraerDatos(response);
 
         productos.forEach(p => {
@@ -154,7 +156,7 @@ export class ProductosComponent implements OnInit, AfterViewInit {
   }
 
   chipLabel(v: any): string {
-    return `${v.talla} / ${v.color} / ${v.genero}  ×${v.stock}`;
+    return `${v.talla} / ${v.color}  ×${v.stock}`;
   }
 
   chipColor(v: any): 'primary' | 'warn' | 'accent' {
@@ -176,7 +178,7 @@ export class ProductosComponent implements OnInit, AfterViewInit {
   configurarFiltro(): void {
     this.dataSource.filterPredicate = (data: any, filter: string) => {
       const variantesTexto = (data.variantes ?? [])
-        .map((v: any) => `${v.talla} ${v.color} ${v.genero}`)
+        .map((v: any) => `${v.talla} ${v.color}`)
         .join(' ');
 
       const texto = `
