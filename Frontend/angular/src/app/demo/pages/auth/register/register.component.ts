@@ -1,10 +1,8 @@
-// angular import
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
-// Material imports
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -12,11 +10,10 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
-// Services
 import { ApiService } from 'src/app/@theme/services/api.service';
 import { AuthService } from 'src/app/@theme/services/auth.service';
+import { ModalResponseService } from 'src/app/@theme/services/modal-response.service'; // ✅
 
-// project import
 import { SharedModule } from 'src/app/demo/shared/shared.module';
 
 interface Rol {
@@ -25,24 +22,13 @@ interface Rol {
   descripcion: string;
 }
 
-interface RegisterData {
-  nombre: string;
-  apellido: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  telefono: string;
-  direccion: string;
-  id_rol: number;
-}
-
 @Component({
   selector: 'app-register',
   standalone: true,
   imports: [
     CommonModule,
-    SharedModule, 
-    RouterModule, 
+    SharedModule,
+    RouterModule,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
@@ -55,38 +41,33 @@ interface RegisterData {
   styleUrls: ['./register.component.scss', '../authentication.scss']
 })
 export default class RegisterComponent implements OnInit {
-  // public props
+
   hide = true;
   coHide = true;
   roles: Rol[] = [];
-  errorMessage = '';
-  successMessage = '';
   isLoading = false;
 
-  // FormGroup para manejar todo el formulario
   registerForm = new FormGroup({
-    nombre: new FormControl('', [Validators.required, Validators.minLength(2)]),
-    apellido: new FormControl('', [Validators.required, Validators.minLength(2)]),
-    email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required, Validators.minLength(6)]),
-    confirmPassword: new FormControl('', [Validators.required]),
-    telefono: new FormControl('', [Validators.required]),
-    direccion: new FormControl('', [Validators.required]),
-    id_rol: new FormControl<number | null>(null, [Validators.required]),
-    acceptTerms: new FormControl(false, [Validators.requiredTrue])
+    nombre:          new FormControl('',        [Validators.required, Validators.minLength(2)]),
+    apellido:        new FormControl('',        [Validators.required, Validators.minLength(2)]),
+    email:           new FormControl('',        [Validators.required, Validators.email]),
+    password:        new FormControl('',        [Validators.required, Validators.minLength(6)]),
+    confirmPassword: new FormControl('',        [Validators.required]),
+    telefono:        new FormControl('',        [Validators.required]),
+    direccion:       new FormControl('',        [Validators.required]),
+    id_rol:          new FormControl<number | null>(null, [Validators.required]),
+    acceptTerms:     new FormControl(false,     [Validators.requiredTrue])
   });
 
   constructor(
     private apiService: ApiService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private modalService: ModalResponseService // ✅
   ) {}
 
   ngOnInit(): void {
-    // Cargar roles primero
     this.loadRoles();
-    
-    // Verificar autenticación después de un pequeño delay
     setTimeout(() => {
       if (this.authService.isAuthenticated()) {
         this.router.navigate(['/dashboard']);
@@ -100,7 +81,6 @@ export default class RegisterComponent implements OnInit {
         if (response.status === 'success') {
           this.roles = response.data;
         } else if (Array.isArray(response)) {
-          // Si la respuesta es directamente un array
           this.roles = response;
         }
       },
@@ -111,51 +91,57 @@ export default class RegisterComponent implements OnInit {
   }
 
   onSubmit(): void {
+    // Validación del formulario en el frontend
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
-      this.errorMessage = 'Por favor complete todos los campos requeridos';
+      this.modalService.show({
+        title: 'Formulario incompleto',
+        message: 'Por favor complete todos los campos requeridos',
+        type: 'warning'
+      });
       return;
     }
 
-    // Validar que las contraseñas coincidan
-    const password = this.registerForm.get('password')?.value;
+    const password        = this.registerForm.get('password')?.value;
     const confirmPassword = this.registerForm.get('confirmPassword')?.value;
 
     if (password !== confirmPassword) {
-      this.errorMessage = 'Las contraseñas no coinciden';
+      this.modalService.show({
+        title: 'Error de contraseña',
+        message: 'Las contraseñas no coinciden',
+        type: 'error'
+      });
       return;
     }
 
     this.isLoading = true;
-    this.errorMessage = '';
 
-    const registerData: any = {
-      nombre: this.registerForm.get('nombre')?.value,
-      apellido: this.registerForm.get('apellido')?.value,
-      email: this.registerForm.get('email')?.value,
-      password: password,
-      confirmPassword: confirmPassword,
-      telefono: this.registerForm.get('telefono')?.value,
-      direccion: this.registerForm.get('direccion')?.value,
-      id_rol: this.registerForm.get('id_rol')?.value
+    const registerData = {
+      nombre:          this.registerForm.get('nombre')?.value,
+      apellido:        this.registerForm.get('apellido')?.value,
+      email:           this.registerForm.get('email')?.value,
+      password,
+      confirmPassword,
+      telefono:        this.registerForm.get('telefono')?.value,
+      direccion:       this.registerForm.get('direccion')?.value,
+      id_rol:          this.registerForm.get('id_rol')?.value
     };
-
 
     this.apiService.post<any>('auth/register', registerData).subscribe({
       next: (response) => {
+        // ✅ El backend responde con ResponseHelper → showmodal viene incluido
+        this.modalService.handleResponse(response);
+
         if (response.status === 'success') {
-          this.successMessage = 'Registro exitoso. Redirigiendo...';
-          setTimeout(() => {
-            this.router.navigate(['/auth/login']);
-          }, 2000);
-        } else {
-          this.errorMessage = response.message || 'Error al registrar usuario';
+          setTimeout(() => this.router.navigate(['/auth/login']), 2000);
         }
+
         this.isLoading = false;
       },
       error: (error) => {
         console.error('Error al registrar:', error);
-        this.errorMessage = error.error?.message || 'Error al conectar con el servidor';
+        // ✅ Muestra el mensaje de error que devuelve el backend (ej: "La contraseña debe tener al menos 6 caracteres")
+        this.modalService.handleError(error);
         this.isLoading = false;
       }
     });
@@ -163,29 +149,14 @@ export default class RegisterComponent implements OnInit {
 
   getErrorMessage(field: string): string {
     const control = this.registerForm.get(field);
-    
-    if (!control || !control.errors || !control.touched) {
-      return '';
-    }
+    if (!control?.errors || !control.touched) return '';
 
-    if (control.hasError('required')) {
-      return 'Este campo es requerido';
+    if (control.hasError('required'))   return 'Este campo es requerido';
+    if (control.hasError('email'))      return 'Ingrese un email válido';
+    if (control.hasError('minlength')) {
+      const min = control.errors['minlength'].requiredLength;
+      return `Debe tener al menos ${min} caracteres`;
     }
-
-    if (field === 'email' && control.hasError('email')) {
-      return 'Ingrese un email válido';
-    }
-
-    if (field === 'password' && control.hasError('minlength')) {
-      return 'La contraseña debe tener al menos 6 caracteres';
-    }
-
-    if (field === 'nombre' || field === 'apellido') {
-      if (control.hasError('minlength')) {
-        return 'Debe tener al menos 2 caracteres';
-      }
-    }
-
     return '';
   }
 }
