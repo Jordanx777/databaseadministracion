@@ -3,10 +3,11 @@ import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError, RouterModule } from '@angular/router';
 // project import
 import { SharedModule } from './demo/shared/shared.module';
+import { ResponseModalComponent } from 'src/app/demo/layout/component/response-modal/response-modal';
 
 @Component({
   selector: 'app-root',
-  imports: [SharedModule, RouterModule],
+  imports: [SharedModule, RouterModule, ResponseModalComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
