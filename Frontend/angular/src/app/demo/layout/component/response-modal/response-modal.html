@@ -1,0 +1,42 @@
+<div class="modal-backdrop" *ngIf="visible" (click)="cerrar()">
+  <div class="modal-box" [class]="'modal-' + modal.type" (click)="$event.stopPropagation()">
+
+    <!-- Icono animado -->
+    <div class="modal-icon">
+
+      <!-- SUCCESS -->
+      <svg *ngIf="modal.type === 'success'" viewBox="0 0 52 52">
+        <circle cx="26" cy="26" r="25" fill="none"/>
+        <path fill="none" d="M14 27l8 8 16-16" stroke-linecap="round"/>
+      </svg>
+
+      <!-- ERROR -->
+      <svg *ngIf="modal.type === 'error'" viewBox="0 0 52 52">
+        <circle cx="26" cy="26" r="25" fill="none"/>
+        <path fill="none" d="M16 16 36 36 M36 16 16 36" stroke-linecap="round"/>
+      </svg>
+
+      <!-- WARNING -->
+      <svg *ngIf="modal.type === 'warning'" viewBox="0 0 52 52">
+        <circle cx="26" cy="26" r="25" fill="none"/>
+        <path fill="none" d="M26 16 v12 M26 34 v2" stroke-linecap="round"/>
+      </svg>
+
+      <!-- INFO -->
+      <svg *ngIf="modal.type === 'info'" viewBox="0 0 52 52">
+        <circle cx="26" cy="26" r="25" fill="none"/>
+        <path fill="none" d="M26 20 v2 M26 27 v9" stroke-linecap="round"/>
+      </svg>
+
+    </div>
+
+    <h2 class="modal-title">{{ modal.title }}</h2>
+    <p class="modal-message">{{ modal.message }}</p>
+
+    <button class="modal-btn" (click)="cerrar()">Aceptar</button>
+
+    <!-- Barra de progreso auto-cierre -->
+    <div class="progress-bar" [class.running]="visible"></div>
+
+  </div>
+</div>

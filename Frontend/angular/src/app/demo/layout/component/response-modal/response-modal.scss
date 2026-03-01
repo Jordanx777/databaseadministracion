@@ -1,0 +1,177 @@
+// ── Backdrop ──────────────────────────────────────────────
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+// ── Caja principal ────────────────────────────────────────
+.modal-box {
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px 36px 32px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.25s ease;
+}
+
+// ── Ícono SVG animado ─────────────────────────────────────
+.modal-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 72px;
+    height: 72px;
+
+    circle {
+      stroke-width: 2;
+      stroke-dasharray: 166;
+      stroke-dashoffset: 166;
+      animation: drawCircle 0.6s ease forwards;
+    }
+
+    path {
+      stroke-width: 3.5;
+      stroke-dasharray: 80;
+      stroke-dashoffset: 80;
+      animation: drawCheck 0.4s 0.4s ease forwards;
+    }
+  }
+}
+
+// ── Colores por tipo ──────────────────────────────────────
+.modal-success {
+  .modal-icon {
+    background: #f0fdf4;
+    svg circle { stroke: #22c55e; }
+    svg path  { stroke: #22c55e; }
+  }
+  .modal-btn    { background: #22c55e; }
+  .progress-bar { background: #22c55e; }
+}
+
+.modal-error {
+  .modal-icon {
+    background: #fef2f2;
+    svg circle { stroke: #ef4444; }
+    svg path   {
+      stroke: #ef4444;
+      stroke-dasharray: 50;
+      stroke-dashoffset: 50;
+    }
+  }
+  .modal-btn    { background: #ef4444; }
+  .progress-bar { background: #ef4444; }
+}
+
+.modal-warning {
+  .modal-icon {
+    background: #fffbeb;
+    svg circle { stroke: #f59e0b; }
+    svg path   {
+      stroke: #f59e0b;
+      stroke-dasharray: 30;
+      stroke-dashoffset: 30;
+    }
+  }
+  .modal-btn    { background: #f59e0b; }
+  .progress-bar { background: #f59e0b; }
+}
+
+.modal-info {
+  .modal-icon {
+    background: #eff6ff;
+    svg circle { stroke: #3b82f6; }
+    svg path   {
+      stroke: #3b82f6;
+      stroke-dasharray: 30;
+      stroke-dashoffset: 30;
+    }
+  }
+  .modal-btn    { background: #3b82f6; }
+  .progress-bar { background: #3b82f6; }
+}
+
+// ── Textos ────────────────────────────────────────────────
+.modal-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 10px;
+}
+
+.modal-message {
+  font-size: 0.95rem;
+  color: #555;
+  margin: 0 0 28px;
+  line-height: 1.5;
+}
+
+// ── Botón ─────────────────────────────────────────────────
+.modal-btn {
+  color: #fff;
+  border: none;
+  padding: 10px 40px;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+
+  &:hover  { opacity: 0.88; transform: scale(1.03); }
+  &:active { transform: scale(0.97); }
+}
+
+// ── Barra de progreso ─────────────────────────────────────
+.progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  width: 100%;
+  border-radius: 0 0 20px 20px;
+
+  &.running {
+    animation: progress 4s linear forwards;
+  }
+}
+
+// ── Animaciones ───────────────────────────────────────────
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes progress {
+  from { width: 100%; }
+  to   { width: 0%;   }
+}
+
+@keyframes drawCircle {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes drawCheck {
+  to { stroke-dashoffset: 0; }
+}
