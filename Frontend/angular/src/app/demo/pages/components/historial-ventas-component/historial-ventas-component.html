@@ -1,0 +1,323 @@
+<!-- src/app/modules/ventas/components/historial-ventas/historial-ventas.component.html -->
+
+<div class="historial-container">
+
+  <!-- ===== LOADING ===== -->
+  <div *ngIf="cargando" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando historial de ventas...</p>
+  </div>
+
+  <!-- ===== CONTENIDO ===== -->
+  <ng-container *ngIf="!cargando">
+
+    <!-- ===== ESTADÍSTICAS ===== -->
+    <div class="estadisticas-grid">
+      
+      <mat-card class="stat-card stat-total">
+        <div class="stat-icon">
+          <mat-icon>receipt_long</mat-icon>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Total Ventas</span>
+          <span class="stat-value">{{ estadisticas.total_ventas }}</span>
+        </div>
+      </mat-card>
+
+      <mat-card class="stat-card stat-vendido">
+        <div class="stat-icon">
+          <mat-icon>attach_money</mat-icon>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Total Vendido</span>
+          <span class="stat-value">{{ formatearMoneda(estadisticas.total_vendido) }}</span>
+        </div>
+      </mat-card>
+
+      <mat-card class="stat-card stat-cobrado">
+        <div class="stat-icon">
+          <mat-icon>payments</mat-icon>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Total Cobrado</span>
+          <span class="stat-value">{{ formatearMoneda(estadisticas.total_cobrado) }}</span>
+        </div>
+      </mat-card>
+
+      <mat-card class="stat-card stat-pendiente">
+        <div class="stat-icon">
+          <mat-icon>pending</mat-icon>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Total Pendiente</span>
+          <span class="stat-value">{{ formatearMoneda(estadisticas.total_pendiente) }}</span>
+        </div>
+      </mat-card>
+
+    </div>
+
+    <!-- ===== FILTROS ===== -->
+    <mat-card class="filtros-card">
+      
+      <div class="filtros-header">
+        <h3>
+          <mat-icon>filter_list</mat-icon>
+          Filtros de Búsqueda
+        </h3>
+        <button mat-stroked-button (click)="limpiarFiltros()">
+          <mat-icon>clear</mat-icon>
+          Limpiar Filtros
+        </button>
+      </div>
+
+      <div class="filtros-grid">
+        
+        <!-- Búsqueda general -->
+        <mat-form-field appearance="outline" class="span-2">
+          <mat-label>Buscar</mat-label>
+          <input matInput 
+            [(ngModel)]="busqueda" 
+            (input)="aplicarFiltros()"
+            placeholder="Buscar por número de factura, cliente...">
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+
+        <!-- Filtro por estado -->
+        <mat-form-field appearance="outline">
+          <mat-label>Estado</mat-label>
+          <mat-select [(ngModel)]="filtroEstado" (selectionChange)="aplicarFiltros()">
+            <mat-option value="todas">Todas</mat-option>
+            <mat-option value="pagada">Pagadas</mat-option>
+            <mat-option value="pendiente">Pendientes</mat-option>
+            <mat-option value="cancelada">Canceladas</mat-option>
+          </mat-select>
+          <mat-icon matPrefix>checklist</mat-icon>
+        </mat-form-field>
+
+        <!-- Filtro por tipo de pago -->
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo de Pago</mat-label>
+          <mat-select [(ngModel)]="filtroTipoPago" (selectionChange)="aplicarFiltros()">
+            <mat-option value="todos">Todos</mat-option>
+            <mat-option value="contado">Contado</mat-option>
+            <mat-option value="credito">Crédito</mat-option>
+            <mat-option value="mixto">Mixto</mat-option>
+          </mat-select>
+          <mat-icon matPrefix>payment</mat-icon>
+        </mat-form-field>
+
+      </div>
+
+      <div class="resultados-info">
+        <span>Mostrando {{ historialFiltrado.length }} de {{ historial.length }} ventas</span>
+      </div>
+
+    </mat-card>
+
+    <!-- ===== TABLA DE VENTAS ===== -->
+    <mat-card class="tabla-card">
+
+      <div class="tabla-header">
+        <h2>
+          <mat-icon>history</mat-icon>
+          Historial de Ventas
+        </h2>
+      </div>
+
+      <!-- Sin resultados -->
+      <div *ngIf="historialFiltrado.length === 0" class="empty-state">
+        <mat-icon>search_off</mat-icon>
+        <p>No se encontraron ventas</p>
+      </div>
+
+      <!-- Lista de ventas -->
+      <div *ngIf="historialFiltrado.length > 0" class="ventas-list">
+
+        <mat-accordion>
+          
+          <mat-expansion-panel 
+            *ngFor="let venta of historialPaginado" 
+            class="venta-panel">
+
+            <!-- Header -->
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <div class="venta-header-content">
+                  
+                  <div class="venta-info-principal">
+                    <span class="numero-factura">{{ venta.numero_factura }}</span>
+                    <span class="fecha">{{ formatearFecha(venta.fecha_venta) }}</span>
+                  </div>
+
+                  <div class="venta-chips">
+                    <mat-chip [class]="getEstadoClass(venta.estado_venta)" highlighted>
+                      {{ venta.estado_venta }}
+                    </mat-chip>
+                    <mat-chip [class]="getTipoPagoClass(venta.tipo_pago)" highlighted>
+                      {{ venta.tipo_pago }}
+                    </mat-chip>
+                  </div>
+
+                </div>
+              </mat-panel-title>
+
+              <mat-panel-description>
+                <div class="venta-resumen">
+                  <div class="cliente-info">
+                    <mat-icon>person</mat-icon>
+                    <span>{{ venta.cliente_nombre }}</span>
+                  </div>
+                  <div class="monto-info">
+                    <span class="label">Total:</span>
+                    <span class="valor">{{ formatearMoneda(venta.monto_venta) }}</span>
+                  </div>
+                  <div class="saldo-info" *ngIf="venta.saldo_pendiente > 0">
+                    <span class="label">Pendiente:</span>
+                    <span class="valor saldo-pendiente">{{ formatearMoneda(venta.saldo_pendiente) }}</span>
+                  </div>
+                </div>
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <!-- Contenido expandible -->
+            <div class="venta-detalle">
+
+              <!-- Información del cliente -->
+              <div class="seccion">
+                <h4>
+                  <mat-icon>account_circle</mat-icon>
+                  Información del Cliente
+                </h4>
+                <div class="info-grid">
+                  <div class="info-item">
+                    <span class="label">Nombre:</span>
+                    <span class="value">{{ venta.cliente_nombre }}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="label">Tipo:</span>
+                    <span class="value">{{ venta.cliente_id ? 'Cliente Registrado' : 'Cliente Ocasional' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Productos vendidos -->
+              <div class="seccion">
+                <h4>
+                  <mat-icon>shopping_cart</mat-icon>
+                  Productos Vendidos
+                </h4>
+                <div class="productos-list">
+                  <div *ngFor="let producto of venta.productos" class="producto-item">
+                    <div class="producto-info">
+                      <span class="producto-nombre">{{ producto.producto }}</span>
+                      <span class="producto-detalles">
+                        {{ producto.marca || 'Sin marca' }} | 
+                        Talla: {{ producto.talla }} | 
+                        Color: {{ producto.color }}
+                      </span>
+                    </div>
+                    <div class="producto-cantidad">
+                      <span>x{{ producto.cantidad }}</span>
+                    </div>
+                    <div class="producto-precio">
+                      <span>{{ formatearMoneda(producto.precio) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Resumen financiero -->
+              <div class="seccion">
+                <h4>
+                  <mat-icon>calculate</mat-icon>
+                  Resumen Financiero
+                </h4>
+                <div class="resumen-financiero">
+                  <div class="resumen-item">
+                    <span class="label">Monto Total:</span>
+                    <span class="value total">{{ formatearMoneda(venta.monto_venta) }}</span>
+                  </div>
+                  <div class="resumen-item">
+                    <span class="label">Total Pagado:</span>
+                    <span class="value pagado">{{ formatearMoneda(venta.total_pagado) }}</span>
+                  </div>
+                  <div class="resumen-item">
+                    <span class="label">Saldo Pendiente:</span>
+                    <span class="value pendiente">{{ formatearMoneda(venta.saldo_pendiente) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Historial de pagos -->
+              <div class="seccion" *ngIf="venta.pagos && venta.pagos.length > 0">
+                <h4>
+                  <mat-icon>receipt</mat-icon>
+                  Historial de Pagos ({{ venta.pagos.length }})
+                </h4>
+                <div class="pagos-list">
+                  <div *ngFor="let pago of venta.pagos" class="pago-item">
+                    <div class="pago-fecha">
+                      <mat-icon>event</mat-icon>
+                      <span>{{ formatearFecha(pago.fecha) }}</span>
+                    </div>
+                    <div class="pago-metodo">
+                      <mat-chip class="chip-metodo">{{ pago.metodo }}</mat-chip>
+                    </div>
+                    <div class="pago-monto">
+                      <span>{{ formatearMoneda(pago.monto) }}</span>
+                    </div>
+                    <div class="pago-referencia" *ngIf="pago.referencia">
+                      <span class="ref-label">Ref:</span>
+                      <span>{{ pago.referencia }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Acciones -->
+              <div class="acciones">
+                <button mat-flat-button color="primary" (click)="verDetalleVenta(venta.venta_id)">
+                  <mat-icon>visibility</mat-icon>
+                  Ver Detalles
+                </button>
+                <button 
+                  mat-stroked-button 
+                  color="accent"
+                  *ngIf="venta.cliente_id"
+                  (click)="verCuentaCliente(venta.cliente_id)">
+                  <mat-icon>person_search</mat-icon>
+                  Ver Cuenta Cliente
+                </button>
+                <button 
+                  mat-flat-button 
+                  color="accent"
+                  *ngIf="venta.saldo_pendiente > 0"
+                  (click)="registrarPago(venta)">
+                  <mat-icon>payments</mat-icon>
+                  Registrar Pago
+                </button>
+              </div>
+
+            </div>
+
+          </mat-expansion-panel>
+
+        </mat-accordion>
+
+        <!-- Paginación -->
+        <mat-paginator
+          [length]="totalItems"
+          [pageSize]="itemsPorPagina"
+          [pageIndex]="paginaActual"
+          [pageSizeOptions]="[5, 10, 25, 50, 100]"
+          (page)="onPageChange($event)"
+          showFirstLastButtons>
+        </mat-paginator>
+
+      </div>
+
+    </mat-card>
+
+  </ng-container>
+
+</div>
