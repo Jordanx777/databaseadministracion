@@ -101,11 +101,11 @@ class ProductosModel
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    /** ✅ Ahora incluye genero en la consulta */
+     /** ✅ Sin genero en variantes */
     public function getVariantesByProducto(int $productoId): array
     {
         $stmt = $this->pdo->prepare("
-            SELECT id, producto_id, talla, color, genero, stock, estado
+            SELECT id, producto_id, talla, color, stock, estado
             FROM producto_variantes
             WHERE producto_id = ?
             ORDER BY talla, color
@@ -118,32 +118,34 @@ class ProductosModel
     // CREAR
     // ─────────────────────────────────────────────────────────────────────────
 
+    
     public function createProducto(array $data, array $variantes): int|false
     {
         try {
             $this->pdo->beginTransaction();
 
-            // ✅ Insertar producto padre — sin genero, talla, color, stock
+            // ✅ Insertar producto padre CON genero
             $stmt = $this->pdo->prepare("
                 INSERT INTO productos (
                     nombre, categoria_id, subcategoria_id, marca_id, proveedor_id,
-                    precio_compra, precio_venta, imagen_url
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    genero, precio_compra, precio_venta, imagen_url
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
                 $data['nombre'],
                 $data['categoria_id'],
                 $data['subcategoria_id'] ?? null,
-                $data['marca_id'],
-                $data['proveedor_id'],
-                $data['precio_compra'],
+                $data['marca_id'] ?? null,        // ✅ Opcional
+                $data['proveedor_id'] ?? null,    // ✅ Opcional
+                $data['genero'] ?? null,          // ✅ Genero en productos
+                $data['precio_compra'] ?? null,   // ✅ Opcional
                 $data['precio_venta'],
                 $data['imagen_url'] ?? null,
             ]);
 
             $productoId = (int)$this->pdo->lastInsertId();
 
-            // Insertar variantes con genero
+            // Insertar variantes SIN genero
             $this->insertarVariantes($productoId, $variantes);
 
             $this->pdo->commit();
@@ -154,12 +156,11 @@ class ProductosModel
             return false;
         }
     }
-
     // ─────────────────────────────────────────────────────────────────────────
     // ACTUALIZAR
     // ─────────────────────────────────────────────────────────────────────────
 
-    public function updateProducto(int $id, array $data, ?array $variantes = null): bool
+     public function updateProducto(int $id, array $data, ?array $variantes = null): bool
     {
         try {
             $this->pdo->beginTransaction();
@@ -191,6 +192,7 @@ class ProductosModel
         }
     }
 
+
     // ─────────────────────────────────────────────────────────────────────────
     // DELETE
     // ─────────────────────────────────────────────────────────────────────────
@@ -206,15 +208,14 @@ class ProductosModel
     // HELPERS PRIVADOS
     // ─────────────────────────────────────────────────────────────────────────
 
-    /** ✅ INSERT incluye genero */
+   /** ✅ INSERT SIN genero */
     private function insertarVariantes(int $productoId, array $variantes): void
     {
         $stmt = $this->pdo->prepare("
-            INSERT INTO producto_variantes (producto_id, talla, color, genero, stock)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO producto_variantes (producto_id, talla, color, stock)
+            VALUES (?, ?, ?, ?)
             ON CONFLICT (producto_id, talla, color)
             DO UPDATE SET
-                genero     = EXCLUDED.genero,
                 stock      = EXCLUDED.stock,
                 updated_at = CURRENT_TIMESTAMP
         ");
@@ -224,18 +225,12 @@ class ProductosModel
                 $productoId,
                 $v['talla'],
                 $v['color'],
-                $v['genero'],                  // ✅
                 (int)($v['stock'] ?? 0),
             ]);
         }
     }
 
-    /**
-     * Sincroniza variantes en UPDATE:
-     * - Con id  → actualiza
-     * - Sin id  → inserta
-     * - Ausentes → elimina
-     */
+    /** ✅ Sincronizar SIN genero */
     private function sincronizarVariantes(int $productoId, array $variantes): void
     {
         $idsRecibidos = array_filter(
@@ -243,7 +238,6 @@ class ProductosModel
             fn($id) => $id !== null && $id !== ''
         );
 
-        // Eliminar variantes que ya no están
         if (!empty($idsRecibidos)) {
             $placeholders = implode(',', array_fill(0, count($idsRecibidos), '?'));
             $stmt = $this->pdo->prepare("
@@ -256,31 +250,28 @@ class ProductosModel
             $stmt->execute([$productoId]);
         }
 
-        // ✅ UPDATE y INSERT incluyen genero
         $stmtUpdate = $this->pdo->prepare("
             UPDATE producto_variantes
-            SET talla = ?, color = ?, genero = ?, stock = ?, updated_at = CURRENT_TIMESTAMP
+            SET talla = ?, color = ?, stock = ?, updated_at = CURRENT_TIMESTAMP
             WHERE id = ? AND producto_id = ?
         ");
         $stmtInsert = $this->pdo->prepare("
-            INSERT INTO producto_variantes (producto_id, talla, color, genero, stock)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO producto_variantes (producto_id, talla, color, stock)
+            VALUES (?, ?, ?, ?)
         ");
 
         foreach ($variantes as $v) {
-            $talla  = $v['talla'];
-            $color  = $v['color'];
-            $genero = $v['genero'];             // ✅
-            $stock  = (int)($v['stock'] ?? 0);
+            $talla = $v['talla'];
+            $color = $v['color'];
+            $stock = (int)($v['stock'] ?? 0);
 
             if (!empty($v['id'])) {
-                $stmtUpdate->execute([$talla, $color, $genero, $stock, (int)$v['id'], $productoId]);
+                $stmtUpdate->execute([$talla, $color, $stock, (int)$v['id'], $productoId]);
             } else {
-                $stmtInsert->execute([$productoId, $talla, $color, $genero, $stock]);
+                $stmtInsert->execute([$productoId, $talla, $color, $stock]);
             }
         }
     }
-
     // ─────────────────────────────────────────────────────────────────────────
     // MÉTODOS EXTRA
     // ─────────────────────────────────────────────────────────────────────────
