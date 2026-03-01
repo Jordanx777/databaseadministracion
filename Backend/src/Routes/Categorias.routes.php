@@ -1,9 +1,14 @@
 <?php
 use App\Controllers\CategoriasController;
 
+// Obtener todas las categorías
 $router->get('/api/categorias', [CategoriasController::class, 'getAllCategorias']);
-// $router->get('/api/categorias/{id}', [CategoriasController::class, 'getCategoriaById']);
-// $router->post('/api/categorias', [CategoriasController::class, 'createCategoria']);
-// $router->put('/api/categorias/{id}', [CategoriasController::class, 'updateCategoria']);
-// $router->delete('/api/categorias/{id}', [CategoriasController::class, 'deleteCategoria']);
+// Obtener una categoría por ID
+$router->get('/api/categorias/{id}', [CategoriasController::class, 'getCategoriaById']);
+// Crear categoría
+$router->post('/api/categorias', [CategoriasController::class, 'createCategoria']);
+// Actualizar categoría
+$router->put('/api/categorias/{id}', [CategoriasController::class, 'updateCategoria']);
+// Eliminar categoría
+$router->delete('/api/categorias/{id}', [CategoriasController::class, 'deleteCategoria']);
 ?>
