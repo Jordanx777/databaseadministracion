@@ -72,14 +72,15 @@ class ProductosController
     // ─────────────────────────────────────────────────────────────────────────
     // CREAR
     // ─────────────────────────────────────────────────────────────────────────
-    public function crearProducto()
+     public function crearProducto()
     {
         try {
             $data = $_POST;
             if (empty($data)) { ResponseHelper::error('No se recibieron datos', 400); return; }
 
-            // ✅ Campos requeridos del padre — sin talla, color, genero, stock
-            $camposRequeridos = ['nombre', 'categoria_id', 'marca_id', 'precio_compra', 'precio_venta', 'proveedor_id'];
+            // ✅ Campos requeridos: nombre, categoria_id, precio_venta
+            // genero está en el producto padre ahora
+            $camposRequeridos = ['nombre', 'categoria_id', 'precio_venta'];
             foreach ($camposRequeridos as $campo) {
                 if (!isset($data[$campo]) || $data[$campo] === '') {
                     ResponseHelper::error("El campo '$campo' es obligatorio", 400);
@@ -97,10 +98,10 @@ class ProductosController
                 ResponseHelper::error('Las variantes no tienen un formato válido', 400);
                 return;
             }
-            // ✅ Cada variante debe tener talla, color, genero y stock
+            // ✅ Cada variante solo necesita talla, color y stock
             foreach ($variantes as $i => $v) {
-                if (empty($v['talla']) || empty($v['color']) || empty($v['genero']) || !isset($v['stock'])) {
-                    ResponseHelper::error("La variante #" . ($i + 1) . " requiere talla, color, género y stock", 400);
+                if (empty($v['talla']) || empty($v['color']) || !isset($v['stock'])) {
+                    ResponseHelper::error("La variante #" . ($i + 1) . " requiere talla, color y stock", 400);
                     return;
                 }
             }
@@ -124,6 +125,7 @@ class ProductosController
             ResponseHelper::error($e->getMessage(), 500);
         }
     }
+
 
     // ─────────────────────────────────────────────────────────────────────────
     // ACTUALIZAR
@@ -179,20 +181,20 @@ class ProductosController
                     ResponseHelper::error('Las variantes no tienen un formato válido', 400);
                     return;
                 }
-                // ✅ Validar genero en cada variante
+                // ✅ Validar talla, color, stock (sin genero)
                 foreach ($variantes as $i => $v) {
-                    if (empty($v['talla']) || empty($v['color']) || empty($v['genero']) || !isset($v['stock'])) {
-                        ResponseHelper::error("La variante #" . ($i + 1) . " requiere talla, color, género y stock", 400);
+                    if (empty($v['talla']) || empty($v['color']) || !isset($v['stock'])) {
+                        ResponseHelper::error("La variante #" . ($i + 1) . " requiere talla, color y stock", 400);
                         return;
                     }
                 }
                 unset($data['variantes']);
             }
 
-            // ✅ Campos permitidos del padre — sin genero, talla, color, stock
+            // ✅ Campos permitidos del padre CON genero
             $camposPermitidos = [
                 'nombre', 'categoria_id', 'subcategoria_id', 'marca_id',
-                'proveedor_id', 'precio_compra', 'precio_venta', 'imagen_url', 'estado'
+                'proveedor_id', 'genero', 'precio_compra', 'precio_venta', 'imagen_url', 'estado'
             ];
             $dataFiltrada = array_intersect_key($data, array_flip($camposPermitidos));
 
@@ -212,6 +214,7 @@ class ProductosController
             ResponseHelper::error($e->getMessage(), 500);
         }
     }
+
 
     // ─────────────────────────────────────────────────────────────────────────
     // DELETE
