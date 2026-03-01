@@ -3,11 +3,15 @@
 namespace App\Controllers;
 
 use App\Models\VentasModel;
+use App\Helpers\ResponseHelper;
+use Exception;
 
-class VentasController {
+class VentasController
+{
     private $ventaModel;
-    
-    public function __construct() {
+
+    public function __construct()
+    {
         $this->ventaModel = new VentasModel();
     }
 
@@ -33,7 +37,6 @@ class VentasController {
                 'data' => $pagos,
                 'total' => count($pagos)
             ]);
-
         } catch (\Exception $e) {
             http_response_code(500);
             echo json_encode([
@@ -43,16 +46,17 @@ class VentasController {
         }
     }
 
-    
+
     /**
      * Crear una nueva venta
      * POST /api/ventas
      */
-    public function crear() {
+    public function crear()
+    {
         try {
             // Obtener datos del body
             $data = json_decode(file_get_contents('php://input'), true);
-            
+
             // Validaciones básicas
             if (empty($data['total']) || $data['total'] <= 0) {
                 http_response_code(400);
@@ -62,7 +66,7 @@ class VentasController {
                 ]);
                 return;
             }
-            
+
             if (empty($data['detalles']) || !is_array($data['detalles'])) {
                 http_response_code(400);
                 echo json_encode([
@@ -71,7 +75,7 @@ class VentasController {
                 ]);
                 return;
             }
-            
+
             // Validar cliente
             if (empty($data['cliente_id']) && empty($data['cliente_nombre'])) {
                 http_response_code(400);
@@ -81,7 +85,7 @@ class VentasController {
                 ]);
                 return;
             }
-            
+
             // Validar tipo de pago
             $tiposPagoValidos = ['contado', 'credito', 'mixto'];
             if (empty($data['tipo_pago']) || !in_array($data['tipo_pago'], $tiposPagoValidos)) {
@@ -92,13 +96,12 @@ class VentasController {
                 ]);
                 return;
             }
-            
+
             // Crear venta
             $resultado = $this->ventaModel->crear($data);
-            
+
             http_response_code(201);
             echo json_encode($resultado);
-            
         } catch (\Exception $e) {
             http_response_code(500);
             echo json_encode([
@@ -107,78 +110,79 @@ class VentasController {
             ]);
         }
     }
-    
+
     /**
      * Obtener todas las ventas
      * GET /api/ventas
      */
-    public function obtenerVentasCompletas() {
-    try {
-        $filtros = $_GET ?? [];
-        $ventas = $this->ventaModel->obtenerVentasCompletas($filtros);
-        
-        http_response_code(200);
-        echo json_encode([
-            'success' => true,
-            'data' => $ventas,
-            'total' => count($ventas)
-        ]);
-        
-    } catch (\Exception $e) {
-        http_response_code(500);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Error al obtener ventas: ' . $e->getMessage()
-        ]);
-    }
-}
+    public function obtenerVentasCompletas()
+    {
+        try {
+            $filtros = $_GET ?? [];
+            $ventas = $this->ventaModel->obtenerVentasCompletas($filtros);
 
-/**
- * Obtener venta completa por ID
- * GET /api/ventas/completas/:id
- */
-public function obtenerVentaCompletaPorId(array $params) {
-    try {
-        $id = $params['id'] ?? null;
-        if (!$id) {
-            http_response_code(400);
+            http_response_code(200);
+            echo json_encode([
+                'success' => true,
+                'data' => $ventas,
+                'total' => count($ventas)
+            ]);
+        } catch (\Exception $e) {
+            http_response_code(500);
             echo json_encode([
                 'success' => false,
-                'message' => 'ID de venta es requerido'
+                'message' => 'Error al obtener ventas: ' . $e->getMessage()
             ]);
-            return;
         }
-        $venta = $this->ventaModel->obtenerVentaCompletaPorId($id);
-        
-        if (!$venta) {
-            http_response_code(404);
-            echo json_encode([
-                'success' => false,
-                'message' => 'Venta no encontrada'
-            ]);
-            return;
-        }
-        
-        http_response_code(200);
-        echo json_encode([
-            'success' => true,
-            'data' => $venta
-        ]);
-        
-    } catch (\Exception $e) {
-        http_response_code(500);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Error al obtener la venta: ' . $e->getMessage()
-        ]);
     }
-}
-    
+
+    /**
+     * Obtener venta completa por ID
+     * GET /api/ventas/completas/:id
+     */
+    public function obtenerVentaCompletaPorId(array $params)
+    {
+        try {
+            $id = $params['id'] ?? null;
+            if (!$id) {
+                http_response_code(400);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'ID de venta es requerido'
+                ]);
+                return;
+            }
+            $venta = $this->ventaModel->obtenerVentaCompletaPorId($id);
+
+            if (!$venta) {
+                http_response_code(404);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Venta no encontrada'
+                ]);
+                return;
+            }
+
+            http_response_code(200);
+            echo json_encode([
+                'success' => true,
+                'data' => $venta
+            ]);
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error al obtener la venta: ' . $e->getMessage()
+            ]);
+        }
+    }
+
     /**
      * Cancelar una venta
      * PUT /api/ventas/:id/cancelar
      */
-    public function cancelar(array $params) {
+    public function cancelar(array $params)
+    {
         try {
             $id = $params['id'] ?? null;
             if (!$id) {
@@ -190,15 +194,41 @@ public function obtenerVentaCompletaPorId(array $params) {
                 return;
             }
             $resultado = $this->ventaModel->cancelar($id);
-            
+
             http_response_code(200);
             echo json_encode($resultado);
-            
         } catch (\Exception $e) {
             http_response_code(500);
             echo json_encode([
                 'success' => false,
                 'message' => 'Error al cancelar la venta: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    // . Obtener historial completo de todas las cuentas (para administración)
+    public function obtenerHistorialCompleto()
+    {
+        try {
+            $historialCompleto = $this->ventaModel->getHistorialCompleto();
+            // if ($historialCompleto) {
+            //     ResponseHelper::success(200, true, 'Historial completo obtenido exitosamente', $historialCompleto);
+            // } else {
+            //     ResponseHelper::error('error al obtener el historial ');
+            // }
+
+            http_response_code(200);
+            echo json_encode([
+                'success' => true,
+                'data' => $historialCompleto,
+                'total' => count($historialCompleto)
+            ]);
+        } catch (Exception $e) {
+            // ResponseHelper::error($e->getMessage(), 500);
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error al obtener historial completo: ' . $e->getMessage()
             ]);
         }
     }
