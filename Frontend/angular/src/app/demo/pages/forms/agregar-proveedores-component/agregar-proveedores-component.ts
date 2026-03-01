@@ -64,7 +64,6 @@ export class AgregarProveedoresComponent implements OnInit {
       ciudad: [''],
       observaciones: [''],
       estado: [true, Validators.required],
-      fecha_llegada: [''],
     });
   }
 
@@ -77,12 +76,6 @@ export class AgregarProveedoresComponent implements OnInit {
 
     this.cargando = true;
     const proveedor = { ...this.proveedorForm.value };
-
-    // Formatear fecha si existe
-    if (proveedor.fecha_llegada) {
-      const fecha = new Date(proveedor.fecha_llegada);
-      proveedor.fecha_llegada = fecha.toISOString().split('T')[0]; // formato YYYY-MM-DD
-    }
 
     // Convertir estado a booleano si viene como string
     if (typeof proveedor.estado === 'string') {

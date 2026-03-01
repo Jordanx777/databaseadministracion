@@ -69,30 +69,6 @@
         </mat-form-field>
       </div>
 
-      <div class="col-md-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Fecha de llegada estimada</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="fecha_llegada">
-          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-          <mat-hint>Opcional</mat-hint>
-        </mat-form-field>
-      </div>
-
-      <!-- ================= ESTADO ================= -->
-      <div class="col-12 mt-4">
-        <h5 class="section-title">Configuración</h5>
-      </div>
-
-      <div class="col-md-6">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Estado *</mat-label>
-          <mat-select formControlName="estado">
-            <mat-option [value]="true">Activo</mat-option>
-            <mat-option [value]="false">Inactivo</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
 
       <!-- ================= OBSERVACIONES ================= -->
       <div class="col-12">
