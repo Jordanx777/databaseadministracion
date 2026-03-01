@@ -22,12 +22,11 @@ const routes: Routes = [
       },
 
       /* rutas de forms */
-
       {
         path: 'addproducto',
         loadComponent: () =>
-          import('../forms/agregar-productoscomponent/agregar-productoscomponent')
-            .then(m => m.AgregarProductoscomponent),
+          import('../forms/agregar-productos-component/agregar-productos.component')
+            .then(m => m.AgregarProductosComponent),
       },
       {
         path: 'registrar-pago',
@@ -39,8 +38,8 @@ const routes: Routes = [
         // ✅ Ruta de EDICIÓN — mismo componente, recibe el id
         path: 'addproducto/:id',
         loadComponent: () =>
-          import('../forms/agregar-productoscomponent/agregar-productoscomponent')
-            .then(m => m.AgregarProductoscomponent),
+          import('../forms/agregar-productos-component/agregar-productos.component')
+            .then(m => m.AgregarProductosComponent),
       },
 
       {
@@ -57,12 +56,12 @@ const routes: Routes = [
             .then(m => m.AgregarVentasComponent),
       },
 
-      {
-        path: 'adddeudores',
-        loadComponent: () =>
-          import('../forms/agregar-clientes-saldo-component/agregar-clientes-saldo-component')
-            .then(m => m.AgregarClientesSaldoComponent),
-      },
+      // {
+      //   path: 'adddeudores',
+      //   loadComponent: () =>
+      //     import('../forms/agregar-clientes-saldo-component/agregar-clientes-saldo-component')
+      //       .then(m => m.AgregarClientesSaldoComponent),
+      // },
 
       /* rutas de pages */
 
@@ -72,7 +71,12 @@ const routes: Routes = [
           import('./productos-component/productos-component')
             .then(m => m.ProductosComponent)
       },
-
+      {
+        path: 'Categorias&Subcategorias',
+        loadComponent: () =>
+          import('./categorias-subcategorias/categorias-subcategorias')
+            .then(m => m.CategoriasGestionComponent)
+      },
       {
         path: 'catalogo',
         loadComponent: () =>
@@ -123,6 +127,12 @@ const routes: Routes = [
         path: 'color',
         loadComponent: () =>
           import('./color/color.component')
+      },
+      {
+        path: 'HistorialVentas',
+        loadComponent: () =>
+          import('./historial-ventas-component/historial-ventas-component')
+            .then(m => m.HistorialVentasComponent)
       }
     ]
   }
