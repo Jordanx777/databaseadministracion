@@ -399,4 +399,42 @@ class VentasModel
             throw $e;
         }
     }
+    public function getHistorialCompleto(): array
+{
+    try {
+        $stmt = $this->conn->query("
+            SELECT 
+                venta_id,
+                numero_factura,
+                fecha_venta,
+                cliente_id,
+                cliente_nombre,
+                monto_venta,
+                tipo_pago,
+                estado_venta,
+                total_pagado,
+                saldo_pendiente,
+                productos,
+                pagos
+            FROM historial_cliente
+            ORDER BY fecha_venta DESC
+        ");
+        
+        $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Decodificar JSON
+        foreach ($resultados as &$resultado) {
+            $resultado['productos'] = !empty($resultado['productos'])
+                ? json_decode($resultado['productos'], true)
+                : [];
+            $resultado['pagos'] = !empty($resultado['pagos'])
+                ? json_decode($resultado['pagos'], true)
+                : [];
+        }
+        
+        return $resultados;
+    } catch (\PDOException $e) {
+        throw new \Exception("Error al obtener historial: " . $e->getMessage());
+    }
+}
 }
