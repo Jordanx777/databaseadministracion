@@ -1,16 +1,21 @@
 <?php
+
 namespace App\Models;
+
 use App\Config\Database;
 use PDO;
 
-class ProveedoresModel {
+class ProveedoresModel
+{
     private $db;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->db = Database::connect();
     }
 
-    public function getAllProveedores(): array {
+    public function getAllProveedores(): array
+    {
         try {
             $stmt = $this->db->query("SELECT * FROM proveedores ORDER BY id");
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -19,7 +24,8 @@ class ProveedoresModel {
         }
     }
 
-    public function getProveedorById(int $id): ?array {
+    public function getProveedorById(int $id): ?array
+    {
         try {
             $stmt = $this->db->prepare("SELECT * FROM proveedores WHERE id = :id");
             $stmt->execute(['id' => $id]);
@@ -30,55 +36,57 @@ class ProveedoresModel {
         }
     }
 
-    public function createProveedor(array $data): ?int {
-    try {
-        // Preparar datos con valores por defecto
-        $nombre = $data['nombre'] ?? null;
-        $nit = $data['nit'] ?? null;
-        $correo = $data['correo'] ?? null;
-        $observaciones = $data['observaciones'] ?? null;
-        $telefono = $data['telefono'] ?? null;
-        $ciudad = $data['ciudad'] ?? null;
-        $estado = isset($data['estado']) ? (bool)$data['estado'] : true;
-        $fecha_llegada = $data['fecha_llegada'] ?? null;
+    public function createProveedor(array $data): ?int
+    {
+        try {
+            // Preparar datos con valores por defecto
+            $nombre = $data['nombre'] ?? null;
+            $nit = $data['nit'] ?? null;
+            $correo = $data['correo'] ?? null;
+            $observaciones = $data['observaciones'] ?? null;
+            $telefono = $data['telefono'] ?? null;
+            $ciudad = $data['ciudad'] ?? null;
 
-        $sql = "INSERT INTO proveedores (nombre, observaciones, nit, correo, telefono, ciudad, estado, fecha_llegada) 
-                VALUES (:nombre, :observaciones, :nit, :correo, :telefono, :ciudad, :estado, :fecha_llegada) 
+            $sql = "INSERT INTO proveedores (nombre, observaciones, nit, correo, telefono, ciudad, estado) 
+                VALUES (:nombre, :observaciones, :nit, :correo, :telefono, :ciudad, :estado) 
                 RETURNING id";
-        
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([
-            'nombre' => $nombre,
-            'observaciones' => $observaciones,
-            'nit' => $nit,
-            'correo' => $correo,
-            'telefono' => $telefono,
-            'ciudad' => $ciudad,
-            'estado' => $estado,
-            'fecha_llegada' => $fecha_llegada
-        ]);
-        
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result['id'] ?? null;
-    } catch (\PDOException $e) {
-        if (strpos($e->getMessage(), 'duplicate key') !== false) {
-            if (strpos($e->getMessage(), 'nit') !== false) {
-                throw new \Exception("El NIT ya está registrado");
-            }
-            if (strpos($e->getMessage(), 'correo') !== false) {
-                throw new \Exception("El correo electrónico ya está registrado");
-            }
-        }
-        throw new \Exception("Error al crear el proveedor: " . $e->getMessage());
-    }
-}
 
-    public function updateProveedor(int $id, array $data): bool {
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([
+                'nombre' => $nombre,
+                'observaciones' => $observaciones,
+                'nit' => $nit,
+                'correo' => $correo,
+                'telefono' => $telefono,
+                'ciudad' => $ciudad,
+                'estado' => true,
+            ]);
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result['id'] ?? null;
+        } catch (\PDOException $e) {
+            if (strpos($e->getMessage(), 'duplicate key') !== false) {
+                if (strpos($e->getMessage(), 'nit') !== false) {
+                    throw new \Exception("El NIT ya está registrado");
+                }
+                // si 
+                if (strpos($e->getMessage(), 'correo') !== false) {
+                    throw new \Exception("El correo electrónico ya está registrado");
+                }
+            }
+            throw new \Exception("Error al crear el proveedor: " . $e->getMessage());
+        }
+    }
+
+    public function updateProveedor(int $id, array $data): bool
+    {
         try {
             // Verificar si el proveedor existe
             if (!$this->getProveedorById($id)) {
                 throw new \Exception("Proveedor no encontrado.");
             }
+
+
 
             // Construir la consulta de actualización dinámicamente
             $fields = [];
@@ -108,13 +116,9 @@ class ProveedoresModel {
                 $fields[] = "ciudad = :ciudad";
                 $params['ciudad'] = $data['ciudad'];
             }
-            if (isset($data['estado'])) {
+            if (isset($data['estado']) && $data['estado'] !== '') {
                 $fields[] = "estado = :estado";
-                $params['estado'] = $data['estado'];
-            }
-            if (isset($data['fecha_llegada'])) {
-                $fields[] = "fecha_llegada = :fecha_llegada";
-                $params['fecha_llegada'] = $data['fecha_llegada'];
+                $params['estado'] = filter_var($data['estado'], FILTER_VALIDATE_BOOLEAN) ? 'true' : 'false';
             }
 
             if (empty($fields)) {
@@ -122,21 +126,24 @@ class ProveedoresModel {
             }
 
             $sql = "UPDATE proveedores SET " . implode(", ", $fields) . " WHERE id = :id";
+            error_log("SQL Update: " . $sql); // Log para depuración
+            error_log("Params: " . print_r($params, true)); // Log para depuración
             $stmt = $this->db->prepare($sql);
-            
+
             return $stmt->execute($params);
         } catch (\PDOException $e) {
             throw new \Exception("Error al actualizar el proveedor: " . $e->getMessage());
         }
     }
 
-    public function deleteProveedor(int $id): bool {
+    public function deleteProveedor(int $id): bool
+    {
         try {
             // Verificar si el proveedor existe
             if (!$this->getProveedorById($id)) {
                 throw new \Exception("Proveedor no encontrado.");
             }
-            
+
             // Cambiar estado a false en lugar de eliminar físicamente
             $stmt = $this->db->prepare("UPDATE proveedores SET estado = false WHERE id = :id");
             return $stmt->execute(['id' => $id]);
@@ -145,7 +152,8 @@ class ProveedoresModel {
         }
     }
 
-    public function getProveedoresActivos(): array {
+    public function getProveedoresActivos(): array
+    {
         try {
             $stmt = $this->db->query("SELECT * FROM proveedores WHERE estado = true ORDER BY nombre");
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -154,4 +162,3 @@ class ProveedoresModel {
         }
     }
 }
-?>
