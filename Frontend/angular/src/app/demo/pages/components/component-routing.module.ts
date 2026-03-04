@@ -72,6 +72,12 @@ const routes: Routes = [
             .then(m => m.ProductosComponent)
       },
       {
+        path: 'Roles',
+        loadComponent: () =>
+          import('./roles.component/roles.component')
+            .then(m => m.RolesComponent)
+      },
+      {
         path: 'marcas',
         loadComponent: ()=>
           import('./marcas-component/marcas.component')
