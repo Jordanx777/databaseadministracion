@@ -97,51 +97,127 @@ class AuthController
     }
 
     // POST /api/auth/login
-    public function login(): void
-    {
-        header('Content-Type: application/json; charset=UTF-8');
+    // public function login(): void
+    // {
+    //     header('Content-Type: application/json; charset=UTF-8');
 
+    //     try {
+    //         $input = json_decode(file_get_contents('php://input'), true);
+
+    //         if (empty($input['email']) || empty($input['password'])) {
+    //             ResponseHelper::error('El correo y la contraseña son requeridos', 400);
+    //             return;
+    //         }
+
+    //         $usuarioModel = new UsuarioModel();
+    //         $user         = $usuarioModel->getByEmail($input['email']);
+
+    //         if (!$user) {
+    //             ResponseHelper::error('Credenciales inválidas', 401);
+    //             return;
+    //         }
+
+    //         if (!password_verify($input['password'], $user['contrasena'])) {
+    //             ResponseHelper::error('Credenciales inválidas', 401);
+    //             return;
+    //         }
+
+    //         if (!$user['activo']) {
+    //             ResponseHelper::error('Esta cuenta ha sido desactivada. Contacte al administrador', 403);
+    //             return;
+    //         }
+
+    //         session_start();
+    //         $_SESSION['user_id']    = $user['id_usuario'];
+    //         $_SESSION['user_email'] = $user['correo'];
+    //         $_SESSION['user_role']  = $user['id_rol'];
+
+    //         $usuarioModel->updateLastAccess($user['id_usuario']);
+
+    //         unset($user['contrasena']);
+
+    //         ResponseHelper::success(
+    //             ['user' => $user],
+    //             'Bienvenido, ' . $user['nombre']
+    //         );
+    //     } catch (\Exception $e) {
+    //         ResponseHelper::error('Error al iniciar sesión: ' . $e->getMessage(), 500);
+    //     }
+    // }
+
+    // POST /api/auth/login
+    public function login(): void {
         try {
             $input = json_decode(file_get_contents('php://input'), true);
-
+            
             if (empty($input['email']) || empty($input['password'])) {
-                ResponseHelper::error('El correo y la contraseña son requeridos', 400);
+                http_response_code(400);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Email y contraseña son requeridos'
+                ]);
                 return;
             }
-
+            
             $usuarioModel = new UsuarioModel();
-            $user         = $usuarioModel->getByEmail($input['email']);
-
+            $user = $usuarioModel->getByEmail($input['email']);
+            
             if (!$user) {
-                ResponseHelper::error('Credenciales inválidas', 401);
+                http_response_code(401);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Credenciales inválidas'
+                ]);
                 return;
             }
-
+            
+            // Verificar contraseña
             if (!password_verify($input['password'], $user['contrasena'])) {
-                ResponseHelper::error('Credenciales inválidas', 401);
+                http_response_code(401);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Credenciales inválidas'
+                ]);
                 return;
             }
-
+            
+            // Verificar si está activo
             if (!$user['activo']) {
-                ResponseHelper::error('Esta cuenta ha sido desactivada. Contacte al administrador', 403);
+                http_response_code(403);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Usuario desactivado'
+                ]);
                 return;
             }
-
+            
+            // Iniciar sesión
             session_start();
-            $_SESSION['user_id']    = $user['id_usuario'];
+            $_SESSION['user_id'] = $user['id_usuario'];
             $_SESSION['user_email'] = $user['correo'];
-            $_SESSION['user_role']  = $user['id_rol'];
-
+            $_SESSION['user_role'] = $user['id_rol'];
+            
+            // Actualizar último acceso
             $usuarioModel->updateLastAccess($user['id_usuario']);
-
+            
+            // Quitar contraseña antes de enviar
             unset($user['contrasena']);
-
-            ResponseHelper::success(
-                ['user' => $user],
-                'Bienvenido, ' . $user['nombre']
-            );
+            
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Login exitoso',
+                'data' => [
+                    'user' => $user
+                ]
+            ]);
+            
         } catch (\Exception $e) {
-            ResponseHelper::error('Error al iniciar sesión: ' . $e->getMessage(), 500);
+            http_response_code(500);
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Error al iniciar sesión',
+                'error' => $e->getMessage()
+            ]);
         }
     }
 
@@ -157,30 +233,71 @@ class AuthController
     }
 
     // GET /api/auth/me
-    public function me(): void
-    {
-        header('Content-Type: application/json; charset=UTF-8');
+    // public function me(): void
+    // {
+    //     header('Content-Type: application/json; charset=UTF-8');
 
+    //     session_start();
+
+    //     if (!isset($_SESSION['user_id'])) {
+    //         ResponseHelper::unauthorized('No hay una sesión activa');
+    //         return;
+    //     }
+
+    //     try {
+    //         $usuarioModel = new UsuarioModel();
+    //         $user         = $usuarioModel->getById($_SESSION['user_id']);
+
+    //         if (!$user) {
+    //             ResponseHelper::notFound('Usuario no encontrado');
+    //             return;
+    //         }
+
+    //         unset($user['contrasena']);
+    //         ResponseHelper::success(['user' => $user], 'Datos del usuario obtenidos');
+    //     } catch (\Exception $e) {
+    //         ResponseHelper::error('Error al obtener el usuario: ' . $e->getMessage(), 500);
+    //     }
+    // }
+
+     public function me(): void {
         session_start();
-
+        
         if (!isset($_SESSION['user_id'])) {
-            ResponseHelper::unauthorized('No hay una sesión activa');
+            http_response_code(401);
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'No autenticado'
+            ]);
             return;
         }
-
+        
         try {
             $usuarioModel = new UsuarioModel();
-            $user         = $usuarioModel->getById($_SESSION['user_id']);
-
-            if (!$user) {
-                ResponseHelper::notFound('Usuario no encontrado');
-                return;
+            $user = $usuarioModel->getById($_SESSION['user_id']);
+            
+            if ($user) {
+                unset($user['contrasena']);
+                echo json_encode([
+                    'status' => 'success',
+                    'data' => [
+                        'user' => $user
+                    ]
+                ]);
+            } else {
+                http_response_code(404);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Usuario no encontrado'
+                ]);
             }
-
-            unset($user['contrasena']);
-            ResponseHelper::success(['user' => $user], 'Datos del usuario obtenidos');
         } catch (\Exception $e) {
-            ResponseHelper::error('Error al obtener el usuario: ' . $e->getMessage(), 500);
+            http_response_code(500);
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Error al obtener usuario',
+                'error' => $e->getMessage()
+            ]);
         }
     }
 }
