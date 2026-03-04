@@ -8,15 +8,20 @@
       <div class="main-form">
         <app-card [showHeader]="false" class="auth-form-card" [padding]="40">
           <h4 class="text-center m-b-25 f-20 f-w-500">Sign up with your work email.</h4>
-
-          <!-- ✅ Sin alertas inline — el modal global las reemplaza -->
+          
+          <!-- Mensajes de error/éxito -->
+          @if (errorMessage) {
+            <div class="alert alert-danger">{{ errorMessage }}</div>
+          }
+          @if (successMessage) {
+            <div class="alert alert-success">{{ successMessage }}</div>
+          }
 
           <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
             <div class="row text-start">
-
               <!-- First Name -->
               <div class="col-md-6">
-                <label class="f-w-500">First Name</label>
+                <label for="nombre" class="f-w-500">First Name</label>
                 <mat-form-field appearance="outline" class="w-100 m-t-5">
                   <input type="text" matInput placeholder="First Name" formControlName="nombre" />
                   @if (registerForm.get('nombre')?.invalid && registerForm.get('nombre')?.touched) {
@@ -27,7 +32,7 @@
 
               <!-- Last Name -->
               <div class="col-md-6">
-                <label class="f-w-500">Last Name</label>
+                <label for="apellido" class="f-w-500">Last Name</label>
                 <mat-form-field appearance="outline" class="w-100 m-t-5">
                   <input type="text" matInput placeholder="Last Name" formControlName="apellido" />
                   @if (registerForm.get('apellido')?.invalid && registerForm.get('apellido')?.touched) {
@@ -38,7 +43,7 @@
 
               <!-- Phone -->
               <div class="col-12">
-                <label class="f-w-500">Phone Number</label>
+                <label for="telefono" class="f-w-500">Phone Number</label>
                 <mat-form-field appearance="outline" class="w-100 m-t-5">
                   <input matInput type="tel" placeholder="Enter your phone number" formControlName="telefono" />
                   @if (registerForm.get('telefono')?.invalid && registerForm.get('telefono')?.touched) {
@@ -49,7 +54,7 @@
 
               <!-- Address -->
               <div class="col-12">
-                <label class="f-w-500">Address</label>
+                <label for="direccion" class="f-w-500">Address</label>
                 <mat-form-field appearance="outline" class="w-100 m-t-5">
                   <input matInput type="text" placeholder="Enter your address" formControlName="direccion" />
                   @if (registerForm.get('direccion')?.invalid && registerForm.get('direccion')?.touched) {
@@ -57,10 +62,13 @@
                   }
                 </mat-form-field>
               </div>
+            </div>
+
+            
 
               <!-- Email -->
               <div class="col-12">
-                <label class="f-w-500">Enter Your Email</label>
+                <label for="email" class="f-w-500">Enter Your Email</label>
                 <mat-form-field appearance="outline" class="w-100 m-t-5">
                   <input matInput placeholder="Email Address" formControlName="email" />
                   @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
@@ -71,10 +79,10 @@
 
               <!-- Password -->
               <div class="col-12">
-                <label class="f-w-500">Enter your password</label>
+                <label for="password" class="f-w-500">Enter your password</label>
                 <mat-form-field appearance="outline" class="w-100 m-t-5">
                   <input matInput [type]="hide ? 'password' : 'text'" placeholder="Enter your password" formControlName="password" />
-                  <button mat-icon-button matSuffix type="button" (click)="hide = !hide">
+                  <button mat-icon-button matSuffix type="button" (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide">
                     <mat-icon>{{ hide ? 'visibility_off' : 'visibility' }}</mat-icon>
                   </button>
                   @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
@@ -85,10 +93,10 @@
 
               <!-- Confirm Password -->
               <div class="col-12">
-                <label class="f-w-500">Confirm Password</label>
+                <label for="confirmPassword" class="f-w-500">Confirm Password</label>
                 <mat-form-field appearance="outline" class="w-100 m-t-5">
                   <input matInput [type]="coHide ? 'password' : 'text'" placeholder="Confirm your password" formControlName="confirmPassword" />
-                  <button mat-icon-button matSuffix type="button" (click)="coHide = !coHide">
+                  <button mat-icon-button matSuffix type="button" (click)="coHide = !coHide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="coHide">
                     <mat-icon>{{ coHide ? 'visibility_off' : 'visibility' }}</mat-icon>
                   </button>
                   @if (registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched) {
@@ -99,7 +107,7 @@
 
               <!-- Rol -->
               <div class="col-12">
-                <label class="f-w-500">Select Role</label>
+                <label for="id_rol" class="f-w-500">Select Role</label>
                 <mat-form-field appearance="outline" class="w-100 m-t-5">
                   <mat-select placeholder="Select a role" formControlName="id_rol">
                     @for (rol of roles; track rol.id_rol) {
@@ -112,34 +120,32 @@
                 </mat-form-field>
               </div>
 
-              <!-- Terms & Conditions -->
-              <div class="col-12">
-                <mat-checkbox formControlName="acceptTerms" color="primary">
-                  I agree to the
-                  <a href="/terms" target="_blank" class="text-primary-500">Terms & Conditions</a>
-                </mat-checkbox>
-                @if (registerForm.get('acceptTerms')?.invalid && registerForm.get('acceptTerms')?.touched) {
-                  <div class="text-danger f-s-12 m-t-5">
-                    Debe aceptar los términos y condiciones
-                  </div>
-                }
-              </div>
-
+              
+            <!-- ✅ AGREGAR ESTO: Terms & Conditions -->
+            <div class="col-12">
+              <mat-checkbox formControlName="acceptTerms" color="primary">
+                I agree to the 
+                <a href="/terms" target="_blank" class="text-primary-500">Terms & Conditions</a>
+              </mat-checkbox>
+              @if (registerForm.get('acceptTerms')?.invalid && registerForm.get('acceptTerms')?.touched) {
+                <div class="text-danger f-s-12 m-t-5">
+                  Debe aceptar los términos y condiciones
+                </div>
+              }
             </div>
 
-            <!-- Submit -->
+            <!-- Submit Button -->
             <div class="grid">
               <button mat-flat-button color="primary" class="b-rad-20 m-t-15" type="submit" [disabled]="isLoading">
                 {{ isLoading ? 'Registering...' : 'Register' }}
               </button>
             </div>
 
-            <!-- Login link -->
+            <!-- Login Link -->
             <div class="check-me m-t-15">
               <h6 class="f-w-400 text-muted m-b-0">Already have an Account?</h6>
               <a class="text-primary-500" [routerLink]="['/auth/login']">Login Account</a>
             </div>
-
           </form>
         </app-card>
       </div>
