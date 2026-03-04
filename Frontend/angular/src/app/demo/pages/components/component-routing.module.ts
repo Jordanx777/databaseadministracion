@@ -72,6 +72,12 @@ const routes: Routes = [
             .then(m => m.ProductosComponent)
       },
       {
+        path: 'marcas',
+        loadComponent: ()=>
+          import('./marcas-component/marcas.component')
+        .then(m => m.MarcasComponent)
+      },
+      {
         path: 'Categorias&Subcategorias',
         loadComponent: () =>
           import('./categorias-subcategorias/categorias-subcategorias')
