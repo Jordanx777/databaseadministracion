@@ -18,6 +18,22 @@ export const menus: Navigation[] = [
     ]
   },
   {
+    id: 'Roles',
+    title: 'Roles',
+    type: 'group',
+    icon: 'icon-navigation',
+    children: [
+      {
+        id: 'Roles',
+        title: 'Roles',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/component/Roles',
+        icon: '#custom-tag'
+      },
+    ]
+  },
+  {
     id: 'marcas',
     title: 'Marcas',
     type: 'group',
