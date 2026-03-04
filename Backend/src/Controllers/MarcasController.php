@@ -1,16 +1,21 @@
 <?php
+
 namespace App\Controllers;
+
 use App\Models\MarcasModel;
 use App\Helpers\ResponseHelper;
 
-class MarcasController {
+class MarcasController
+{
     private $marcasModel;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->marcasModel = new MarcasModel();
     }
 
-    public function getAllMarcas() {
+    public function getAllMarcas()
+    {
         try {
             $marcas = $this->marcasModel->getAllMarcas();
             ResponseHelper::success($marcas, 'Marcas obtenidas exitosamente');
@@ -19,7 +24,8 @@ class MarcasController {
         }
     }
 
-    public function getMarcaById($id) {
+    public function getMarcaById($id)
+    {
         try {
             $marca = $this->marcasModel->getMarcaById($id);
             if ($marca) {
@@ -32,8 +38,10 @@ class MarcasController {
         }
     }
 
-    public function createMarca($data) {
+    public function createMarca()
+    {
         try {
+            $data = json_decode(file_get_contents('php://input'), true);
             $id = $this->marcasModel->createMarca($data);
             if ($id) {
                 ResponseHelper::created(['id' => $id], 'Marca creada exitosamente');
@@ -45,8 +53,13 @@ class MarcasController {
         }
     }
 
-    public function updateMarca($id, $data) {
+    public function updateMarca(array $params)
+    {
         try {
+            $id = $params['id'] ?? NULL;
+
+            $data = json_decode(file_get_contents('php://input'), true);
+
             $result = $this->marcasModel->updateMarca($id, $data);
             if ($result) {
                 ResponseHelper::success(['id' => $id], 'Marca actualizada exitosamente');
@@ -58,8 +71,11 @@ class MarcasController {
         }
     }
 
-    public function deleteMarca($id) {
+    public function deleteMarca(array $params)
+    {
         try {
+            $id = $params['id'] ?? null;
+
             $result = $this->marcasModel->deleteMarca($id);
             if ($result) {
                 ResponseHelper::success(['id' => $id], 'Marca eliminada exitosamente');
