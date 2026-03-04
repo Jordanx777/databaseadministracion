@@ -1,0 +1,534 @@
+// ── Variables ────────────────────────────────────────────
+$white:        #ffffff;
+$bg-page:      #f5f6fa;
+$bg-card:      #ffffff;
+$bg-input:     #f9fafb;
+$border:       #e5e7eb;
+$border-focus: #7c3aed;
+
+$text-primary:   #111827;
+$text-secondary: #6b7280;
+$text-muted:     #9ca3af;
+
+$purple:       #7c3aed;
+$purple-light: #ede9fe;
+$purple-hover: #6d28d9;
+
+$green:        #22c55e;
+$green-bg:     #f0fdf4;
+$green-border: #bbf7d0;
+
+$danger:       #ef4444;
+$danger-bg:    #fef2f2;
+$danger-border:#fecaca;
+
+$warning:      #f59e0b;
+
+$radius-sm:  6px;
+$radius-md:  10px;
+$radius-lg:  14px;
+$radius-xl:  18px;
+
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+$shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+$shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.14);
+
+// ── Reset ────────────────────────────────────────────────
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+// ── Page ─────────────────────────────────────────────────
+.marcas-page {
+  min-height: 100vh;
+  background: $bg-page;
+  padding: 52px 24px 80px;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: $text-primary;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+// ── Header ───────────────────────────────────────────────
+.page-header { margin-bottom: 36px; }
+
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: $purple;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: $text-muted;
+}
+
+.page-title {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: $text-primary;
+  line-height: 1.1;
+}
+
+.page-subtitle {
+  margin-top: 6px;
+  font-size: 13px;
+  color: $text-muted;
+}
+
+// ── Toolbar ──────────────────────────────────────────────
+.toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.search-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.search-icon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: $text-muted;
+  pointer-events: none;
+  line-height: 1;
+}
+
+.search-input {
+  width: 100%;
+  padding: 11px 14px 11px 38px;
+  background: $bg-card;
+  border: 1.5px solid $border;
+  border-radius: $radius-md;
+  font-size: 14px;
+  color: $text-primary;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: $shadow-sm;
+
+  &::placeholder { color: $text-muted; }
+  &:focus {
+    border-color: $border-focus;
+    box-shadow: 0 0 0 3px rgba($purple, 0.12);
+  }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+// ── Buttons ──────────────────────────────────────────────
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: $radius-md;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  line-height: 1;
+
+  &:disabled { opacity: 0.6; cursor: not-allowed; pointer-events: none; }
+
+  &--primary {
+    background: $purple;
+    color: $white;
+    box-shadow: 0 2px 10px rgba($purple, 0.28);
+    &:hover { background: $purple-hover; transform: translateY(-1px); box-shadow: 0 4px 18px rgba($purple, 0.38); }
+    &:active { transform: translateY(0); }
+  }
+
+  &--ghost {
+    background: $white;
+    color: $text-secondary;
+    border: 1.5px solid $border;
+    box-shadow: $shadow-sm;
+    &:hover { background: $bg-page; color: $text-primary; }
+  }
+
+  &--danger {
+    background: $danger-bg;
+    color: $danger;
+    border: 1.5px solid $danger-border;
+    &:hover { background: darken($danger-bg, 3%); }
+  }
+
+  &--danger-solid {
+    background: $danger;
+    color: $white;
+    box-shadow: 0 2px 10px rgba($danger, 0.24);
+    &:hover { background: darken($danger, 5%); transform: translateY(-1px); }
+  }
+
+  &--sm { padding: 7px 14px; font-size: 12px; border-radius: $radius-sm; }
+}
+
+// ── Spinner ──────────────────────────────────────────────
+.spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba($white, 0.35);
+  border-top-color: $white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+
+  &--white { border-color: rgba($white, 0.35); border-top-color: $white; }
+}
+
+// ── Skeleton loader ──────────────────────────────────────
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  border-bottom: 1px solid $border;
+  &:last-child { border-bottom: none; }
+}
+
+.skeleton {
+  height: 14px;
+  border-radius: $radius-sm;
+  background: linear-gradient(90deg, #ececf1 25%, #f5f5f8 50%, #ececf1 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+
+  &--sm  { width: 60px; }
+  &--md  { width: 120px; flex: 1; }
+  &--lg  { width: 180px; }
+}
+
+// ── Table Card ───────────────────────────────────────────
+.table-card {
+  background: $bg-card;
+  border: 1px solid $border;
+  border-radius: $radius-xl;
+  overflow: hidden;
+  box-shadow: $shadow-md;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  thead tr {
+    background: #fafafa;
+    border-bottom: 1.5px solid $border;
+  }
+
+  th {
+    padding: 14px 20px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: $text-muted;
+    &.center { text-align: center; }
+  }
+
+  .data-row {
+    border-bottom: 1px solid $border;
+    transition: background 0.15s;
+    &:last-child { border-bottom: none; }
+    &:hover { background: #fafbff; }
+  }
+
+  td {
+    padding: 16px 20px;
+    vertical-align: middle;
+    &.center { text-align: center; }
+  }
+}
+
+.badge {
+  display: inline-block;
+  background: $bg-page;
+  border: 1px solid $border;
+  border-radius: $radius-sm;
+  padding: 3px 10px;
+  font-size: 12px;
+  color: $text-muted;
+  font-weight: 500;
+}
+
+.nombre-cell {
+  font-weight: 600;
+  color: $text-primary;
+}
+
+.desc-cell {
+  font-size: 13px;
+  color: $text-secondary;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.date-cell {
+  font-size: 13px;
+  color: $text-muted;
+}
+
+.actions-cell .btn + .btn { margin-left: 8px; }
+
+// ── Status pill ──────────────────────────────────────────
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  &--active {
+    background: $green-bg;
+    color: darken($green, 10%);
+    border: 1px solid $green-border;
+    &::before { background: $green; }
+  }
+
+  &--inactive {
+    background: #f3f4f6;
+    color: $text-muted;
+    border: 1px solid $border;
+    &::before { background: $text-muted; }
+  }
+}
+
+// ── Empty state ──────────────────────────────────────────
+.empty-state {
+  text-align: center;
+  padding: 56px 20px;
+  color: $text-muted;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+
+  .empty-icon { font-size: 32px; }
+}
+
+.table-footer {
+  margin-top: 12px;
+  text-align: right;
+  font-size: 12px;
+  color: $text-muted;
+  letter-spacing: 0.5px;
+}
+
+// ── Overlay & Modal ──────────────────────────────────────
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.36);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+  animation: fadeIn 0.2s ease;
+}
+
+.modal {
+  background: $white;
+  border: 1px solid $border;
+  border-radius: $radius-xl;
+  padding: 36px 40px;
+  min-width: 420px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: $shadow-lg;
+  animation: popIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: $text-primary;
+  margin-bottom: 22px;
+  letter-spacing: -0.5px;
+}
+
+.modal-body    { font-size: 14px; color: $text-secondary; margin-bottom: 4px; }
+.modal-highlight { font-size: 16px; font-weight: 700; color: $text-primary; margin-bottom: 8px; }
+.modal-warning { font-size: 12px; color: $text-muted; margin-bottom: 28px; }
+
+.delete-icon { font-size: 36px; margin-bottom: 12px; }
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 28px;
+}
+
+// ── Form ─────────────────────────────────────────────────
+.form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: $text-muted;
+  margin-bottom: 8px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: $bg-input;
+  border: 1.5px solid $border;
+  border-radius: $radius-md;
+  font-size: 14px;
+  font-family: inherit;
+  color: $text-primary;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &::placeholder { color: $text-muted; }
+  &:focus {
+    border-color: $border-focus;
+    background: $white;
+    box-shadow: 0 0 0 3px rgba($purple, 0.1);
+  }
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
+.form-error {
+  margin-top: 6px;
+  font-size: 12px;
+  color: $danger;
+  font-weight: 500;
+}
+
+// ── Toggle ───────────────────────────────────────────────
+.form-toggle { margin-top: 18px; }
+
+.toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.toggle-checkbox { display: none; }
+
+.toggle-track {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  background: $border;
+  border-radius: 99px;
+  transition: background 0.22s;
+
+  .toggle-checkbox:checked + & { background: $purple; }
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  background: $white;
+  border-radius: 50%;
+  box-shadow: $shadow-sm;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  .toggle-checkbox:checked ~ .toggle-track & { transform: translateX(18px); }
+}
+
+// Angular binding workaround: style toggle-thumb via parent
+.toggle-label:has(.toggle-checkbox:checked) .toggle-thumb {
+  transform: translateX(18px);
+}
+.toggle-label:has(.toggle-checkbox:checked) .toggle-track {
+  background: $purple;
+}
+
+.toggle-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: $text-secondary;
+}
+
+// ── Toast ────────────────────────────────────────────────
+.toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 9999;
+  padding: 13px 22px;
+  border-radius: $radius-md;
+  font-size: 13px;
+  font-weight: 600;
+  color: $white;
+  box-shadow: $shadow-lg;
+  animation: slideUp 0.3s ease;
+
+  &--success { background: $green; }
+  &--error   { background: $danger; }
+  &--warning { background: $warning; }
+}
+
+// ── Animations ───────────────────────────────────────────
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

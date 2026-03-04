@@ -1,0 +1,177 @@
+<section class="marcas-page">
+
+  <!-- ── Header ──────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="header-meta">
+      <span class="dot"></span>
+      <span class="label">Gestión de datos</span>
+    </div>
+    <h1 class="page-title">Marcas</h1>
+    <p class="page-subtitle">{{ marcas.length }} registro{{ marcas.length !== 1 ? 's' : '' }} en total</p>
+  </div>
+
+  <!-- ── Toolbar ─────────────────────────────────────── -->
+  <div class="toolbar">
+    <div class="search-wrapper">
+      <span class="search-icon">⌕</span>
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Buscar marca..."
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearch()"
+        [disabled]="isLoading"
+      />
+    </div>
+    <button class="btn btn--primary" (click)="openCreate()" [disabled]="isLoading">
+      <span>+</span> Nueva marca
+    </button>
+  </div>
+
+  <!-- ── Loading skeleton ────────────────────────────── -->
+  <div class="table-card" *ngIf="isLoading">
+    <div class="skeleton-row" *ngFor="let i of [1,2,3,4]">
+      <div class="skeleton skeleton--sm"></div>
+      <div class="skeleton skeleton--md"></div>
+      <div class="skeleton skeleton--lg"></div>
+      <div class="skeleton skeleton--sm"></div>
+      <div class="skeleton skeleton--sm"></div>
+      <div class="skeleton skeleton--md"></div>
+    </div>
+  </div>
+
+  <!-- ── Table ───────────────────────────────────────── -->
+  <div class="table-card" *ngIf="!isLoading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Descripción</th>
+          <th>Creado el</th>
+          <th>Actualizado el</th>
+          <th class="center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="filtered.length === 0">
+          <td colspan="6" class="empty-state">
+            <span class="empty-icon">📭</span>
+            <span>No se encontraron marcas.</span>
+          </td>
+        </tr>
+        <tr *ngFor="let m of filtered" class="data-row">
+          <td><span class="badge">#{{ m.id }}</span></td>
+          <td class="nombre-cell">{{ m.nombre }}</td>
+          <td class="desc-cell">{{ m.descripcion || '—' }}</td>
+          <td class="date-cell">{{ formatDate(m.created_at) }}</td>
+          <td class="date-cell">{{ formatDate(m.updated_at) }}</td>
+          <td class="actions-cell center">
+            <button class="btn btn--ghost btn--sm" (click)="openEdit(m)">✎ Editar</button>
+            <button class="btn btn--danger btn--sm" (click)="openDelete(m)">✕ Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="table-footer" *ngIf="!isLoading">
+    Mostrando {{ filtered.length }} de {{ marcas.length }}
+  </p>
+
+</section>
+
+<!-- ── Modal: Crear ────────────────────────────────────── -->
+<div class="overlay" *ngIf="modalType === 'create'" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h2 class="modal-title">Nueva Marca</h2>
+
+    <label class="form-label">Nombre *</label>
+    <input
+      class="form-input"
+      type="text"
+      placeholder="Ej: Samsung"
+      [(ngModel)]="formData.nombre"
+      (ngModelChange)="clearError()"
+      (keydown.enter)="handleCreate()"
+      autofocus
+    />
+
+    <label class="form-label" style="margin-top: 16px;">Descripción</label>
+    <textarea
+      class="form-input form-textarea"
+      placeholder="Descripción opcional..."
+      [(ngModel)]="formData.descripcion"
+      rows="3"
+    ></textarea>
+
+    <p class="form-error" *ngIf="formError">{{ formError }}</p>
+
+    <div class="modal-actions">
+      <button class="btn btn--ghost" (click)="closeModal()" [disabled]="isSaving">Cancelar</button>
+      <button class="btn btn--primary" (click)="handleCreate()" [disabled]="isSaving">
+        <span class="spinner" *ngIf="isSaving"></span>
+        {{ isSaving ? 'Guardando...' : 'Crear marca' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Editar ───────────────────────────────────── -->
+<div class="overlay" *ngIf="modalType === 'edit'" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h2 class="modal-title">Editar Marca</h2>
+
+    <label class="form-label">Nombre *</label>
+    <input
+      class="form-input"
+      type="text"
+      [(ngModel)]="formData.nombre"
+      (ngModelChange)="clearError()"
+      (keydown.enter)="handleEdit()"
+      autofocus
+    />
+
+    <label class="form-label" style="margin-top: 16px;">Descripción</label>
+    <textarea
+      class="form-input form-textarea"
+      placeholder="Descripción opcional..."
+      [(ngModel)]="formData.descripcion"
+      rows="3"
+    ></textarea>
+
+    <p class="form-error" *ngIf="formError">{{ formError }}</p>
+
+    <div class="modal-actions">
+      <button class="btn btn--ghost" (click)="closeModal()" [disabled]="isSaving">Cancelar</button>
+      <button class="btn btn--primary" (click)="handleEdit()" [disabled]="isSaving">
+        <span class="spinner" *ngIf="isSaving"></span>
+        {{ isSaving ? 'Guardando...' : 'Guardar cambios' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Eliminar ─────────────────────────────────── -->
+<div class="overlay" *ngIf="modalType === 'delete'" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="delete-icon">🗑️</div>
+    <h2 class="modal-title">Eliminar Marca</h2>
+    <p class="modal-body">¿Estás seguro de que deseas eliminar la marca</p>
+    <p class="modal-highlight">"{{ selectedMarca?.nombre }}"?</p>
+    <p class="modal-warning">Esta acción no se puede deshacer.</p>
+
+    <div class="modal-actions">
+      <button class="btn btn--ghost" (click)="closeModal()" [disabled]="isDeleting">Cancelar</button>
+      <button class="btn btn--danger-solid" (click)="handleDelete()" [disabled]="isDeleting">
+        <span class="spinner spinner--white" *ngIf="isDeleting"></span>
+        {{ isDeleting ? 'Eliminando...' : 'Sí, eliminar' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ───────────────────────────────────────────── -->
+<div class="toast" *ngIf="toast" [ngClass]="'toast--' + toast.type">
+  {{ toast.message }}
+</div>
