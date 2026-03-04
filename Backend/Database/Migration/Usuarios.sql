@@ -8,11 +8,8 @@ CREATE TABLE usuario (
     contrasena VARCHAR(255) NOT NULL, -- Almacenar hash, nunca texto plano
     id_rol INTEGER NOT NULL,
     telefono VARCHAR(20),
-    -- fecha_nacimiento DATE,
     direccion TEXT,
-    -- foto_perfil VARCHAR(255), -- URL o ruta de la imagen
     activo BOOLEAN DEFAULT true,
-    -- verificado BOOLEAN DEFAULT false, -- Si el correo ha sido verificado
     ultimo_acceso TIMESTAMP,
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
