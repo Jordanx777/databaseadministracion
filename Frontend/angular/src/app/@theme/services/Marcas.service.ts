@@ -1,5 +1,3 @@
-// src/app/@theme/services/Marcas.service.ts
-
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
@@ -38,21 +36,21 @@ export class MarcasService {
    * Crear una nueva marca
    */
   createMarca(marca: Marca): Observable<any> {
-    return this.apiService.post('marcas', marca);
+    return this.apiService.post('marcas/crear', marca);
   }
 
   /**
    * Actualizar una marca
    */
   updateMarca(id: number, marca: Marca): Observable<any> {
-    return this.apiService.put(`marcas/${id}`, marca);
+    return this.apiService.put(`marcas/actualizar/${id}`, marca);
   }
 
   /**
    * Eliminar una marca
    */
   deleteMarca(id: number): Observable<any> {
-    return this.apiService.delete(`marcas/${id}`);
+    return this.apiService.delete(`marcas/eliminar/${id}`);
   }
 
   /**
