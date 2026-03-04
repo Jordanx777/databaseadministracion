@@ -41,6 +41,8 @@ try {
     require_once __DIR__ . '/../src/Routes/Ventas.routes.php';
     require_once __DIR__ . '/../src/Routes/Cuentas.routes.php';
     require_once __DIR__ . '/../src/Routes/Pagos.routes.php';
+    require_once __DIR__ . '/../src/Routes/Marcas.routes.php';
+
     
     // Ejecutar router
     $router->run();
