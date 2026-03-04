@@ -9,92 +9,142 @@ class AuthController
 {
 
     // POST /api/auth/register
-    public function register(): void
-    {
+   
+    
+    public function register(): void {
+        // ✅ Asegurar que siempre retorne JSON
         header('Content-Type: application/json; charset=UTF-8');
-
+        
         try {
+            
+            // Obtener datos del JSON
             $rawInput = file_get_contents('php://input');
-            $input    = json_decode($rawInput, true);
-
+            
+            $input = json_decode($rawInput, true);
+            
             if (json_last_error() !== JSON_ERROR_NONE) {
-                ResponseHelper::error('JSON inválido: ' . json_last_error_msg(), 400);
+                http_response_code(400);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'JSON inválido: ' . json_last_error_msg()
+                ]);
                 return;
             }
-
-            // Validar campos requeridos
+            
+            // Validar datos requeridos
             $requiredFields = ['nombre', 'apellido', 'email', 'password', 'confirmPassword', 'telefono', 'id_rol'];
+            
             foreach ($requiredFields as $field) {
-                if (empty($input[$field]) || trim((string)$input[$field]) === '') {
-                    ResponseHelper::error("El campo '$field' es requerido", 400);
+                if (!isset($input[$field]) || trim($input[$field]) === '') {
+                    http_response_code(400);
+                    echo json_encode([
+                        'status' => 'error',
+                        'message' => "El campo $field es requerido"
+                    ]);
                     return;
                 }
             }
-
-            // Validar email
+            
+            // Validar formato de email
             if (!filter_var($input['email'], FILTER_VALIDATE_EMAIL)) {
-                ResponseHelper::error('El formato del correo electrónico es inválido', 400);
+                http_response_code(400);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Email inválido'
+                ]);
                 return;
             }
-
+            
             // Validar longitud de contraseña
             if (strlen($input['password']) < 6) {
-                ResponseHelper::error('La contraseña debe tener al menos 6 caracteres', 400);
+                http_response_code(400);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'La contraseña debe tener al menos 6 caracteres'
+                ]);
                 return;
             }
 
-            // Validar que las contraseñas coincidan
+            // Comparar las contraseñas
             if ($input['password'] !== $input['confirmPassword']) {
-                ResponseHelper::error('Las contraseñas no coinciden', 400);
+                http_response_code(400);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Las contraseñas no coinciden'
+                ]);
                 return;
             }
-
+            
             $usuarioModel = new UsuarioModel();
-
+            
             // Verificar si el email ya existe
             if ($usuarioModel->existsByEmail($input['email'])) {
-                ResponseHelper::error('El correo electrónico ya está registrado', 409);
+                http_response_code(409);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'El correo electrónico ya está registrado'
+                ]);
                 return;
             }
-
+            
             // Hash de la contraseña
             $passwordHash = password_hash($input['password'], PASSWORD_BCRYPT);
-
+            
+            // Preparar datos
             $userData = [
-                'nombre'    => trim($input['nombre']),
-                'apellido'  => trim($input['apellido']),
-                'correo'    => trim($input['email']),
+                'nombre' => trim($input['nombre']),
+                'apellido' => trim($input['apellido']),
+                'correo' => trim($input['email']),
                 'contrasena' => $passwordHash,
-                'telefono'  => trim($input['telefono']),
-                'direccion' => trim($input['direccion'] ?? ''),
-                'id_rol'    => (int)$input['id_rol'],
-                'activo'    => true,
+                'telefono' => trim($input['telefono']),
+                'direccion' => trim($input['direccion']),
+                'id_rol' => (int)$input['id_rol'],
+                'activo' => true,
+                
             ];
-
+            
+            // Crear usuario
             $userId = $usuarioModel->create($userData);
-
+            
             if ($userId) {
+                // Obtener usuario completo (sin contraseña)
                 $user = $usuarioModel->getById($userId);
-                unset($user['contrasena']);
-
+                
+                // Iniciar sesión
                 session_start();
-                $_SESSION['user_id']    = $userId;
+                $_SESSION['user_id'] = $userId;
                 $_SESSION['user_email'] = $user['correo'];
-                $_SESSION['user_role']  = $user['id_rol'];
-
-                ResponseHelper::created(
-                    ['user' => $user],
-                    'Usuario registrado exitosamente'
-                );
+                $_SESSION['user_role'] = $user['id_rol'];
+                
+                http_response_code(201);
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Usuario registrado exitosamente',
+                    'data' => [
+                        'user' => $user
+                    ]
+                ]);
             } else {
-                throw new \Exception('No se pudo crear el usuario');
+                throw new \Exception('Error al crear el usuario - ID null');
             }
+            
         } catch (\PDOException $e) {
-            ResponseHelper::error('Error de base de datos: ' . $e->getMessage(), 500);
+            http_response_code(500);
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Error de base de datos',
+                'error' => $e->getMessage()
+            ]);
         } catch (\Exception $e) {
-            ResponseHelper::error($e->getMessage(), 500);
+            http_response_code(500);
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Error al registrar usuario',
+                'error' => $e->getMessage()
+            ]);
         }
     }
+    
 
     // POST /api/auth/login
     // public function login(): void
