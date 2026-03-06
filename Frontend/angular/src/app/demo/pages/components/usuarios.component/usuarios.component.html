@@ -1,0 +1,345 @@
+<section class="usuarios-page">
+
+  <!-- ── Header ──────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="header-meta">
+      <span class="dot"></span>
+      <span class="label">Gestión de usuarios</span>
+    </div>
+    <h1 class="page-title">Usuarios</h1>
+    <p class="page-subtitle">{{ totalItems }} registro{{ totalItems !== 1 ? 's' : '' }} en total</p>
+  </div>
+
+  <!-- ── Toolbar ─────────────────────────────────────── -->
+  <div class="toolbar">
+    <div class="search-wrapper">
+      <span class="search-icon">⌕</span>
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Buscar por nombre, correo o rol..."
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearch()"
+        [disabled]="isLoading"
+      />
+    </div>
+
+    <!-- Filtro estado -->
+    <select class="filter-select" [(ngModel)]="filterActivo" (ngModelChange)="onFilterChange()" [disabled]="isLoading">
+      <option value="">Todos los estados</option>
+      <option value="true">Activos</option>
+      <option value="false">Inactivos</option>
+    </select>
+
+    <!-- Filtro rol -->
+    <select class="filter-select" [(ngModel)]="filterRol" (ngModelChange)="onFilterChange()" [disabled]="isLoading">
+      <option value="">Todos los roles</option>
+      <option *ngFor="let r of roles" [ngValue]="r.id_rol">{{ r.nombre }}</option>
+    </select>
+
+    <!-- Limpiar filtros -->
+    <button class="btn btn--ghost btn--sm" *ngIf="hasActiveFilters" (click)="clearFilters()">
+      ✕ Limpiar
+    </button>
+
+    <button class="btn btn--primary" (click)="openCreate()" [disabled]="isLoading">
+      <span>+</span> Nuevo usuario
+    </button>
+  </div>
+
+  <!-- ── Skeleton ────────────────────────────────────── -->
+  <div class="table-card" *ngIf="isLoading">
+    <div class="skeleton-row" *ngFor="let i of [1,2,3,4,5]">
+      <div class="skeleton skeleton--sm"></div>
+      <div class="skeleton skeleton--md"></div>
+      <div class="skeleton skeleton--md"></div>
+      <div class="skeleton skeleton--sm"></div>
+      <div class="skeleton skeleton--sm"></div>
+      <div class="skeleton skeleton--sm"></div>
+      <div class="skeleton skeleton--md"></div>
+    </div>
+  </div>
+
+  <!-- ── Table ───────────────────────────────────────── -->
+  <div class="table-card" *ngIf="!isLoading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Usuario</th>
+          <th>Correo</th>
+          <th>Rol</th>
+          <th>Teléfono</th>
+          <th class="center">Estado</th>
+          <th>Último acceso</th>
+          <th class="center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="usuarios.length === 0">
+          <td colspan="8" class="empty-state">
+            <span class="empty-icon">👤</span>
+            <span>No se encontraron usuarios.</span>
+          </td>
+        </tr>
+
+        <tr *ngFor="let u of usuarios" class="data-row">
+
+          <!-- ID -->
+          <td><span class="badge">#{{ u.id_usuario }}</span></td>
+
+          <!-- Nombre + avatar -->
+          <td>
+            <div class="user-cell">
+              <div class="user-avatar">{{ getInitials(u) }}</div>
+              <div>
+                <div class="user-name">{{ u.nombre }} {{ u.apellido }}</div>
+                <div class="user-sub">{{ u.direccion || '' }}</div>
+              </div>
+            </div>
+          </td>
+
+          <!-- Correo -->
+          <td class="text-secondary">{{ u.correo }}</td>
+
+          <!-- Rol — select inline -->
+          <td>
+            <div class="inline-select-wrap">
+              <select
+                class="inline-select"
+                [ngModel]="u.id_rol"
+                (ngModelChange)="changeRol(u, $event)"
+                [disabled]="changingRolId === u.id_usuario"
+              >
+                <option *ngFor="let r of roles" [ngValue]="r.id_rol">{{ r.nombre }}</option>
+              </select>
+              <span class="inline-spinner" *ngIf="changingRolId === u.id_usuario"></span>
+            </div>
+          </td>
+
+          <!-- Teléfono -->
+          <td class="text-muted">{{ u.telefono || '—' }}</td>
+
+          <!-- Toggle activo -->
+          <td class="center">
+            <button
+              class="toggle-btn"
+              [class.toggle-btn--on]="u.activo"
+              [disabled]="togglingId === u.id_usuario"
+              (click)="toggleActivo(u)"
+              [title]="u.activo ? 'Desactivar' : 'Activar'"
+            >
+              <span class="toggle-btn__track">
+                <span class="toggle-btn__thumb"></span>
+              </span>
+              <span class="toggle-btn__label">{{ u.activo ? 'Activo' : 'Inactivo' }}</span>
+              <span class="inline-spinner inline-spinner--dark" *ngIf="togglingId === u.id_usuario"></span>
+            </button>
+          </td>
+
+          <!-- Último acceso -->
+          <td class="text-muted">{{ formatDate(u.ultimo_acceso ?? '') }}</td>
+
+          <!-- Acciones -->
+          <td class="actions-cell center">
+            <button class="btn btn--ghost btn--sm" (click)="openEdit(u)">✎ Editar</button>
+            <button class="btn btn--danger btn--sm" (click)="openDelete(u)">✕</button>
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── Paginación ──────────────────────────────────── -->
+  <div class="pagination" *ngIf="!isLoading && lastPage > 1">
+    <div class="pagination__info">
+      Mostrando {{ (currentPage - 1) * perPage + 1 }}–{{ [currentPage * perPage, totalItems] | min }} de {{ totalItems }}
+    </div>
+
+    <div class="pagination__controls">
+      <!-- Per page -->
+      <select class="per-page-select" [(ngModel)]="perPage" (ngModelChange)="onPerPageChange()">
+        <option [ngValue]="5">5</option>
+        <option [ngValue]="10">10</option>
+        <option [ngValue]="25">25</option>
+        <option [ngValue]="50">50</option>
+      </select>
+
+      <!-- Prev -->
+      <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">‹</button>
+
+      <!-- Primera página si no está en la ventana -->
+      <ng-container *ngIf="pages[0] > 1">
+        <button class="page-btn" (click)="goToPage(1)">1</button>
+        <span class="page-dots" *ngIf="pages[0] > 2">…</span>
+      </ng-container>
+
+      <!-- Ventana de páginas -->
+      <button
+        *ngFor="let p of pages"
+        class="page-btn"
+        [class.page-btn--active]="p === currentPage"
+        (click)="goToPage(p)"
+      >{{ p }}</button>
+
+      <!-- Última página si no está en la ventana -->
+      <ng-container *ngIf="pages[pages.length - 1] < lastPage">
+        <span class="page-dots" *ngIf="pages[pages.length - 1] < lastPage - 1">…</span>
+        <button class="page-btn" (click)="goToPage(lastPage)">{{ lastPage }}</button>
+      </ng-container>
+
+      <!-- Next -->
+      <button class="page-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === lastPage">›</button>
+    </div>
+  </div>
+
+  <!-- Footer simple cuando solo hay una página -->
+  <p class="table-footer" *ngIf="!isLoading && lastPage <= 1">
+    Mostrando {{ usuarios.length }} de {{ totalItems }}
+  </p>
+
+</section>
+
+<!-- ── Modal: Crear ────────────────────────────────────── -->
+<div class="overlay" *ngIf="modalType === 'create'" (click)="closeModal()">
+  <div class="modal modal--wide" (click)="$event.stopPropagation()">
+    <h2 class="modal-title">Nuevo Usuario</h2>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Nombre *</label>
+        <input class="form-input" type="text" placeholder="Juan"
+          [(ngModel)]="createForm.nombre" (ngModelChange)="clearError()" autofocus />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Apellido</label>
+        <input class="form-input" type="text" placeholder="Pérez"
+          [(ngModel)]="createForm.apellido" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Correo *</label>
+        <input class="form-input" type="email" placeholder="juan@email.com"
+          [(ngModel)]="createForm.correo" (ngModelChange)="clearError()" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña *</label>
+        <input class="form-input" type="password" placeholder="Mínimo 6 caracteres"
+          [(ngModel)]="createForm.password" (ngModelChange)="clearError()" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Teléfono</label>
+        <input class="form-input" type="text" placeholder="+57 300 000 0000"
+          [(ngModel)]="createForm.telefono" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Rol *</label>
+        <select class="form-input form-select" [(ngModel)]="createForm.id_rol" (ngModelChange)="clearError()">
+          <option [ngValue]="0" disabled>Seleccionar rol...</option>
+          <option *ngFor="let r of roles" [ngValue]="r.id_rol">{{ r.nombre }}</option>
+        </select>
+      </div>
+      <div class="form-group form-group--full">
+        <label class="form-label">Dirección</label>
+        <input class="form-input" type="text" placeholder="Calle 123 # 45-67"
+          [(ngModel)]="createForm.direccion" />
+      </div>
+      <div class="form-group form-group--full">
+        <label class="toggle-label">
+          <input type="checkbox" [(ngModel)]="createForm.activo" class="toggle-checkbox" />
+          <span class="toggle-track"><span class="toggle-thumb" [class.toggle-thumb--on]="createForm.activo"></span></span>
+          <span class="toggle-text">{{ createForm.activo ? 'Usuario activo' : 'Usuario inactivo' }}</span>
+        </label>
+      </div>
+    </div>
+
+    <p class="form-error" *ngIf="formError">{{ formError }}</p>
+
+    <div class="modal-actions">
+      <button class="btn btn--ghost" (click)="closeModal()" [disabled]="isSaving">Cancelar</button>
+      <button class="btn btn--primary" (click)="handleCreate()" [disabled]="isSaving">
+        <span class="spinner" *ngIf="isSaving"></span>
+        {{ isSaving ? 'Guardando...' : 'Crear usuario' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Editar ───────────────────────────────────── -->
+<div class="overlay" *ngIf="modalType === 'edit'" (click)="closeModal()">
+  <div class="modal modal--wide" (click)="$event.stopPropagation()">
+    <h2 class="modal-title">Editar Usuario</h2>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Nombre *</label>
+        <input class="form-input" type="text"
+          [(ngModel)]="editForm.nombre" (ngModelChange)="clearError()" autofocus />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Apellido</label>
+        <input class="form-input" type="text" [(ngModel)]="editForm.apellido" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Correo *</label>
+        <input class="form-input" type="email"
+          [(ngModel)]="editForm.correo" (ngModelChange)="clearError()" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Teléfono</label>
+        <input class="form-input" type="text" [(ngModel)]="editForm.telefono" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Rol *</label>
+        <select class="form-input form-select" [(ngModel)]="editForm.id_rol" (ngModelChange)="clearError()">
+          <option [ngValue]="0" disabled>Seleccionar rol...</option>
+          <option *ngFor="let r of roles" [ngValue]="r.id_rol">{{ r.nombre }}</option>
+        </select>
+      </div>
+      <div class="form-group form-group--full">
+        <label class="form-label">Dirección</label>
+        <input class="form-input" type="text" [(ngModel)]="editForm.direccion" />
+      </div>
+      <div class="form-group form-group--full">
+        <label class="toggle-label">
+          <input type="checkbox" [(ngModel)]="editForm.activo" class="toggle-checkbox" />
+          <span class="toggle-track"><span class="toggle-thumb" [class.toggle-thumb--on]="editForm.activo"></span></span>
+          <span class="toggle-text">{{ editForm.activo ? 'Usuario activo' : 'Usuario inactivo' }}</span>
+        </label>
+      </div>
+    </div>
+
+    <p class="form-error" *ngIf="formError">{{ formError }}</p>
+
+    <div class="modal-actions">
+      <button class="btn btn--ghost" (click)="closeModal()" [disabled]="isSaving">Cancelar</button>
+      <button class="btn btn--primary" (click)="handleEdit()" [disabled]="isSaving">
+        <span class="spinner" *ngIf="isSaving"></span>
+        {{ isSaving ? 'Guardando...' : 'Guardar cambios' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Eliminar ─────────────────────────────────── -->
+<div class="overlay" *ngIf="modalType === 'delete'" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="delete-icon">👤</div>
+    <h2 class="modal-title">Eliminar Usuario</h2>
+    <p class="modal-body">¿Estás seguro de que deseas eliminar a</p>
+    <p class="modal-highlight">"{{ selectedUsuario?.nombre }} {{ selectedUsuario?.apellido }}"?</p>
+    <p class="modal-warning">El usuario quedará inactivo y no podrá iniciar sesión.</p>
+    <div class="modal-actions">
+      <button class="btn btn--ghost" (click)="closeModal()" [disabled]="isDeleting">Cancelar</button>
+      <button class="btn btn--danger-solid" (click)="handleDelete()" [disabled]="isDeleting">
+        <span class="spinner spinner--white" *ngIf="isDeleting"></span>
+        {{ isDeleting ? 'Eliminando...' : 'Sí, eliminar' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ───────────────────────────────────────────── -->
+<div class="toast" *ngIf="toast" [ngClass]="'toast--' + toast.type">
+  {{ toast.message }}
+</div>

@@ -22,6 +22,7 @@ const routes: Routes = [
       },
 
       /* rutas de forms */
+      
       {
         path: 'addproducto',
         loadComponent: () =>
@@ -64,7 +65,12 @@ const routes: Routes = [
       // },
 
       /* rutas de pages */
-
+      {
+        path: 'Usuarios',
+        loadComponent: () =>
+          import('./usuarios.component/usuarios.component')
+            .then(m => m.UsuariosComponent)
+      },
       {
         path: 'producto',
         loadComponent: () =>

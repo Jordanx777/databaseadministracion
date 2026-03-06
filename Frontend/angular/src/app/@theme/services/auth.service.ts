@@ -113,4 +113,19 @@ export class AuthService {
     const state = this.authState.value;
     return state !== null && state !== false;
   }
+
+    // Paso 1 — solicitar reset (envía email)
+  forgotPassword(correo: string): Observable<any> {
+    return this.apiService.post('auth/forgot-password', { correo });
+  }
+
+  // Paso 2 — validar token antes de mostrar el form
+  validateResetToken(token: string): Observable<any> {
+    return this.apiService.get(`auth/validate-token?token=${token}`);
+  }
+
+  // Paso 3 — resetear con el token
+  resetPassword(token: string, password: string, confirmPassword: string): Observable<any> {
+    return this.apiService.post('auth/reset-password', { token, password, confirmPassword });
+  }
 }

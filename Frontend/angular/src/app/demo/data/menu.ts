@@ -18,6 +18,22 @@ export const menus: Navigation[] = [
     ]
   },
   {
+    id: 'Usuarios',
+    title: 'Usuarios',
+    type: 'group',
+    icon: 'icon-navigation',
+    children: [
+      {
+        id: 'Usuarios',
+        title: 'Usuarios',
+        type: 'item',
+        classes: 'nav-item',
+        url: '/component/Usuarios',
+        icon: '#custom-tag'
+      },
+    ]
+  },
+  {
     id: 'Roles',
     title: 'Roles',
     type: 'group',
@@ -188,12 +204,12 @@ export const menus: Navigation[] = [
     ]
   },
   
-  {
-    id: 'auth',
-    title: 'Authentication',
-    type: 'group',
-    icon: 'icon-navigation',
-    children: [
+  // {
+  //   id: 'auth',
+  //   title: 'Authentication',
+  //   type: 'group',
+  //   icon: 'icon-navigation',
+  //   children: [
       // {
       //   id: 'Login',
       //   title: 'Login',
@@ -204,18 +220,18 @@ export const menus: Navigation[] = [
       //   target: true,
       //   breadcrumbs: false
       // },
-      {
-        id: 'register',
-        title: 'Register',
-        type: 'item',
-        classes: 'nav-item',
-        url: '/auth/register',
-        icon: '#custom-password-check',
-        target: true,
-        breadcrumbs: false
-      }
-    ]
-  },
+  //     {
+  //       id: 'register',
+  //       title: 'Register',
+  //       type: 'item',
+  //       classes: 'nav-item',
+  //       url: '/auth/register',
+  //       icon: '#custom-password-check',
+  //       target: true,
+  //       breadcrumbs: false
+  //     }
+  //   ]
+  // },
   // {
   //   id: 'ui-component',
   //   title: 'Ui Component',

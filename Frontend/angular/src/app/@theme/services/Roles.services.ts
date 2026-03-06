@@ -27,12 +27,10 @@ export class RolesService {
   }
 
   createRol(rol: Rol): Observable<any> {
-    console.log("Roles: ",rol);
     return this.apiService.post('roles/crear', rol);
   }
 
   updateRol(id: number, rol: Rol): Observable<any> {
-    console.log("Actualizar: ",rol);
     return this.apiService.put(`roles/actualizar/${id}`, rol);
   }
 

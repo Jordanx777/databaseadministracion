@@ -61,6 +61,10 @@ export default class LoginComponent implements OnInit, OnDestroy {
     return this.form.get('password') as FormControl;
   }
 
+  Olvidastetucontrase(): void {
+    this.router.navigate(['/forgot-password']);
+  }
+
   getErrorMessage(): string {
     if (this.email.hasError('required')) {
       return 'Debes ingresar un email';
