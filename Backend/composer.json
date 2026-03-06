@@ -7,7 +7,8 @@
         "ext-pdo": "*",
         "ext-pgsql": "*",
         "firebase/php-jwt": "^6.10",
-        "vlucas/phpdotenv": "^5.5"
+        "vlucas/phpdotenv": "^5.5",
+        "phpmailer/phpmailer": "^7.0"
     },
     "autoload": {
         "psr-4": {
