@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Models\UsuarioModel;
+use App\Models\AuthModel;
 use App\Helpers\ResponseHelper;
 
 class AuthController
@@ -75,7 +75,7 @@ class AuthController
                 return;
             }
             
-            $usuarioModel = new UsuarioModel();
+            $usuarioModel = new AuthModel();
             
             // Verificar si el email ya existe
             if ($usuarioModel->existsByEmail($input['email'])) {
@@ -209,7 +209,7 @@ class AuthController
                 return;
             }
             
-            $usuarioModel = new UsuarioModel();
+            $usuarioModel = new AuthModel();
             $user = $usuarioModel->getByEmail($input['email']);
             
             if (!$user) {
@@ -323,7 +323,7 @@ class AuthController
         }
         
         try {
-            $usuarioModel = new UsuarioModel();
+            $usuarioModel = new AuthModel();
             $user = $usuarioModel->getById($_SESSION['user_id']);
             
             if ($user) {
