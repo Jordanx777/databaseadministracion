@@ -42,6 +42,8 @@ try {
     require_once __DIR__ . '/../src/Routes/Cuentas.routes.php';
     require_once __DIR__ . '/../src/Routes/Pagos.routes.php';
     require_once __DIR__ . '/../src/Routes/Marcas.routes.php';
+    require_once __DIR__ . '/../src/Routes/Usuarios.routes.php';
+    require_once __DIR__ . '/../src/Routes/Passwordreset.routes.php';
 
     
     // Ejecutar router
