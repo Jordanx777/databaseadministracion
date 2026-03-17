@@ -7,7 +7,6 @@ use App\Helpers\ResponseHelper;
 
 class AuthController
 {
-
     // POST /api/auth/register
    
     
@@ -350,4 +349,5 @@ class AuthController
             ]);
         }
     }
+
 }
