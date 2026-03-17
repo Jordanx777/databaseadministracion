@@ -16,12 +16,64 @@ class CuentasModel
 
     // 1. Listar todas las cuentas por cobrar
     // error en esta 
-    public function getCuentasPorCobrar()
+    // ── Cuentas por cobrar con paginación y búsqueda ──────
+    public function getCuentasPorCobrar(array $filtros = []): array
     {
-        $stmt = $this->db->prepare("SELECT * FROM cuentas_por_cobrar");
+        $page    = max(1, (int) ($filtros['page']     ?? 1));
+        $perPage = max(1, (int) ($filtros['per_page'] ?? 10));
+        $offset  = ($page - 1) * $perPage;
+ 
+        $where  = ['1=1'];
+        $params = [];
+ 
+        if (!empty($filtros['buscar'])) {
+            $where[]  = "(nombre ILIKE :buscar OR apodo ILIKE :buscar OR telefono ILIKE :buscar OR referencia ILIKE :buscar)";
+            $params[':buscar'] = '%' . $filtros['buscar'] . '%';
+        }
+ 
+        if (!empty($filtros['tipo_cliente'])) {
+            $where[]  = "tipo_cliente = :tipo_cliente";
+            $params[':tipo_cliente'] = $filtros['tipo_cliente'];
+        }
+ 
+        if (!empty($filtros['mora'])) {
+            if ($filtros['mora'] === 'baja')   { $where[] = "dias_mora <= 7";           }
+            if ($filtros['mora'] === 'media')  { $where[] = "dias_mora > 7 AND dias_mora <= 30"; }
+            if ($filtros['mora'] === 'alta')   { $where[] = "dias_mora > 30";           }
+        }
+ 
+        $whereStr = implode(' AND ', $where);
+ 
+        // Total y estadísticas globales
+        $countSql  = "SELECT 
+                        COUNT(*)                          AS total,
+                        COALESCE(SUM(saldo_pendiente), 0) AS total_deuda
+                      FROM cuentas_por_cobrar WHERE $whereStr";
+        $countStmt = $this->db->prepare($countSql);
+        $countStmt->execute($params);
+        $stats = $countStmt->fetch(PDO::FETCH_ASSOC);
+ 
+        // Datos paginados
+        $sql  = "SELECT * FROM cuentas_por_cobrar WHERE $whereStr ORDER BY dias_mora DESC, saldo_pendiente DESC";
+        $stmt = $this->db->prepare($sql . " LIMIT :limit OFFSET :offset");
+ 
+        foreach ($params as $key => $val) {
+            $stmt->bindValue($key, $val, PDO::PARAM_STR);
+        }
+        $stmt->bindValue(':limit',  $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset,  PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+ 
+        return [
+            'data'        => $stmt->fetchAll(PDO::FETCH_ASSOC),
+            'total'       => (int)   $stats['total'],
+            'page'        => $page,
+            'per_page'    => $perPage,
+            'last_page'   => (int) ceil((int) $stats['total'] / $perPage),
+            'total_deuda' => (float) $stats['total_deuda'],
+        ];
     }
+ 
 
     // 2. Listar solo las cuentas activas
     public function getCuentasActivas()
