@@ -20,6 +20,16 @@ export interface VentaCrear {
   pagos?: PagoInicialCrear[];
 }
 
+export interface VentasPaginadas {
+  data:              VentaCompleta[];
+  total:             number;
+  page:              number;
+  per_page:          number;
+  last_page:         number;
+  total_vendido:     number;
+  total_por_cobrar:  number;
+}
+
 export interface DetalleVentaCrear {
   producto_id: number;
   variante_id: number;
@@ -113,17 +123,17 @@ crearVenta(venta: VentaCrear): Observable<any> {
   /**
    * Obtener ventas completas (con detalles y pagos)
    */
-  obtenerVentasCompletas(filtros?: any): Observable<{success: boolean, data: VentaCompleta[], total: number}> {
-      let params = new URLSearchParams();
-    if (filtros) {
-      Object.keys(filtros).forEach(key => {
-        if (filtros[key]) {
-          params.append(key, filtros[key]);
-        }
-      });
-    }
-    return this.apiService.get<any>(`ventas/completas?${params.toString()}`);
+  obtenerVentasCompletas(filtros?: any): Observable<{ success: boolean; data: VentasPaginadas }> {
+  let params = new URLSearchParams();
+  if (filtros) {
+    Object.keys(filtros).forEach(key => {
+      if (filtros[key] !== undefined && filtros[key] !== '') {
+        params.append(key, filtros[key]);
+      }
+    });
   }
+  return this.apiService.get<any>(`ventas/completas?${params.toString()}`);
+}
 
 obtenerPorId(id: number): Observable<any> {
     return this.apiService.get<any>(`ventas/${id}`);
