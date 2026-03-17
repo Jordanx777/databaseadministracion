@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { throwError } from 'rxjs';  // ← agrega esto, quita el 'of'
 
 
 @Injectable({
@@ -71,13 +71,7 @@ export class ApiService {
 
   private handleError(error: any) {
     console.error('API Error:', error);
-    return of({
-      showModal: true,
-      modal: {
-        title: 'Error de conexión',
-        message: 'No se pudo contactar con el servidor',
-        type: 'error'
-      }
-    });
+     // ✅ Re-lanza el error para que el .subscribe({ error: }) lo reciba
+  return throwError(() => error);
   }
 }
