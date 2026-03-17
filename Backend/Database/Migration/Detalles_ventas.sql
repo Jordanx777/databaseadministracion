@@ -13,7 +13,6 @@ CREATE TABLE ventas_detalle (
     -- Guardar datos de la variante (snapshot al momento de la venta)
     talla_vendida VARCHAR(20) NOT NULL,
     color_vendido VARCHAR(50) NOT NULL,
-    genero_vendido VARCHAR(20),
     
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
