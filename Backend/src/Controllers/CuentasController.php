@@ -22,10 +22,22 @@ class CuentasController
     }
 
     // 1. Listar todas las cuentas por cobrar
-    public function listarCuentasPorCobrar()
+    public function listarCuentasPorCobrar(): void
     {
-        $cuentas = $this->cuentasModel->getCuentasPorCobrar();
-        echo json_encode($cuentas);
+        try {
+            $filtros = [
+                'page'         => $_GET['page']         ?? 1,
+                'per_page'     => $_GET['per_page']     ?? 10,
+                'buscar'       => $_GET['buscar']       ?? '',
+                'tipo_cliente' => $_GET['tipo_cliente'] ?? '',
+                'mora'         => $_GET['mora']         ?? '',
+            ];
+ 
+            $resultado = $this->cuentasModel->getCuentasPorCobrar($filtros);
+            ResponseHelper::success($resultado, 'Cuentas por cobrar obtenidas');
+        } catch (Exception $e) {
+            ResponseHelper::error($e->getMessage(), 500);
+        }
     }
 
     // 2. Listar solo las cuentas activas
