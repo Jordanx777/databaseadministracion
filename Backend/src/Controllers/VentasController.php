@@ -46,6 +46,17 @@ class VentasController
         }
     }
 
+      public function getCreditoDisponible(array $params): void
+    {
+        try {
+            $id      = (int) ($params['id'] ?? 0);
+            $result  = $this->ventaModel->getCreditoDisponible($id);
+            ResponseHelper::success($result, 'Crédito disponible obtenido');
+        } catch (\Exception $e) {
+            ResponseHelper::error($e->getMessage(), 500);
+        }
+    }
+
 
     /**
      * Crear una nueva venta
