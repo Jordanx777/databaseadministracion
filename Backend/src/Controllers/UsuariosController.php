@@ -185,4 +185,65 @@ class UsuariosController {
             ResponseHelper::error($e->getMessage(), 500);
         }
     }
+
+    
+    // ── POST /api/auth/change-password ───────────────────
+    // Body: { password_actual, password_nuevo, confirmar_password }
+    // Requiere sesión activa
+    public function changePassword(): void {
+        try {
+            session_start();
+
+            if (!isset($_SESSION['user_id'])) {
+                http_response_code(401);
+                echo json_encode(['status' => 'error', 'message' => 'No autenticado']);
+                return;
+            }
+
+            $data = json_decode(file_get_contents('php://input'), true);
+
+            if (empty($data['password_actual'])) {
+                ResponseHelper::error('La contraseña actual es requerida', 400);
+                return;
+            }
+            if (empty($data['password_nuevo'])) {
+                ResponseHelper::error('La nueva contraseña es requerida', 400);
+                return;
+            }
+            if (strlen($data['password_nuevo']) < 6) {
+                ResponseHelper::error('La nueva contraseña debe tener al menos 6 caracteres', 400);
+                return;
+            }
+            if ($data['password_nuevo'] !== ($data['confirmar_password'] ?? '')) {
+                ResponseHelper::error('Las contraseñas no coinciden', 400);
+                return;
+            }
+            if ($data['password_actual'] === $data['password_nuevo']) {
+                ResponseHelper::error('La nueva contraseña debe ser diferente a la actual', 400);
+                return;
+            }
+
+            $usuarioModel = new UsuarioModel();
+            $usuario      = $usuarioModel->getById($_SESSION['user_id']);
+
+            if (!$usuario) {
+                ResponseHelper::notFound('Usuario no encontrado');
+                return;
+            }
+
+            // ✅ Verificar que la contraseña actual sea correcta
+            if (!password_verify($data['password_actual'], $usuario['contrasena'])) {
+                ResponseHelper::error('La contraseña actual es incorrecta', 401);
+                return;
+            }
+
+            $hash = password_hash($data['password_nuevo'], PASSWORD_BCRYPT);
+            $usuarioModel->updatePassword($_SESSION['user_id'], $hash);
+
+            ResponseHelper::success(null, 'Contraseña actualizada exitosamente');
+
+        } catch (\Exception $e) {
+            ResponseHelper::error('Error al cambiar contraseña: ' . $e->getMessage(), 500);
+        }
+    }
 }
