@@ -7,6 +7,6 @@ $router->get('/api/ventas/completas/{id}', [VentasController::class, 'obtenerVen
 $router->put('/api/ventas/cancelar/{id}', [VentasController::class, 'cancelar']);
 $router->get('api/pagos/venta/{id}', [VentasController::class,'listarPorVenta']);
 $router->get('/api/cuentas/historial/completo', [VentasController::class, 'obtenerHistorialCompleto']);
-$router->get('/api/clientes/{id}/credito', [VentasController::class, 'getCreditoDisponible']);
+$router->get('/api/clientes/credito/{id}', [VentasController::class, 'getCreditoDisponible']);
 
 ?>
