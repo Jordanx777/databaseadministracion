@@ -29,6 +29,10 @@ class Database {
                     PDO::ATTR_EMULATE_PREPARES => false, // Usa prepared statements reales
                 ]);
 
+                // ✅ Configurar timezone a Colombia (UTC-5)
+                // Todas las fechas que PostgreSQL retorne vendrán en hora colombiana
+                self::$instance->exec("SET timezone = 'America/Bogota'");
+
                 
             } catch (PDOException $e) {
                 throw new \Exception("Error de conexión: " . $e->getMessage());
