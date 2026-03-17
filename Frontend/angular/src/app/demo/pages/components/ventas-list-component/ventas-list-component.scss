@@ -1,293 +1,214 @@
-// src/app/modules/ventas/components/ventas-list/ventas-list.component.scss
+/* ── Layout ──────────────────────────────────────────────────────────── */
+.cuentas-container { padding: 20px; }
 
-.ventas-container {
-  padding: 20px;
-  min-height: calc(100vh - 64px);
-}
-
-.card-ventas {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-// ===== LOADING =====
 .loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  gap: 20px;
-
-  p {
-    color: #666;
-    font-size: 14px;
-  }
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 60px 0; gap: 16px; color: rgba(0,0,0,.45);
 }
 
-// ===== HEADER =====
+/* ── Header ──────────────────────────────────────────────────────────── */
 .tabla-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  gap: 15px;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px; padding: 16px 16px 8px;
 }
 
 .header-info {
-  .tabla-titulo {
-    font-size: 24px;
-    font-weight: 600;
-    color: #333;
-    margin: 0 0 5px 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    mat-icon {
-      color: #3f51b5;
-    }
-  }
-
-  .tabla-subtitulo {
-    color: #666;
-    font-size: 14px;
-  }
+  .tabla-titulo   { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  .tabla-subtitulo{ display: block; font-size: 13px; color: rgba(0,0,0,.5); margin-bottom: 8px; }
 }
 
-// ===== ESTADÍSTICAS =====
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
-  margin-bottom: 20px;
+.total-deuda {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; background: #e3f2fd; border-radius: 8px;
+  font-size: 14px; color: #1565c0;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  strong { font-weight: 600; }
 }
 
-.stat-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 20px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  gap: 15px;
-
-  &.alert {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  }
-
-  .stat-icon {
-    font-size: 40px;
-    width: 40px;
-    height: 40px;
-    opacity: 0.9;
-  }
-
-  .stat-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .stat-label {
-    font-size: 13px;
-    opacity: 0.9;
-    margin-bottom: 5px;
-  }
-
-  .stat-value {
-    font-size: 24px;
-    font-weight: 700;
-  }
-}
-
-// ===== FILTROS =====
+/* ── Filtros ─────────────────────────────────────────────────────────── */
 .filtros-section {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  align-items: center;
-
-  .filtro-buscar {
-    flex: 1;
-    min-width: 250px;
-  }
-
-  .filtro-select {
-    min-width: 150px;
-  }
+  display: flex; flex-wrap: wrap; gap: 8px;
+  align-items: center; padding: 8px 16px 12px;
 }
+.filtro-buscar { flex: 1; min-width: 200px; }
+.filtro-select { width: 170px; }
 
-// ===== TABLA =====
-.tabla-wrapper {
-  overflow-x: auto;
-  margin-bottom: 20px;
-}
+/* ── Tabla ───────────────────────────────────────────────────────────── */
+.tabla-wrapper { overflow-x: auto; border-top: 1px solid rgba(0,0,0,.08); }
 
-.tabla-ventas {
+.tabla-cuentas {
   width: 100%;
-  background: white;
+  .mat-column-nombre          { min-width: 180px; }
+  .mat-column-saldo_pendiente { font-weight: 600; }
+  .mat-column-acciones        { width: 100px; text-align: right; white-space: nowrap; }
 
-  th {
-    font-weight: 600;
-    color: #666;
-    font-size: 13px;
-    text-transform: uppercase;
+  th.mat-header-cell {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase; color: rgba(0,0,0,.5);
+    padding: 12px 16px;
   }
-
-  td {
-    font-size: 14px;
-  }
-
-  .fila-venta {
-    transition: background-color 0.2s;
-
-    &:hover {
-      background-color: #f5f5f5;
-    }
-
-    &.fila-pendiente {
-      border-left: 3px solid #ff9800;
-    }
-  }
+  td.mat-cell { font-size: 13px; padding: 10px 16px; }
 }
 
-// Celdas específicas
-.factura-cell {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  .factura-icon {
-    color: #3f51b5;
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-  }
-
-  .factura-numero {
-    font-weight: 500;
-    color: #333;
-  }
+.fila-cuenta {
+  transition: background .15s;
+  &:hover { background: #f5f9ff; }
 }
 
-.cliente-cell {
-  display: flex;
-  flex-direction: column;
+/* ── Celdas ──────────────────────────────────────────────────────────── */
+.cliente-cell { display: flex; flex-direction: column; gap: 2px; }
+.cliente-nombre { font-weight: 500; font-size: 14px; }
+.cliente-meta   { font-size: 11px; color: rgba(0,0,0,.45); }
 
-  .cliente-nombre {
-    font-weight: 500;
-    color: #333;
-  }
+.precio         { white-space: nowrap; font-size: 13px; }
+.precio-pagado  { color: #2e7d32; font-weight: 500; }
+.precio-pendiente { color: #c62828; font-weight: 600; }
 
-  .cliente-meta {
-    font-size: 12px;
-    color: #999;
-  }
+.center { text-align: center; }
+.acciones-cell { white-space: nowrap; }
+
+/* ── Badges ──────────────────────────────────────────────────────────── */
+%badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 3px 10px; border-radius: 99px;
+  font-size: 11px; font-weight: 700; letter-spacing: .4px;
 }
 
-.precio {
-  font-weight: 600;
-  
-  &.precio-pagado {
-    color: #4caf50;
-  }
-}
-
-.saldo-cero {
-  color: #4caf50;
-}
-
-.saldo-pendiente {
-  color: #f44336;
-  font-weight: 600;
-}
-
-// Chips
-.chip-registrado {
-  background-color: #e3f2fd !important;
-  color: #1976d2 !important;
-}
-
-.chip-ocasional {
-  background-color: #fff3e0 !important;
-  color: #f57c00 !important;
-}
-
-.chip-pagada {
-  background-color: #e8f5e9 !important;
-  color: #388e3c !important;
-}
-
-.chip-pendiente {
-  background-color: #fff3e0 !important;
-  color: #f57c00 !important;
-}
-
-// Tipo de pago badges
-.tipo-pago-badge {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
+.tipo-badge {
+  @extend %badge;
   text-transform: capitalize;
-
-  &.tipo-contado {
-    background: #e8f5e9;
-    color: #388e3c;
-  }
-
-  &.tipo-credito {
-    background: #fff3e0;
-    color: #f57c00;
-  }
-
-  &.tipo-mixto {
-    background: #e3f2fd;
-    color: #1976d2;
-  }
+  &.badge-registrado { background: #e8f5e9; color: #2e7d32; }
+  &.badge-ocasional  { background: #fff8e1; color: #f57f17; }
 }
 
-// Acciones
-.acciones-cell {
-  display: flex;
-  gap: 5px;
-  align-items: center;
+.mora-badge {
+  @extend %badge;
+  min-width: 44px;
+  &.mora-baja  { background: #e8f5e9; color: #2e7d32; }
+  &.mora-media { background: #fff8e1; color: #f57f17; }
+  &.mora-alta  { background: #ffebee; color: #c62828; }
 }
 
-// Empty state
+.facturas-badge {
+  @extend %badge;
+  background: #e3f2fd; color: #1565c0; min-width: 28px;
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────── */
 .empty-state {
-  text-align: center;
-  padding: 60px 20px !important;
+  text-align: center; padding: 40px 0 !important;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  color: rgba(0,0,0,.35);
+  mat-icon { font-size: 48px; width: 48px; height: 48px; }
+  p { margin: 0; font-size: 14px; }
+}
 
-  mat-icon {
-    font-size: 64px;
-    width: 64px;
-    height: 64px;
-    color: #ccc;
-    margin-bottom: 15px;
-  }
+/* ── Paginación ──────────────────────────────────────────────────────── */
+.pagination {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px; flex-wrap: wrap; gap: 12px;
+  border-top: 1px solid rgba(0,0,0,.08);
+}
 
-  p {
-    color: #999;
-    margin: 0 0 20px 0;
+.pagination__info { font-size: 13px; color: rgba(0,0,0,.5); }
+.pagination__controls { display: flex; align-items: center; gap: 6px; }
+
+.per-page-select {
+  padding: 6px 10px; border: 1px solid rgba(0,0,0,.2);
+  border-radius: 6px; font-size: 12px; background: white;
+  cursor: pointer; outline: none;
+  &:focus { border-color: #1976d2; }
+}
+
+.page-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 34px; height: 34px; padding: 0 10px;
+  border: 1px solid rgba(0,0,0,.18); border-radius: 6px;
+  background: white; font-size: 13px; color: rgba(0,0,0,.6);
+  cursor: pointer; transition: all .15s;
+
+  &:hover:not(:disabled):not(.page-btn--active) { background: #f5f5f5; color: #000; }
+  &--active { background: #1976d2; border-color: #1976d2; color: white; font-weight: 700; cursor: default; }
+  &:disabled { opacity: .35; cursor: not-allowed; }
+}
+
+.page-dots { font-size: 13px; color: rgba(0,0,0,.4); padding: 0 4px; }
+
+/* ── Modal ───────────────────────────────────────────────────────────── */
+.modal-historial-container { display: flex; flex-direction: column; max-height: 90vh; }
+
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between; padding: 20px 24px;
+}
+
+.modal-header-info {
+  display: flex; align-items: center; gap: 12px;
+  .modal-icon    { font-size: 28px; width: 28px; height: 28px; color: #1976d2; }
+  .modal-titulo  { font-size: 18px; font-weight: 600; margin: 0; }
+  .modal-subtitulo { font-size: 13px; color: rgba(0,0,0,.5); margin: 2px 0 0; }
+}
+
+.btn-cerrar { opacity: .6; &:hover { opacity: 1; } }
+.modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+
+/* ── Historial ───────────────────────────────────────────────────────── */
+.loading-historial, .sin-historial {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 40px 0; color: rgba(0,0,0,.4);
+  mat-icon { font-size: 48px; width: 48px; height: 48px; margin-bottom: 12px; }
+}
+
+.historial-list { display: flex; flex-direction: column; gap: 16px; }
+
+.historial-item { border: 1px solid rgba(0,0,0,.12); border-radius: 8px; overflow: hidden; }
+
+.item-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; background: #f5f5f5; border-bottom: 1px solid rgba(0,0,0,.08);
+}
+
+.item-info {
+  h4 { font-size: 14px; font-weight: 600; margin: 0 0 2px; }
+  .item-fecha { font-size: 12px; color: rgba(0,0,0,.5); }
+}
+
+.item-montos {
+  display: flex; align-items: center; gap: 8px;
+  .monto-venta { font-size: 15px; font-weight: 600; }
+  .estado-badge {
+    @extend %badge;
+    text-transform: capitalize;
+    &.estado-pendiente { background: #fff8e1; color: #f57f17; }
+    &.estado-pagada    { background: #e8f5e9; color: #2e7d32; }
+    &.estado-cancelada { background: #ffebee; color: #c62828; }
   }
 }
 
-// Responsive
+.item-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+.productos-vendidos, .pagos-realizados {
+  font-size: 13px;
+  strong { display: block; margin-bottom: 6px; color: rgba(0,0,0,.7); }
+  ul { margin: 0; padding-left: 20px; li { margin: 4px 0; color: rgba(0,0,0,.65); } }
+}
+
+.item-saldo {
+  display: flex; gap: 16px; padding-top: 8px;
+  border-top: 1px solid rgba(0,0,0,.08);
+  font-size: 13px; font-weight: 500;
+  .saldo-pendiente { color: #c62828; font-weight: 600; }
+}
+
+.item-acciones {
+  margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+  display: flex; justify-content: flex-end;
+  button { min-width: 180px; }
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .tabla-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .filtros-section {
-    flex-direction: column;
-
-    .filtro-buscar,
-    .filtro-select {
-      width: 100%;
-    }
-  }
+  .filtros-section { flex-direction: column; }
+  .filtro-buscar, .filtro-select { width: 100%; }
+  .pagination { flex-direction: column; align-items: flex-start; }
 }
