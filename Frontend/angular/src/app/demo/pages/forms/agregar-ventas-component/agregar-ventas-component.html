@@ -1,7 +1,7 @@
 <div class="ventas-container">
 
   <!-- LOADING INICIAL -->
-   <div *ngIf="cargandoDatos" class="loading-container">
+  <div *ngIf="cargandoDatos" class="loading-container">
     <mat-spinner></mat-spinner>
     <p>Cargando datos...</p>
   </div>
@@ -26,7 +26,6 @@
 
         <div class="form-grid">
 
-          <!-- Tipo de cliente -->
           <mat-radio-group formControlName="tipo_cliente" class="tipo-cliente-radio span-2">
             <mat-radio-button *ngFor="let tipo of tiposCliente" [value]="tipo.value">
               {{ tipo.label }}
@@ -47,7 +46,10 @@
                 Campo obligatorio
               </mat-error>
             </mat-form-field>
-            <mat-autocomplete #autoCliente="matAutocomplete" [displayWith]="displayCliente">
+            <mat-autocomplete
+              #autoCliente="matAutocomplete"
+              [displayWith]="displayCliente"
+              (optionSelected)="onClienteSeleccionado($event.option.value)">
               <mat-option *ngFor="let cliente of clientesFiltrados | async" [value]="cliente">
                 <div class="cliente-option">
                   <span class="cliente-nombre">{{ cliente.nombre }}</span>
@@ -67,12 +69,10 @@
                 Campo obligatorio
               </mat-error>
             </mat-form-field>
-
             <mat-form-field appearance="outline">
               <mat-label>Teléfono</mat-label>
               <input matInput formControlName="cliente_telefono" placeholder="3001234567">
             </mat-form-field>
-
             <mat-form-field appearance="outline" class="span-2">
               <mat-label>Referencia (dirección, barrio, etc.)</mat-label>
               <input matInput formControlName="cliente_referencia">
@@ -90,10 +90,8 @@
         </div>
 
         <div class="agregar-producto-section">
-
           <div class="form-grid">
 
-            <!-- Buscar producto -->
             <mat-form-field appearance="outline" class="span-2">
               <mat-label>Buscar producto</mat-label>
               <input
@@ -107,25 +105,24 @@
               <mat-option *ngFor="let producto of productosFiltrados | async" [value]="producto">
                 <div class="producto-option">
                   <span class="producto-nombre">{{ producto.nombre }}</span>
-                  <span class="producto-meta">{{ producto.marca_nombre }}</span>
+                  <!-- ✅ Fix: no mostrar null si no hay marca -->
+                  <span class="producto-meta" *ngIf="producto.marca_nombre">{{ producto.marca_nombre }}</span>
                   <span class="producto-precio">{{ producto.precio_venta | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
                 </div>
               </mat-option>
             </mat-autocomplete>
 
-            <!-- Variante -->
             <mat-form-field appearance="outline">
               <mat-label>Seleccionar variante</mat-label>
               <mat-select formControlName="variante_seleccionada">
                 <mat-option
                   *ngFor="let v of formVenta.get('producto_busqueda')?.value?.variantes"
                   [value]="v.id">
-                  {{ v.talla }} / {{ v.color }} / {{ v.genero }} (Stock: {{ v.stock }})
+                  {{ v.talla }} / {{ v.color }} (Stock: {{ v.stock }})
                 </mat-option>
               </mat-select>
             </mat-form-field>
 
-            <!-- Cantidad -->
             <mat-form-field appearance="outline">
               <mat-label>Cantidad</mat-label>
               <input matInput type="number" formControlName="cantidad_agregar" min="1">
@@ -133,60 +130,47 @@
 
           </div>
 
-          <button
-            mat-raised-button
-            color="primary"
-            type="button"
-            (click)="agregarAlCarrito()"
-            class="btn-agregar-carrito">
+          <button mat-raised-button color="primary" type="button"
+            (click)="agregarAlCarrito()" class="btn-agregar-carrito">
             <mat-icon>add_shopping_cart</mat-icon>
             Agregar al carrito
           </button>
-
         </div>
 
         <!-- CARRITO -->
         <div class="carrito-section" *ngIf="carrito.length > 0">
-
-          <h4>Carrito ({{ carrito.length }} productos)</h4>
-
+          <h4>Carrito ({{ carrito.length }} producto{{ carrito.length !== 1 ? 's' : '' }})</h4>
           <div class="tabla-wrapper">
             <table mat-table [dataSource]="carrito" class="tabla-carrito">
 
-              <!-- Producto -->
               <ng-container matColumnDef="producto">
                 <th mat-header-cell *matHeaderCellDef>Producto</th>
                 <td mat-cell *matCellDef="let item">
                   <div class="producto-cell">
                     <span class="producto-nombre">{{ item.producto_nombre }}</span>
-                    <span class="producto-meta">{{ item.marca_nombre }}</span>
+                    <!-- ✅ Fix: no mostrar marca si está vacía -->
+                    <span class="producto-meta" *ngIf="item.marca_nombre">{{ item.marca_nombre }}</span>
                   </div>
                 </td>
               </ng-container>
 
-              <!-- Variante -->
               <ng-container matColumnDef="variante">
                 <th mat-header-cell *matHeaderCellDef>Variante</th>
                 <td mat-cell *matCellDef="let item">
-                  {{ item.talla }} / {{ item.color }} / {{ item.genero }}
+                  {{ item.talla }} / {{ item.color }}
                 </td>
               </ng-container>
 
-              <!-- Cantidad -->
               <ng-container matColumnDef="cantidad">
                 <th mat-header-cell *matHeaderCellDef>Cantidad</th>
                 <td mat-cell *matCellDef="let item">
-                  <input
-                    type="number"
-                    class="cantidad-input"
+                  <input type="number" class="cantidad-input"
                     [value]="item.cantidad"
                     (change)="actualizarCantidad(item, +$any($event.target).value)"
-                    min="1"
-                    [max]="item.stock_disponible">
+                    min="1" [max]="item.stock_disponible">
                 </td>
               </ng-container>
 
-              <!-- Precio unitario -->
               <ng-container matColumnDef="precio_unitario">
                 <th mat-header-cell *matHeaderCellDef>Precio unit.</th>
                 <td mat-cell *matCellDef="let item" class="precio">
@@ -194,7 +178,6 @@
                 </td>
               </ng-container>
 
-              <!-- Subtotal -->
               <ng-container matColumnDef="subtotal">
                 <th mat-header-cell *matHeaderCellDef>Subtotal</th>
                 <td mat-cell *matCellDef="let item" class="precio precio-subtotal">
@@ -202,16 +185,11 @@
                 </td>
               </ng-container>
 
-              <!-- Acciones -->
               <ng-container matColumnDef="acciones">
                 <th mat-header-cell *matHeaderCellDef></th>
                 <td mat-cell *matCellDef="let item; let i = index">
-                  <button
-                    mat-icon-button
-                    color="warn"
-                    type="button"
-                    (click)="eliminarDelCarrito(i)"
-                    matTooltip="Eliminar">
+                  <button mat-icon-button color="warn" type="button"
+                    (click)="eliminarDelCarrito(i)" matTooltip="Eliminar">
                     <mat-icon>delete_outline</mat-icon>
                   </button>
                 </td>
@@ -219,10 +197,8 @@
 
               <tr mat-header-row *matHeaderRowDef="columnasCarrito"></tr>
               <tr mat-row *matRowDef="let row; columns: columnasCarrito"></tr>
-
             </table>
           </div>
-
         </div>
 
         <div class="sin-productos" *ngIf="carrito.length === 0">
@@ -241,24 +217,17 @@
         <div class="totales-section">
 
           <div class="form-grid">
-
-            <!-- Subtotal (readonly) -->
             <mat-form-field appearance="outline">
               <mat-label>Subtotal</mat-label>
               <input matInput formControlName="subtotal" readonly>
               <span matTextPrefix>$&nbsp;</span>
             </mat-form-field>
-
-            <!-- Descuento que no se vea en el fomulario y se envia al backend en 0-->
             <input type="hidden" formControlName="descuento" value="0">
-
-            <!-- Total (readonly) -->
             <mat-form-field appearance="outline" class="total-field">
               <mat-label>TOTAL</mat-label>
               <input matInput formControlName="total" readonly>
               <span matTextPrefix>$&nbsp;</span>
             </mat-form-field>
-
           </div>
 
           <!-- Tipo de pago -->
@@ -271,60 +240,98 @@
             </mat-select>
           </mat-form-field>
 
+          <!-- ✅ Panel de crédito disponible -->
+          <ng-container *ngIf="
+            formVenta.get('tipo_cliente')?.value === 'registrado' &&
+            (formVenta.get('tipo_pago')?.value === 'credito' || formVenta.get('tipo_pago')?.value === 'mixto')">
+
+            <!-- Cargando -->
+            <div class="credito-loading" *ngIf="cargandoCredito">
+              <mat-spinner diameter="18"></mat-spinner>
+              <span>Consultando crédito disponible...</span>
+            </div>
+
+            <!-- Info de crédito -->
+            <div *ngIf="creditoInfo && !cargandoCredito"
+              class="credito-panel"
+              [class.credito-panel--ok]="!creditoInsuficiente"
+              [class.credito-panel--warn]="creditoInsuficiente">
+
+              <div class="credito-panel__row">
+                <span>Límite de crédito</span>
+                <strong>{{ creditoInfo.limite | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+              </div>
+              <div class="credito-panel__row">
+                <span>Deuda actual</span>
+                <strong class="deuda">{{ creditoInfo.deuda | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+              </div>
+              <div class="credito-panel__row credito-panel__row--total">
+                <span>Disponible</span>
+                <strong [class.text-ok]="!creditoInsuficiente" [class.text-warn]="creditoInsuficiente">
+                  {{ creditoInfo.disponible | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </strong>
+              </div>
+
+              <!-- Monto que se va a crédito en esta venta -->
+              <div class="credito-panel__row credito-panel__row--esta-venta" *ngIf="montoCredito > 0">
+                <span>Esta venta (crédito)</span>
+                <strong>{{ montoCredito | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+              </div>
+
+              <!-- Alerta de crédito insuficiente -->
+              <div class="credito-alerta" *ngIf="creditoInsuficiente">
+                <mat-icon>warning</mat-icon>
+                <span>
+                  Crédito insuficiente. Falta
+                  <strong>{{ (montoCredito - creditoInfo.disponible) | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+                  para completar esta venta a crédito.
+                </span>
+              </div>
+            </div>
+
+            <!-- Sin crédito configurado -->
+            <div *ngIf="!creditoInfo && !cargandoCredito && formVenta.get('cliente_id')?.value?.id"
+              class="credito-panel credito-panel--warn">
+              <div class="credito-alerta">
+                <mat-icon>block</mat-icon>
+                <span>Este cliente no tiene límite de crédito configurado.</span>
+              </div>
+            </div>
+
+          </ng-container>
+
           <!-- Pagos iniciales (contado / mixto) -->
           <div class="pagos-iniciales" *ngIf="formVenta.get('tipo_pago')?.value !== 'credito'">
-
             <h4>Pagos iniciales</h4>
-
             <div formArrayName="pagos" class="pagos-list">
-
-              <div
-                *ngFor="let pago of pagos.controls; let i = index"
-                [formGroupName]="i"
-                class="pago-item">
-
+              <div *ngFor="let pago of pagos.controls; let i = index"
+                [formGroupName]="i" class="pago-item">
                 <mat-form-field appearance="outline" class="pago-campo">
                   <mat-label>Monto</mat-label>
                   <input matInput type="number" step="0.01" formControlName="monto">
                   <span matTextPrefix>$&nbsp;</span>
                   <mat-error *ngIf="pago.get('monto')?.hasError('required')">Requerido</mat-error>
                 </mat-form-field>
-
                 <mat-form-field appearance="outline" class="pago-campo">
                   <mat-label>Método</mat-label>
                   <mat-select formControlName="metodo_pago">
-                    <mat-option *ngFor="let m of metodosPago" [value]="m.value">
-                      {{ m.label }}
-                    </mat-option>
+                    <mat-option *ngFor="let m of metodosPago" [value]="m.value">{{ m.label }}</mat-option>
                   </mat-select>
                 </mat-form-field>
-
                 <mat-form-field appearance="outline" class="pago-campo">
                   <mat-label>Referencia</mat-label>
                   <input matInput formControlName="referencia">
                 </mat-form-field>
-
-                <button
-                  mat-icon-button
-                  color="warn"
-                  type="button"
-                  (click)="eliminarPago(i)"
-                  [disabled]="formVenta.get('tipo_pago')?.value === 'contado'"
-                  matTooltip="Eliminar pago">
+                <button mat-icon-button color="warn" type="button" (click)="eliminarPago(i)"
+                  [disabled]="formVenta.get('tipo_pago')?.value === 'contado'" matTooltip="Eliminar pago">
                   <mat-icon>remove_circle_outline</mat-icon>
                 </button>
-
               </div>
-
             </div>
 
-            <button
-              *ngIf="formVenta.get('tipo_pago')?.value === 'mixto'"
-              mat-stroked-button
-              color="primary"
-              type="button"
-              (click)="agregarPago()"
-              class="btn-agregar-pago">
+            <button *ngIf="formVenta.get('tipo_pago')?.value === 'mixto'"
+              mat-stroked-button color="primary" type="button"
+              (click)="agregarPago()" class="btn-agregar-pago">
               <mat-icon>add_circle_outline</mat-icon>
               Agregar otro pago
             </button>
@@ -336,48 +343,40 @@
                 (Saldo pendiente: {{ (total - getTotalPagos()) | currency:'COP':'symbol-narrow':'1.0-0' }})
               </span>
             </div>
-
           </div>
 
-          <!-- Mensaje crédito -->
+          <!-- Mensaje crédito puro -->
           <div class="credito-message" *ngIf="formVenta.get('tipo_pago')?.value === 'credito'">
             <mat-icon>info</mat-icon>
             <p>Esta venta quedará registrada como cuenta por cobrar. El cliente deberá realizar pagos posteriormente.</p>
           </div>
 
           <!-- Notas -->
-          <mat-form-field appearance="outline" class="span-2">
+          <mat-form-field appearance="outline" class="span-2 notas-field">
             <mat-label>Notas adicionales (opcional)</mat-label>
             <textarea matInput formControlName="notas" rows="2"></textarea>
           </mat-form-field>
 
         </div>
 
-        <!-- BOTONES FINALES -->
         <mat-divider></mat-divider>
 
+        <!-- BOTONES -->
         <div class="acciones">
-          <button
-            mat-stroked-button
-            type="button"
-            (click)="cancelar()"
-            >
+          <button mat-stroked-button type="button" (click)="cancelar()">
             Cancelar
           </button>
-          <button
-            mat-flat-button
+          <button mat-flat-button color="primary" type="submit"
             class="guardar"
-            color="primary"
-            type="submit"
-           >
-            <mat-icon>check_circle</mat-icon>
-            <span *ngIf="">Registrar venta</span>
+            [disabled]="cargando || creditoInsuficiente">
+            <mat-spinner diameter="18" *ngIf="cargando"></mat-spinner>
+            <mat-icon *ngIf="!cargando">check_circle</mat-icon>
+            {{ cargando ? 'Registrando...' : 'Registrar venta' }}
           </button>
         </div>
 
       </form>
     </mat-card-content>
-
   </mat-card>
 
 </div>
