@@ -30,6 +30,7 @@ SELECT
                 'marca', m.nombre,
                 'talla', vd.talla_vendida,
                 'color', vd.color_vendido,
+                'genero', p.genero,  -- ✅ Desde productos
                 'cantidad', vd.cantidad,
                 'precio', vd.precio_unitario
             )
