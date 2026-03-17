@@ -1,60 +1,187 @@
 <div class="profile-page">
   <app-card>
     <h3 slot="header">Mi Perfil</h3>
-    
+
     @if (currentUser) {
+
+      <!-- ── Header del perfil ──────────────────────── -->
       <div class="profile-content">
         <div class="profile-header">
-          <div class="profile-avatar-large">
-            {{ getUserInitials() }}
-          </div>
+          <div class="profile-avatar-large">{{ getUserInitials() }}</div>
           <div class="profile-name">
             <h4>{{ currentUser.nombre }} {{ currentUser.apellido }}</h4>
             <p class="text-muted">{{ currentUser.rol_nombre }}</p>
           </div>
         </div>
 
-        <div class="profile-details">
-          <div class="detail-row">
-            <label>Usuario:</label>
-            <span>{{ currentUser.nombre }}</span>
-          </div>
-          
-          <div class="detail-row">
-            <label>Email:</label>
-            <span>{{ currentUser.correo || 'No especificado' }}</span>
-          </div>
-          
-          <div class="detail-row">
-            <label>Rol:</label>
-            <span>{{ currentUser.rol_nombre }}</span>
-          </div>
-          
-           <div class="detail-row">
-            <label>Fecha de Registro : </label>
-            <span>{{ currentUser.fecha_creacion | date:'longDate' }}</span>
-          </div>
-
-          <!-- telefono -->
-          <div class="detail-row">
-            <label>Teléfono:</label>
-            <span>{{ currentUser.telefono || 'No especificado' }}</span>
-          </div>
-
-          <!-- direccion -->
-          <div class="detail-row">
-            <label>Dirección:</label>
-            <span>{{ currentUser.direccion || 'No especificado' }}</span>
-          </div>
-          
-          <div class="detail-row">
-            <label>Estado:</label>
-            <span class="badge badge-success">{{ getStatusText() }}</span>
-          </div>
+        <!-- ── Tabs ───────────────────────────────────── -->
+        <div class="profile-tabs">
+          <button
+            class="tab-btn"
+            [class.tab-btn--active]="activeSection === 'info'"
+            (click)="setSection('info')"
+          >
+            👤 Información
+          </button>
+          <button
+            class="tab-btn"
+            [class.tab-btn--active]="activeSection === 'password'"
+            (click)="setSection('password')"
+          >
+            🔒 Cambiar contraseña
+          </button>
         </div>
+
+        <!-- ── Sección: Información ───────────────────── -->
+        @if (activeSection === 'info') {
+          <div class="profile-details">
+            <div class="detail-row">
+              <label>Nombre:</label>
+              <span>{{ currentUser.nombre }} {{ currentUser.apellido }}</span>
+            </div>
+            <div class="detail-row">
+              <label>Email:</label>
+              <span>{{ currentUser.correo || 'No especificado' }}</span>
+            </div>
+            <div class="detail-row">
+              <label>Rol:</label>
+              <span>{{ currentUser.rol_nombre }}</span>
+            </div>
+            <div class="detail-row">
+              <label>Teléfono:</label>
+              <span>{{ currentUser.telefono || 'No especificado' }}</span>
+            </div>
+            <div class="detail-row">
+              <label>Dirección:</label>
+              <span>{{ currentUser.direccion || 'No especificado' }}</span>
+            </div>
+            <div class="detail-row">
+              <label>Registro:</label>
+              <span>{{ currentUser.fecha_creacion | date:'longDate' }}</span>
+            </div>
+            <div class="detail-row">
+              <label>Estado:</label>
+              <span class="badge badge-success">{{ getStatusText() }}</span>
+            </div>
+          </div>
+        }
+
+        <!-- ── Sección: Cambiar contraseña ───────────── -->
+        @if (activeSection === 'password') {
+          <div class="password-section">
+
+            <p class="password-hint">
+              Por seguridad, necesitas confirmar tu contraseña actual antes de establecer una nueva.
+            </p>
+
+            <!-- Contraseña actual -->
+            <div class="form-group">
+              <label class="form-label">Contraseña actual</label>
+              <div class="input-wrap">
+                <input
+                  class="form-input"
+                  [type]="showActual ? 'text' : 'password'"
+                  placeholder="Tu contraseña actual"
+                  [(ngModel)]="passwordForm.password_actual"
+                  (ngModelChange)="passwordError = ''"
+                  [disabled]="isSaving"
+                />
+                <button class="eye-btn" type="button" (click)="showActual = !showActual">
+                  {{ showActual ? '🙈' : '👁️' }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Nueva contraseña -->
+            <div class="form-group">
+              <label class="form-label">Nueva contraseña</label>
+              <div class="input-wrap">
+                <input
+                  class="form-input"
+                  [type]="showNuevo ? 'text' : 'password'"
+                  placeholder="Mínimo 6 caracteres"
+                  [(ngModel)]="passwordForm.password_nuevo"
+                  (ngModelChange)="passwordError = ''"
+                  [disabled]="isSaving"
+                />
+                <button class="eye-btn" type="button" (click)="showNuevo = !showNuevo">
+                  {{ showNuevo ? '🙈' : '👁️' }}
+                </button>
+              </div>
+
+              <!-- Barra de fortaleza -->
+              @if (passwordForm.password_nuevo) {
+                <div class="strength-bar">
+                  <div class="strength-bar__track">
+                    <div class="strength-bar__fill"
+                      [class.strength-bar__fill--weak]="passwordStrength === 'weak'"
+                      [class.strength-bar__fill--medium]="passwordStrength === 'medium'"
+                      [class.strength-bar__fill--strong]="passwordStrength === 'strong'"
+                    ></div>
+                  </div>
+                  <span class="strength-label"
+                    [class.strength-label--weak]="passwordStrength === 'weak'"
+                    [class.strength-label--medium]="passwordStrength === 'medium'"
+                    [class.strength-label--strong]="passwordStrength === 'strong'"
+                  >{{ strengthLabel }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- Confirmar contraseña -->
+            <div class="form-group">
+              <label class="form-label">Confirmar nueva contraseña</label>
+              <div class="input-wrap">
+                <input
+                  class="form-input"
+                  [type]="showConfirm ? 'text' : 'password'"
+                  placeholder="Repite la nueva contraseña"
+                  [(ngModel)]="passwordForm.confirmar_password"
+                  (ngModelChange)="passwordError = ''"
+                  (keydown.enter)="changePassword()"
+                  [disabled]="isSaving"
+                />
+                <button class="eye-btn" type="button" (click)="showConfirm = !showConfirm">
+                  {{ showConfirm ? '🙈' : '👁️' }}
+                </button>
+              </div>
+
+              @if (passwordsMatch !== null) {
+                <div class="match-indicator">
+                  @if (passwordsMatch) {
+                    <span class="match-ok">✓ Las contraseñas coinciden</span>
+                  } @else {
+                    <span class="match-fail">✗ No coinciden</span>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Error / Éxito -->
+            @if (passwordError) {
+              <p class="form-error">{{ passwordError }}</p>
+            }
+            @if (passwordSuccess) {
+              <p class="form-success">{{ passwordSuccess }}</p>
+            }
+
+            <!-- Botón -->
+            <button
+              class="btn-save"
+              (click)="changePassword()"
+              [disabled]="isSaving"
+            >
+              <span class="btn-spinner" *ngIf="isSaving"></span>
+              {{ isSaving ? 'Actualizando...' : 'Actualizar contraseña' }}
+            </button>
+
+          </div>
+        }
+
       </div>
     } @else {
       <p>Cargando información del usuario...</p>
     }
+
   </app-card>
 </div>
