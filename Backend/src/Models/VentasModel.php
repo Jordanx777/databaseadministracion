@@ -276,7 +276,7 @@ class VentasModel
         ]);
     }
 
-    private function generarNumeroFactura()
+    private function generarNumeroFactura(): string
     {
         $fecha = date('Ymd');
         $stmt  = $this->conn->prepare(
@@ -285,7 +285,11 @@ class VentasModel
         $stmt->execute(["FAC-{$fecha}-%"]);
         $ultima = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // ✅ Asignar a variable primero
+        // ✅ Si no hay facturas previas hoy, empezar desde 1
+        if (!$ultima || empty($ultima['numero_factura'])) {
+            return sprintf('FAC-%s-%04d', $fecha, 1);
+        }
+
         $partes     = explode('-', $ultima['numero_factura']);
         $secuencial = intval(end($partes)) + 1;
 
@@ -348,10 +352,10 @@ class VentasModel
         $page    = max(1, (int) ($filtros['page']     ?? 1));
         $perPage = max(1, (int) ($filtros['per_page'] ?? 10));
         $offset  = ($page - 1) * $perPage;
- 
+
         $where  = ['1=1'];
         $params = [];
- 
+
         if (!empty($filtros['estado'])) {
             $where[]  = "venta_estado = ?";
             $params[] = $filtros['estado'];
@@ -378,15 +382,15 @@ class VentasModel
             $params[] = $b;
             $params[] = $b;
         }
- 
+
         $whereStr = implode(' AND ', $where);
- 
+
         // ── Total de registros ────────────────────────────
         $countSql  = "SELECT COUNT(*) AS total FROM ventas_completas WHERE $whereStr";
         $countStmt = $this->conn->prepare($countSql);
         $countStmt->execute($params);
         $total = (int) $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
- 
+
         // ── Estadísticas globales (sin paginación) ────────
         $statsSql  = "SELECT 
                         COALESCE(SUM(venta_total), 0)    AS total_vendido,
@@ -395,11 +399,11 @@ class VentasModel
         $statsStmt = $this->conn->prepare($statsSql);
         $statsStmt->execute($params);
         $stats = $statsStmt->fetch(PDO::FETCH_ASSOC);
- 
+
         // ── Datos paginados ───────────────────────────────
         $sql  = "SELECT * FROM ventas_completas WHERE $whereStr ORDER BY fecha_venta DESC";
         $stmt = $this->conn->prepare($sql . " LIMIT ? OFFSET ?");
- 
+
         // Bindear params de filtros como string
         foreach ($params as $i => $val) {
             $stmt->bindValue($i + 1, $val, PDO::PARAM_STR);
@@ -407,14 +411,14 @@ class VentasModel
         $stmt->bindValue(count($params) + 1, $perPage, PDO::PARAM_INT);
         $stmt->bindValue(count($params) + 2, $offset,  PDO::PARAM_INT);
         $stmt->execute();
- 
+
         $ventas = $stmt->fetchAll(PDO::FETCH_ASSOC);
- 
+
         foreach ($ventas as &$v) {
             $v['productos'] = !empty($v['productos']) ? json_decode($v['productos'], true) : [];
             $v['pagos']     = !empty($v['pagos'])     ? json_decode($v['pagos'],     true) : [];
         }
- 
+
         return [
             'data'             => $ventas,
             'total'            => $total,

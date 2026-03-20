@@ -1,0 +1,430 @@
+<!-- src/app/modules/dashboard/components/dashboard/dashboard.component.html -->
+
+<div class="dashboard-container">
+
+  <!-- ===== LOADING ===== -->
+  <div *ngIf="cargando" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Cargando estadísticas...</p>
+  </div>
+
+  <!-- ===== CONTENIDO ===== -->
+  <div *ngIf="!cargando && dashboard" class="dashboard-content">
+
+    <!-- ===== HEADER ===== -->
+    <div class="dashboard-header">
+      <div class="header-info">
+        <h1>
+          <mat-icon>dashboard</mat-icon>
+          Dashboard del Inventario
+        </h1>
+        <p class="subtitulo">Resumen general de tu negocio</p>
+      </div>
+      <button mat-flat-button color="primary" (click)="cargarDashboard()">
+        <mat-icon>refresh</mat-icon>
+        Actualizar
+      </button>
+    </div>
+
+    <!-- ===== TARJETAS DE RESUMEN ===== -->
+    <div class="cards-grid">
+
+      <!-- Total Productos -->
+      <mat-card class="stat-card card-blue">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>inventory_2</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ dashboard.resumen_general.total_productos }}</span>
+            <span class="stat-label">Productos Activos</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Stock Total -->
+      <mat-card class="stat-card card-green">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>storage</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ dashboard.resumen_general.stock_total }}</span>
+            <span class="stat-label">Unidades en Stock</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Valor Inventario -->
+      <mat-card class="stat-card card-purple">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>attach_money</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ formatearMoneda(dashboard.resumen_general.valor_inventario) }}</span>
+            <span class="stat-label">Valor del Inventario</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Ventas del Mes -->
+      <mat-card class="stat-card card-orange">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>trending_up</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ formatearMoneda(dashboard.estadisticas_ventas.ventas_mes) }}</span>
+            <span class="stat-label">Ventas del Mes</span>
+            <span class="stat-extra">{{ dashboard.estadisticas_ventas.num_ventas_mes }} ventas</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Ventas de Hoy -->
+      <mat-card class="stat-card card-teal">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>today</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ formatearMoneda(dashboard.estadisticas_ventas.ventas_hoy) }}</span>
+            <span class="stat-label">Ventas de Hoy</span>
+            <span class="stat-extra">{{ dashboard.estadisticas_ventas.num_ventas_hoy }} ventas</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Por Cobrar -->
+      <mat-card class="stat-card card-red">
+        <mat-card-content>
+          <div class="stat-icon">
+            <mat-icon>account_balance_wallet</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ formatearMoneda(dashboard.estadisticas_cuentas.total_por_cobrar) }}</span>
+            <span class="stat-label">Por Cobrar</span>
+            <span class="stat-extra">{{ dashboard.estadisticas_cuentas.total_clientes_deuda }} clientes</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+
+    <!-- ===== ALERTAS ===== -->
+    <div class="alerts-section" *ngIf="dashboard.resumen_general.productos_stock_bajo > 0 || dashboard.resumen_general.productos_sin_stock > 0">
+      <mat-card class="alert-card">
+        <mat-card-content>
+          <div class="alert-header">
+            <mat-icon color="warn">warning</mat-icon>
+            <h3>Alertas de Inventario</h3>
+          </div>
+          <div class="alerts-grid">
+            <div class="alert-item" *ngIf="dashboard.resumen_general.productos_stock_bajo > 0">
+              <mat-chip highlighted color="warn">
+                <mat-icon>inventory</mat-icon>
+                {{ dashboard.resumen_general.productos_stock_bajo }} productos con stock bajo
+              </mat-chip>
+            </div>
+            <div class="alert-item" *ngIf="dashboard.resumen_general.productos_sin_stock > 0">
+              <mat-chip highlighted color="accent">
+                <mat-icon>block</mat-icon>
+                {{ dashboard.resumen_general.productos_sin_stock }} productos sin stock
+              </mat-chip>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- ===== GRÁFICOS ===== -->
+    <div class="charts-grid">
+
+      <!-- Ventas Últimos 7 Días -->
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>show_chart</mat-icon>
+            Ventas Últimos 7 Días
+          </mat-card-title>
+          <label for="">
+            Ventas Últimos 7 Días
+          </label>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-container">
+            <canvas id="chartVentasDiarias"></canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Ventas Mensuales -->
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>bar_chart</mat-icon>
+            Ventas Mensuales (Año Actual)
+          </mat-card-title>
+          <label for="">
+            Ventas Mensuales (Año Actual)
+          </label>
+          
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-container">
+            <canvas id="chartVentasMensuales"></canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Ventas por Categoría -->
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>pie_chart</mat-icon>
+            Ventas por Categoría
+          </mat-card-title>
+          <label for="">
+            Ventas por Categoría
+          </label>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-container chart-donut">
+            <canvas id="chartVentasPorCategoria"></canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Ventas por Género -->
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>wc</mat-icon>
+            Ventas por Género
+          </mat-card-title>
+          <label for="">
+            Ventas por Género
+          </label>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-container chart-donut">
+            <canvas id="chartVentasPorGenero"></canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Stock por Categoría -->
+      <mat-card class="chart-card span-2">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>category</mat-icon>
+            Stock por Categoría
+          </mat-card-title>
+          <label for="">
+            Stock por Categoría
+          </label>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-container">
+            <canvas id="chartStockPorCategoria"></canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+
+    <!-- ===== TABLAS ===== -->
+    <div class="tables-grid">
+
+      <!-- Productos Más Vendidos -->
+      <mat-card class="table-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>star</mat-icon>
+            Top 10 Productos Más Vendidos
+          </mat-card-title>
+        </mat-card-header>
+        <label for="">
+            Top 10 Productos Más Vendidos
+          </label>
+        <mat-card-content>
+          <div class="table-container">
+            <table mat-table [dataSource]="dashboard.productos_mas_vendidos" class="dashboard-table">
+
+              <!-- Producto -->
+              <ng-container matColumnDef="producto">
+                <th mat-header-cell *matHeaderCellDef>Producto</th>
+                <td mat-cell *matCellDef="let item">
+                  <div class="producto-info">
+                    <span class="producto-nombre">{{ item.producto_nombre }}</span>
+                    <span class="producto-marca">{{ item.marca_nombre }}</span>
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- Categoría -->
+              <ng-container matColumnDef="categoria">
+                <th mat-header-cell *matHeaderCellDef>Categoría</th>
+                <td mat-cell *matCellDef="let item">{{ item.categoria_nombre }}</td>
+              </ng-container>
+
+              <!-- Vendidas -->
+              <ng-container matColumnDef="vendidas">
+                <th mat-header-cell *matHeaderCellDef>Vendidas</th>
+                <td mat-cell *matCellDef="let item">
+                  <mat-chip highlighted color="primary">{{ item.total_vendido }}</mat-chip>
+                </td>
+              </ng-container>
+
+              <!-- Stock -->
+              <ng-container matColumnDef="stock">
+                <th mat-header-cell *matHeaderCellDef>Stock</th>
+                <td mat-cell *matCellDef="let item">
+                  <mat-chip [highlighted]="item.stock_actual < 5" [color]="item.stock_actual < 5 ? 'warn' : 'accent'">
+                    {{ item.stock_actual }}
+                  </mat-chip>
+                </td>
+              </ng-container>
+
+              <!-- Precio -->
+              <ng-container matColumnDef="precio">
+                <th mat-header-cell *matHeaderCellDef>Precio</th>
+                <td mat-cell *matCellDef="let item">{{ formatearMoneda(item.precio_venta) }}</td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="['producto', 'categoria', 'vendidas', 'stock', 'precio']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['producto', 'categoria', 'vendidas', 'stock', 'precio']"></tr>
+
+            </table>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Productos con Stock Bajo -->
+      <mat-card class="table-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon color="warn">warning</mat-icon>
+            Productos con Stock Bajo
+          </mat-card-title>
+          <label for="">
+           Productos con Stock Bajo
+          </label>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="table-container">
+            <table mat-table [dataSource]="dashboard.productos_stock_bajo" class="dashboard-table">
+
+              <!-- Producto -->
+              <ng-container matColumnDef="producto">
+                <th mat-header-cell *matHeaderCellDef>Producto</th>
+                <td mat-cell *matCellDef="let item">
+                  <div class="producto-info">
+                    <span class="producto-nombre">{{ item.producto_nombre }}</span>
+                    <span class="producto-marca">{{ item.marca_nombre }}</span>
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- Stock -->
+              <ng-container matColumnDef="stock">
+                <th mat-header-cell *matHeaderCellDef>Stock</th>
+                <td mat-cell *matCellDef="let item">
+                  <mat-chip highlighted color="warn">{{ item.stock_total }}</mat-chip>
+                </td>
+              </ng-container>
+
+              <!-- Acciones -->
+              <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let item">
+                  <button mat-icon-button color="primary" (click)="verProducto(item.id)" matTooltip="Ver producto">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="['producto', 'stock', 'acciones']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['producto', 'stock', 'acciones']"></tr>
+
+            </table>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Clientes con Mayor Deuda -->
+      <mat-card class="table-card span-2">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>account_balance_wallet</mat-icon>
+            Clientes con Mayor Deuda
+          </mat-card-title>
+          <label for="">
+           Clientes con Mayor Deuda
+          </label>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="table-container">
+            <table mat-table [dataSource]="dashboard.clientes_mayor_deuda" class="dashboard-table">
+
+              <!-- Cliente -->
+              <ng-container matColumnDef="cliente">
+                <th mat-header-cell *matHeaderCellDef>Cliente</th>
+                <td mat-cell *matCellDef="let item">
+                  <div class="cliente-info">
+                    <span class="cliente-nombre">{{ item.nombre }}</span>
+                    <span class="cliente-telefono">{{ item.telefono }}</span>
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- Deuda -->
+              <ng-container matColumnDef="deuda">
+                <th mat-header-cell *matHeaderCellDef>Deuda</th>
+                <td mat-cell *matCellDef="let item">
+                  <span class="deuda-monto">{{ formatearMoneda(item.saldo_pendiente) }}</span>
+                </td>
+              </ng-container>
+
+              <!-- Facturas -->
+              <ng-container matColumnDef="facturas">
+                <th mat-header-cell *matHeaderCellDef>Facturas</th>
+                <td mat-cell *matCellDef="let item">
+                  <mat-chip highlighted>{{ item.num_facturas }}</mat-chip>
+                </td>
+              </ng-container>
+
+              <!-- Días de Mora -->
+              <ng-container matColumnDef="mora">
+                <th mat-header-cell *matHeaderCellDef>Días Mora</th>
+                <td mat-cell *matCellDef="let item">
+                  <mat-chip [highlighted]="item.dias_mora > 30" [color]="item.dias_mora > 30 ? 'warn' : 'accent'">
+                    {{ item.dias_mora }} días
+                  </mat-chip>
+                </td>
+              </ng-container>
+
+              <!-- Acciones -->
+              <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let item">
+                  <button mat-icon-button color="primary" (click)="verCliente(item.cliente_id)" matTooltip="Ver cuenta">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="['cliente', 'deuda', 'facturas', 'mora', 'acciones']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['cliente', 'deuda', 'facturas', 'mora', 'acciones']"></tr>
+
+            </table>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+
+  </div>
+
+</div>

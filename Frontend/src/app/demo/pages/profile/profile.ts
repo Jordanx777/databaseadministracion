@@ -122,7 +122,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (res) => {
           if (res?.type === 'success' || res?.status === 'success') {
-            console.log("RESPUESTA 1 :",res);
             this.passwordSuccess = '✓ Contraseña actualizada correctamente.';
             this.resetPasswordForm();
             // Limpiar mensaje de éxito después de 4 segundos

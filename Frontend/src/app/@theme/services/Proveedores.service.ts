@@ -48,7 +48,6 @@ export class ProveedoresService {
    * Actualizar un proveedor
    */
   actualizarProveedor(id: number, proveedor: Proveedor): Observable<any> {
-    console.log("Actualizando proveedor ID ", id, " con datos: ", proveedor);
     return this.apiService.put(`proveedores/${id}`, proveedor);
   }
 

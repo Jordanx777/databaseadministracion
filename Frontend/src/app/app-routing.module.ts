@@ -28,9 +28,14 @@ const routes: Routes = [
         path: 'profile',
         component: ProfileComponent
       },
+      // {
+      //   path: 'dashboard',
+      //   loadComponent: () => import('./demo/pages/dashboard/dashboard.component')
+      // },
       {
         path: 'dashboard',
-        loadComponent: () => import('./demo/pages/dashboard/dashboard.component')
+        loadComponent: () =>
+          import('./demo/pages/estadisticas/estadisticas').then((m) => m.DashboardComponent)
       },
       {
         path: 'component',

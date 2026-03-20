@@ -107,7 +107,6 @@ export class HistorialVentasComponent implements OnInit {
     
     this.ventasService.getHistorialCompleto().subscribe({
       next: (response: any) => {
-        console.log('Historial completo:', response);
         
         this.historial = this.extraerDatos(response);
         this.historialFiltrado = [...this.historial];

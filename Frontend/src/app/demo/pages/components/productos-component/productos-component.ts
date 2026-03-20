@@ -109,7 +109,6 @@ export class ProductosComponent implements OnInit, AfterViewInit {
 
     this.productosService.getProductos().subscribe({
       next: (response) => {
-        console.log("productos recibidos:", response);
         const productos = this.extraerDatos(response);
 
         productos.forEach(p => {
