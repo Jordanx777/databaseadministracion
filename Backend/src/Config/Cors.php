@@ -7,6 +7,7 @@ class Cors {
         if ($_ENV['APP_ENV'] === 'development') {
             $allowedOrigins = array_map('trim', explode(',', $_ENV['FRONTEND_URL'] ?? 'http://localhost:4200'));
         } else {
+            echo "url del front".$_ENV['FRONTEND_URL'];
             $allowedOrigins = array_map('trim', explode(',', $_ENV['FRONTEND_URL'] ?? 'https://inventario-frontend.vercel.app'));
         }
 
