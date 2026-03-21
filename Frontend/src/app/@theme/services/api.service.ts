@@ -5,12 +5,18 @@ import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';  // ← agrega esto, quita el 'of'
 
 
+console.log("ruta",  environment.apiUrl);
+
 @Injectable({
   providedIn: 'root'
 })
+
+
 export class ApiService {
 
   private BASE_URL = environment.apiUrl;
+
+  
   // private BASE_URL = "http://localhost:8080/api/";
 
   constructor(private http: HttpClient) {}
