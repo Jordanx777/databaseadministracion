@@ -10,6 +10,12 @@ use App\Config\Cors;
 
 // Cargar variables de entorno
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
+try {
+    $dotenv->load();
+} catch (\Exception $e) {
+    // echo "error".$e;
+    // En producción las vars vienen del sistema, no del .env
+}
 $dotenv->load();
 
 // Configurar CORS
