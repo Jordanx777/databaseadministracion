@@ -25,6 +25,24 @@ $router->get('/api/health', function() {
     }
 });
 
+$router->get('/api/debug', function() {
+    $host = $_ENV['DB_HOST'] ?? getenv('DB_HOST') ?? 'NO ENCONTRADO';
+    $frontendUrl = $_ENV['FRONTEND_URL'] ?? getenv('FRONTEND_URL') ?? 'NO ENCONTRADO';
+    $appEnv = $_ENV['APP_ENV'] ?? getenv('APP_ENV') ?? 'NO ENCONTRADO';
+    
+    echo json_encode([
+        'DB_HOST' => $host,
+        'FRONTEND_URL' => $frontendUrl,
+        'APP_ENV' => $appEnv,
+        'origin_recibido' => $_SERVER['HTTP_ORIGIN'] ?? 'ninguno',
+    ]);
+});
+
+
+// Luego haz push, espera el redeploy, y visita en el navegador:
+
+// https://inventario-backend-wrir.onrender.com/api/debug
+
 
 // Registra una ruta GET
 // $router->get('/api/productos', [ProductoController::class, 'index']);
