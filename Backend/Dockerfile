@@ -14,25 +14,18 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 RUN a2enmod rewrite headers
 
-# CORS dinámico — el origen real se setea vía env FRONTEND_URL
-RUN echo '<IfModule mod_headers.c>' >> /etc/apache2/apache2.conf && \
-    echo '    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"' >> /etc/apache2/apache2.conf && \
-    echo '    Header always set Access-Control-Allow-Headers "Content-Type, Authorization"' >> /etc/apache2/apache2.conf && \
-    echo '</IfModule>' >> /etc/apache2/apache2.conf
-
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
 COPY . /var/www/html
 
-# Remover .env si fue copiado accidentalmente
 RUN rm -f /var/www/html/.env
 
 RUN chown -R www-data:www-data /var/www/html
 
 WORKDIR /var/www/html
 
-RUN composer install --no-dev --optimize-autoloader || true
+RUN composer install --no-dev --optimize-autoloader
 
 EXPOSE 80
