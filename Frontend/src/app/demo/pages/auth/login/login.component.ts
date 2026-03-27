@@ -128,11 +128,11 @@ export default class LoginComponent implements OnInit, OnDestroy {
           }
         },
         error: (error) => {
-          console.error('❌ Login - Error de conexión:', error);
           this.loading = false;
           this.form.enable();
           
-          this.errorMessage = 'Error al conectar con el servidor';
+          // this.errorMessage = 'Error al conectar con el servidor';
+          this.errorMessage = error.error.message;
           
           Swal.fire({
             icon: 'error',
