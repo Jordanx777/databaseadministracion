@@ -4,9 +4,6 @@ import { environment } from '../../../environments/environment';
 import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';  // ← agrega esto, quita el 'of'
 
-
-console.log("ruta",  environment.apiUrl);
-
 @Injectable({
   providedIn: 'root'
 })
