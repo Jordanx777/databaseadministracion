@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import Swal from 'sweetalert2';
 
 // Material imports
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -110,55 +111,83 @@ export default class RegisterComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.registerForm.invalid) {
-      this.registerForm.markAllAsTouched();
-      this.errorMessage = 'Por favor complete todos los campos requeridos';
-      return;
-    }
+  if (this.registerForm.invalid) {
+    this.registerForm.markAllAsTouched();
 
-    // Validar que las contraseñas coincidan
-    const password = this.registerForm.get('password')?.value;
-    const confirmPassword = this.registerForm.get('confirmPassword')?.value;
-
-    if (password !== confirmPassword) {
-      this.errorMessage = 'Las contraseñas no coinciden';
-      return;
-    }
-
-    this.isLoading = true;
-    this.errorMessage = '';
-
-    const registerData: any = {
-      nombre: this.registerForm.get('nombre')?.value,
-      apellido: this.registerForm.get('apellido')?.value,
-      email: this.registerForm.get('email')?.value,
-      password: password,
-      confirmPassword: confirmPassword,
-      telefono: this.registerForm.get('telefono')?.value,
-      direccion: this.registerForm.get('direccion')?.value,
-      id_rol: this.registerForm.get('id_rol')?.value
-    };
-
-
-    this.apiService.post<any>('auth/register', registerData).subscribe({
-      next: (response) => {
-        if (response.status === 'success') {
-          this.successMessage = 'Registro exitoso. Redirigiendo...';
-          setTimeout(() => {
-            this.router.navigate(['/auth/login']);
-          }, 2000);
-        } else {
-          this.errorMessage = response.message || 'Error al registrar usuario';
-        }
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error al registrar:', error);
-        this.errorMessage = error.error?.message || 'Error al conectar con el servidor';
-        this.isLoading = false;
-      }
+    Swal.fire({
+      icon: 'warning',
+      title: 'Formulario incompleto',
+      text: 'Por favor complete todos los campos requeridos'
     });
+
+    return;
   }
+
+  const password = this.registerForm.get('password')?.value;
+  const confirmPassword = this.registerForm.get('confirmPassword')?.value;
+
+  if (password !== confirmPassword) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Las contraseñas no coinciden'
+    });
+    return;
+  }
+
+  this.isLoading = true;
+
+  const registerData: any = {
+    nombre: this.registerForm.get('nombre')?.value,
+    apellido: this.registerForm.get('apellido')?.value,
+    email: this.registerForm.get('email')?.value,
+    password: password,
+    confirmPassword: confirmPassword,
+    telefono: this.registerForm.get('telefono')?.value,
+    direccion: this.registerForm.get('direccion')?.value,
+    id_rol: this.registerForm.get('id_rol')?.value
+  };
+
+  this.apiService.post<any>('auth/register', registerData).subscribe({
+    next: (response) => {
+      this.isLoading = false;
+
+      if (response.status === 'success') {
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Registro exitoso',
+          text: response.message,
+          timer: 2000,
+          showConfirmButton: false
+        });
+
+        setTimeout(() => {
+          this.router.navigate(['/auth/login']);
+        }, 1500);
+
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: response.message || 'Error al registrar usuario'
+        });
+      }
+    },
+
+    error: (error) => {
+      this.isLoading = false;
+
+      const mensaje = error.error?.message || 'Error al conectar con el servidor';
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Error de registro',
+        text: mensaje
+      });
+    }
+  });
+}
 
   getErrorMessage(field: string): string {
     const control = this.registerForm.get(field);
